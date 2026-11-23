@@ -47,3 +47,4 @@ Status: ✅ umgesetzt · 🔨 in Arbeit · 💡 Idee · ❌ verworfen
 | 💡 | Glasur-Blech: „Doppelglasur“ – manche Plätzchen brauchen zwei Schichten (3 Zustände statt 2) |
 | 💡 | Rezeptbuch: „Kanon“-Level, in denen die Folge rückwärts nachgetippt wird |
 | 💡 | Rezeptbuch: Liederquiz – nach dem Level aus drei Liedtiteln den richtigen wählen, für einen Bonusstern |
+| 💡 | Glasur-Blech: interaktives Tutorial-Level mit Pfeil („Tippe hier!“), falls Anleitung + Vorschau nicht reichen |

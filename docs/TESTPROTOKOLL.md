@@ -37,7 +37,7 @@ Keine personenbezogenen Daten. Die Spielerin heißt hier nur „Spielerin“, de
 
 **Folge:** v4 mit Glasur-Blech, Rezeptbuch und Backstube-Startseite (D19–D22).
 
-## Runde 4 – Prototyp v4 (ausstehend)
+## Runde 4 – Prototyp v4 (23.11.2026)
 **Automatisch geprüft:**
 - Regal-Level 1–60 lösbar.
 - Blech-Level 1–40: Der Löser findet den Bestwert, die Lösung glasiert alles.
@@ -48,3 +48,14 @@ Keine personenbezogenen Daten. Die Spielerin heißt hier nur „Spielerin“, de
 - Glasur-Blech: Ist das Form-Muster verständlich (Legende)? Wie ist die Schwierigkeit? Sind die Tipps hilfreich?
 - Rezeptbuch: Passt das Tempo? Erkennt man die Lieder? Stimmen die Melodien (Stille Nacht, Morgen kommt der Weihnachtsmann, Jingle Bells, Deck the Halls)?
 - Backstube: Funktioniert der Wechsel zwischen den Stationen? Öffnet das Spiel beim Neustart dort, wo man war?
+
+**Feedback (Zwischenstand):** Glasur-Blech: „glasieren ist lustig, aber ich versteh es nicht“.
+Das Prinzip mit den wechselnden Nachbarn erschließt sich ohne Erklärung nicht.
+
+**Folge:** v5 (D24). Anleitung, Vorschau beim Drücken, 3×3-Einstieg und Vorstellung jeder neuen Form.
+
+## Runde 5 – Prototyp v5 (ausstehend)
+**Zu prüfen:**
+- Wird das Glasur-Blech mit Anleitung und Vorschau verständlich?
+- Ist der Einstieg über Level 1–5 angenehm?
+- Weiteres Feedback zu Rezeptbuch, Melodien und Backstube aus Runde 4

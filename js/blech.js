@@ -5,14 +5,15 @@
    Ein GF(2)-Löser berechnet die minimale Zugzahl (Ziel für 3 Sterne) und liefert Tipps. */
 const Blech = (() => {
 const SHAPES = {
-  taler:  {name:'Taler',        off:[[0,0],[1,0],[-1,0],[0,1],[0,-1]]},   // Kreuz
-  stern:  {name:'Zimtstern',    off:[[0,0],[1,1],[1,-1],[-1,1],[-1,-1]]}, // schräg
-  stange: {name:'Spritzgebäck', off:[[0,0],[0,1],[0,-1],[0,2],[0,-2]]},   // waagerechte Reihe
+  taler:  {name:'Taler',        how:'oben, unten, links und rechts', off:[[0,0],[1,0],[-1,0],[0,1],[0,-1]]},   // Kreuz
+  stern:  {name:'Zimtstern',    how:'die vier schrägen Nachbarn',    off:[[0,0],[1,1],[1,-1],[-1,1],[-1,-1]]}, // schräg
+  stange: {name:'Spritzgebäck', how:'zwei links und zwei rechts',    off:[[0,0],[0,1],[0,-1],[0,2],[0,-2]]},   // waagerechte Reihe
 };
 function levelCfg(L) {
-  const N = L <= 3 ? 4 : L <= 9 ? 5 : L <= 17 ? 6 : 7;
-  const kinds = L < 4 ? ['taler'] : L < 10 ? ['taler', 'stern'] : ['taler', 'stern', 'stange'];
-  const k = Math.min(Math.floor(N * N * .5), 3 + Math.floor(L * .7));
+  // sanfter Einstieg: L1–2 auf 3×3 mit 1–2 Zügen, neue Formen ab L6 (Stern) und L12 (Spritzgebäck)
+  const N = L <= 2 ? 3 : L <= 5 ? 4 : L <= 10 ? 5 : L <= 18 ? 6 : 7;
+  const kinds = L < 6 ? ['taler'] : L < 12 ? ['taler', 'stern'] : ['taler', 'stern', 'stange'];
+  const k = L <= 2 ? L : Math.min(Math.floor(N * N * .5), 2 + Math.floor(L * .7));
   return {N, kinds, k};
 }
 
@@ -80,18 +81,38 @@ function begin(L, resume, a) {
   api.stage.innerHTML = `<div class="blech" id="blech" style="--n:${N}">${g.map((v, i) =>
     `<button class="cell" data-i="${i}" aria-label="${SHAPES[shape[i]].name}"><span class="cookie s-${shape[i]}${v ? ' on' : ''}"></span></button>`).join('')}</div>`;
   $('blech').onclick = onTap;
-  api.controls.innerHTML = `<button class="btn" id="bUndo">↶ Rückgängig</button><button class="btn" id="hint">Tipp</button><button class="btn" id="restart">Neu starten</button>`;
+  const bl = $('blech'), clearPv = () => bl.querySelectorAll('.pv').forEach(x => x.classList.remove('pv'));
+  bl.onpointerdown = e => { const c = e.target.closest('.cell'); if (!c) return; clearPv(); aff[+c.dataset.i].forEach(j => bl.querySelector(`.cell[data-i="${j}"]`).classList.add('pv')); };
+  bl.onpointerup = bl.onpointercancel = bl.onpointerleave = () => setTimeout(clearPv, 260);
+  const kinds = [...new Set(shape)];
+  api.legend.innerHTML = kinds.map(k => `<span class="pat">${mini(k)}<span><b>${SHAPES[k].name}</b> wechselt ${SHAPES[k].how}</span></span>`).join('');
+  api.controls.innerHTML = `<button class="btn" id="bUndo">↶ Rückgängig</button><button class="btn" id="hint">Tipp</button><button class="btn" id="restart">Neu starten</button><button class="btn" id="bHelp">Wie geht das?</button>`;
+  $('bHelp').onclick = () => explain(kinds);
   $('bUndo').onclick = () => { if (!hist.length) return; const i = hist.pop(); apply(g, i); taps--; Snd.tap(.7); paint(aff[i]); saveCur(); status(); };
   $('hint').onclick = showHint;
   $('restart').onclick = () => api.restart();
-  const kinds = [...new Set(shape)];
-  api.legend.innerHTML = kinds.map(k => `<span class="pat">${mini(k)}${SHAPES[k].name}</span>`).join('');
+
   status();
+  // Anleitung beim ersten Mal, neue Formen kurz vorstellen
+  const p = prog('blech'); p.seen = p.seen || [];
+  const fresh = kinds.filter(k => !p.seen.includes(k));
+  if (fresh.length) { p.seen.push(...fresh); persist(); explain(p.seen.length === fresh.length ? kinds : fresh, p.seen.length !== fresh.length); }
+}
+function explain(kinds, onlyNew = false) {
+  const shapes = kinds.map(k => `<div class="how-row">${mini(k, true)}<div><b>${SHAPES[k].name}</b><br>wechselt mit: ${SHAPES[k].how}</div></div>`).join('');
+  if (onlyNew) return api.help('Neu auf dem Blech!', `<p>Ab jetzt gibt es eine neue Form. Sie nimmt andere Nachbarn mit:</p>${shapes}`);
+  api.help('So wird glasiert', `
+    <ol class="how">
+      <li><b>Ziel:</b> Alle Plätzchen sollen <b>weiß glasiert</b> sein.</li>
+      <li>Tippst du ein Plätzchen an, <b>wechselt</b> es: unglasiert wird glasiert – aber glasiert wird auch wieder unglasiert!</li>
+      <li>Dabei wechseln immer auch <b>Nachbarn mit</b>. Welche, verrät die <b>Form</b> des angetippten Plätzchens:</li>
+    </ol>${shapes}
+    <p class="how-tip">Halte den Finger auf ein Plätzchen: Alle, die mitwechseln würden, leuchten rot umrandet. Erst beim Loslassen wird glasiert – zieh den Finger weg, um abzubrechen.</p>`);
 }
 // kleines 5×5-Schema: welche Nachbarn wechseln mit
-function mini(k) {
+function mini(k, big = false) {
   const on = new Set(SHAPES[k].off.map(([r, c]) => (r + 2) * 5 + c + 2));
-  return `<span class="mini" aria-hidden="true">${[...Array(25).keys()].map(i => `<b class="${i === 12 ? 'me' : on.has(i) ? 'y' : ''}"></b>`).join('')}</span>`;
+  return `<span class="mini${big ? ' big' : ''}" aria-hidden="true">${[...Array(25).keys()].map(i => `<b class="${i === 12 ? 'me' : on.has(i) ? 'y' : ''}"></b>`).join('')}</span>`;
 }
 function status() { api.status(`${taps} ${taps === 1 ? 'Zug' : 'Züge'} · Bestwert ${par}`); $('bUndo').disabled = !hist.length; }
 function saveCur() { api.saveCur({g, taps, hints, noteI, hist: hist.slice(-60)}); }

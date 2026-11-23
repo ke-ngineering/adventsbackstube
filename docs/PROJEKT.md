@@ -4,7 +4,7 @@
 > Wer (Mensch oder Claude) die Entwicklung fortsetzt, liest zuerst diese Datei.
 > Nach jeder Arbeitssitzung: Status, Entscheidungen und Agenda hier aktualisieren.
 
-Stand: 23.11.2026 (Prototyp v4)
+Stand: 23.11.2026 (Prototyp v5)
 
 ## 1. Vision
 
@@ -44,6 +44,7 @@ mit genug Inhalt für spürbar lange Spielsessions (ca. 20–30 Min neue Tagesin
 | D21 | 23.11. | Glasur-Blech mit **Form-abhängigen Mustern** + exaktem Bestwert | Eigene Idee statt reinem Lights-Out |
 | D22 | 23.11. | Rezeptbuch mit **Liedern als Folge**; Melodien-Sammlung erweitert: Morgen kommt der Weihnachtsmann, Jingle Bells, Deck the Halls (alle gemeinfrei) | Musik/Chor-Bezug; Wiedererkennen hilft beim Merken |
 | D23 | 23.11. | Claude arbeitet **ausschließlich** im Repo `adventsbackstube` (Regel ganz oben in CLAUDE.md) | Weitere GitHub-Projekte des Auftraggebers schützen |
+| D24 | 23.11. | Glasur-Blech verständlicher: Anleitung, Formen-Vorstellung, Druck-Vorschau, 3×3-Einstieg | Tester: „lustig, aber ich versteh es nicht“ |
 | D12 | 23.11. | Persönliche Inhalte (Name, Nachrichten) **verschlüsselt** im Repo; Schlüssel steht nur im Link-Teil nach `#`, den sie bekommt (wird nie an Server übertragen) | Personalisierung trotz öffentlichem Repo |
 
 ## 3. Spielkonzept
@@ -58,7 +59,9 @@ mit genug Inhalt für spürbar lange Spielsessions (ca. 20–30 Min neue Tagesin
 2. **Glasur-Blech** ✅ v4 – Raster aus Plätzchen; Antippen wechselt Plätzchen + Nachbarn (glasiert ↔ unglasiert). Ziel: alle glasiert.
    **Eigene Wendung:** Die Form bestimmt das Muster – Taler = Kreuz, Zimtstern = schräg, Spritzgebäck = waagerechte 5er-Reihe
    (Legende mit Mini-Schema). Level rückwärts erzeugt (immer lösbar); GF(2)-Löser liefert exakten Bestwert (3 Sterne) und Tipps
-   (kosten je 1 Stern). Jeder Tipper spielt die nächste Note eines Lieds. Größe 4×4 → 7×7; Formen ab L4 (Stern), L10 (Spritzgebäck).
+   (kosten je 1 Stern). Jeder Tipper spielt die nächste Note eines Lieds. Größe 3×3 (L1–2, 1–2 Züge) → 7×7; Formen ab L6 (Stern), L12 (Spritzgebäck).
+   **Verständlichkeit (v5):** Anleitung beim ersten Öffnen + Knopf „Wie geht das?“, neue Formen werden beim ersten Auftreten vorgestellt,
+   Vorschau beim Drücken (betroffene Plätzchen rot umrandet, Ausführen erst beim Loslassen), Legende in Worten.
 3. **Omas Rezeptbuch** ✅ v4 – Zutaten-Schalen spielen Töne vor, nachtippen; Folge wächst Zeile für Zeile bis zur Ziellänge (6 → 18).
    **Eigene Wendung:** Ungerade Level = echtes Adventslied (Schalen = Tonleiter, aufsteigend sortiert), gerade Level = zufällige Folge.
    Fehler wiederholen die Zeile (kein Game Over), kosten aber Sterne. „Nochmal hören“ jederzeit.

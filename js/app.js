@@ -12,12 +12,14 @@ const api = {
   getCur: () => { const p = prog(cur.id); return p.cur && p.cur.lvl === curL ? p.cur : null; },
   saveCur: o => { prog(cur.id).cur = o ? Object.assign({lvl: curL}, o) : null; persist(); },
   restart: () => startLevel(false),
+  help: (title, html) => { $('helpTitle').textContent = title; $('helpBody').innerHTML = html; $('help').classList.add('on'); $('helpOk').focus(); },
   win,
 };
 
 function updateStars() { $('stars').innerHTML = `<b>★</b> ${totalStars()}`; }
 
 function showHub() {
+  $('help').classList.remove('on');
   if (cur) cur.stop(); cur = null; Snd.stop();
   $('hub').hidden = false; $('game').hidden = true;
   $('sub').textContent = 'Wähle eine Station in deiner Backstube';
@@ -71,6 +73,7 @@ $('back').onclick = () => { Snd.tap(.8); showHub(); };
 $('prev').onclick = () => { if (curL > 1) { curL--; startLevel(true); } };
 $('next').onclick = () => { if (TEST || curL < prog(cur.id).level) { curL++; startLevel(true); } };
 $('go').onclick = () => { $('win').classList.remove('on'); curL++; startLevel(false); };
+$('helpOk').onclick = () => $('help').classList.remove('on');
 $('toHub').onclick = () => { $('win').classList.remove('on'); showHub(); };
 
 const setSndBtn = () => { const b = $('snd'); b.setAttribute('aria-pressed', Snd.on); b.classList.toggle('off', !Snd.on); b.setAttribute('aria-label', Snd.on ? 'Ton ausschalten' : 'Ton einschalten'); };
