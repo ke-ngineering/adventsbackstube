@@ -51,3 +51,5 @@ Status: ✅ umgesetzt · 🔨 in Arbeit · 💡 Idee · ❌ verworfen
 | ✅ | **Spritzbeutel** als eigene Station: Spritzgebäck in einem Zug (v6) |
 | 💡 | Spritzbeutel: Formen-Level, bei denen die Spur ein Motiv ergibt (Stern, Brezel, Herz) |
 | 💡 | Spritzbeutel: Zwei Teigfarben, bei denen Hell- und Dunkel-Punkte abwechselnd durchlaufen werden müssen |
+| 💡 | Glasur-Blech „Meisterbleche“ (optional, ab Level 20): Hier reicht die Jagd nicht, oben muss etwas vorbereitet werden – für Fans, mit Erklärung durch Ausprobieren |
+| 💡 | Spritzbeutel: Zuckerperlen, die man in einer bestimmten Reihenfolge passieren muss |

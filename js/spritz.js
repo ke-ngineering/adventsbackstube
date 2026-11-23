@@ -5,9 +5,10 @@
    Level entstehen aus einem zufälligen Weg (Warnsdorff-Heuristik) → immer lösbar. */
 const Spritz = (() => {
 function levelCfg(L) {
-  const n = L <= 1 ? 3 : L <= 3 ? 4 : L <= 7 ? 5 : L <= 12 ? 6 : 7;
+  // v7 schwerer: größere Bleche, Start-Stern nur in L1–2
+  const n = L <= 1 ? 4 : L <= 3 ? 5 : L <= 5 ? 6 : L <= 9 ? 7 : 8;
   // Lücken machen es knifflig: mindestens ~8 % der Felder bleiben frei
-  return {R: n, C: n, cover: Math.min(.86, .7 + L * .012), maxCover: .92, marked: L <= 6};
+  return {R: n, C: n, cover: Math.min(.86, .7 + L * .012), maxCover: .92, marked: L <= 2};
 }
 function generate(L) {
   const {R, C, cover, maxCover} = levelCfg(L), M = R * C;

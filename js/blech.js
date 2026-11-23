@@ -1,13 +1,14 @@
 /* Mechanik 2: Glasur-Blech – alle Plätzchen glasieren.
    Antippen wechselt ein Plätzchen UND seine Nachbarn zwischen glasiert/unglasiert.
    Eigene Wendung: Die FORM bestimmt, welche Nachbarn mitwechseln.
-   Level entstehen rückwärts (fertiges Blech + zufällige Tipper) → immer lösbar.
-   Ein GF(2)-Löser berechnet die minimale Zugzahl (Ziel für 3 Sterne) und liefert Tipps. */
+   v7: JEDE Form nimmt genau das Plätzchen direkt darüber mit und reicht sonst nicht nach oben.
+   Level entstehen rückwärts nur aus Tippern ab Reihe 2 → die „Jagd“ (immer direkt unter das erste
+   unglasierte tippen) löst jedes Blech garantiert. Ziel für 3 Sterne = Zugzahl der Jagd. */
 const Blech = (() => {
 const SHAPES = {
-  taler:  {name:'Taler',        how:'oben, unten, links und rechts', off:[[0,0],[1,0],[-1,0],[0,1],[0,-1]]},   // Kreuz
-  stern:  {name:'Zimtstern',    how:'die vier schrägen Nachbarn',    off:[[0,0],[1,1],[1,-1],[-1,1],[-1,-1]]}, // schräg
-  stange: {name:'Spritzgebäck', how:'zwei links und zwei rechts',    off:[[0,0],[0,1],[0,-1],[0,2],[0,-2]]},   // waagerechte Reihe
+  taler:  {name:'Taler',        how:'oben, unten, links und rechts',        off:[[0,0],[-1,0],[1,0],[0,-1],[0,1]]},          // Kreuz
+  stern:  {name:'Zimtstern',    how:'oben und die zwei schrägen unten',     off:[[0,0],[-1,0],[1,-1],[1,1]]},                // wie die Sternspitzen
+  stange: {name:'Spritzgebäck', how:'oben sowie zwei links und zwei rechts', off:[[0,0],[-1,0],[0,-1],[0,-2],[0,1],[0,2]]}, // T-Form
 };
 function levelCfg(L) {
   // sanfter Einstieg: L1–2 auf 3×3 mit 1–2 Zügen, neue Formen ab L6 (Stern) und L12 (Spritzgebäck)
@@ -58,16 +59,22 @@ function solve(state) {
   return [...Array(M).keys()].filter(i => (best.x >> BigInt(i)) & 1n);
 }
 
+// Jagd: Reihe für Reihe direkt unter jedes unglasierte Plätzchen tippen → Liste der Tipper
+function chase(state) {
+  const st = state.slice(), taps = [];
+  for (let r = 0; r < N - 1; r++) for (let c = 0; c < N; c++) if (!st[r * N + c]) { const i = (r + 1) * N + c; apply(st, i); taps.push(i); }
+  return {taps, ok: st.every(v => v)};
+}
 function generate(L) {
   const {N: n, kinds, k} = levelCfg(L); N = n;
-  for (let t = 0; t < 50; t++) {
+  for (let t = 0; t < 80; t++) {
     const r = rng(L * 4241 + t * 7717 + 3);
     shape = Array.from({length: N * N}, () => kinds[Math.floor(r() * kinds.length)]);
     aff = shape.map((_, i) => affected(i));
     const state = Array(N * N).fill(1);
-    shuffle([...Array(N * N).keys()], r).slice(0, k).forEach(i => apply(state, i));
-    const sol = solve(state);
-    if (sol && sol.length >= Math.min(k, 3) && state.some(v => !v)) return {state, par: sol.length};
+    shuffle([...Array(N * N - N).keys()].map(i => i + N), r).slice(0, Math.min(k, N * N - N)).forEach(i => apply(state, i)); // nur ab Reihe 2
+    const ch = chase(state);
+    if (ch.ok && ch.taps.length >= Math.min(k, 3) && state.some(v => !v)) return {state, par: ch.taps.length};
   }
   throw new Error('Kein Blech gefunden');
 }
@@ -77,7 +84,7 @@ function begin(L, resume, a) {
   const gen = generate(L); g = gen.state; par = gen.par; taps = 0; hints = 0; noteI = 0; hist = [];
   const c = resume ? api.getCur() : null;
   coachOn = false; coachUsed = false; restMode = false;
-  if (c && Array.isArray(c.g) && c.g.length === g.length) { g = c.g; taps = c.taps || 0; hints = c.hints || 0; noteI = c.noteI || 0; hist = c.hist || []; coachOn = !!c.coachOn; coachUsed = !!c.coachUsed; restMode = !!c.restMode; }
+  if (c && c.v === 7 && Array.isArray(c.g) && c.g.length === g.length) { g = c.g; taps = c.taps || 0; hints = c.hints || 0; noteI = c.noteI || 0; hist = c.hist || []; coachOn = !!c.coachOn; coachUsed = !!c.coachUsed; restMode = !!c.restMode; }
   else api.saveCur(null);
   api.stage.innerHTML = `<div class="blech" id="blech" style="--n:${N}">${g.map((v, i) =>
     `<button class="cell" data-i="${i}" aria-label="${SHAPES[shape[i]].name}"><span class="cookie s-${shape[i]}${v ? ' on' : ''}"></span></button>`).join('')}</div>
@@ -111,15 +118,15 @@ function explain(kinds, onlyNew = false) {
       <li>Tippst du ein Plätzchen an, <b>wechselt</b> es: unglasiert wird glasiert – aber glasiert wird auch wieder unglasiert!</li>
       <li>Dabei wechseln immer auch <b>Nachbarn mit</b>. Welche, verrät die <b>Form</b> des angetippten Plätzchens:</li>
     </ol>${shapes}
-    <p class="how-tip">Halte den Finger auf ein Plätzchen: Alle, die mitwechseln würden, leuchten rot umrandet. Erst beim Loslassen wird glasiert – zieh den Finger weg, um abzubrechen.</p>`);
+    <p class="how-tip"><b>Wichtig:</b> Jede Form nimmt das Plätzchen direkt <b>darüber</b> mit. Wie man das ausnutzt, zeigt der Knopf „Lösungsweg“.<br>Halte den Finger auf ein Plätzchen: Alle, die mitwechseln würden, leuchten rot umrandet. Erst beim Loslassen wird glasiert – zieh den Finger weg, um abzubrechen.</p>`);
 }
 // kleines 5×5-Schema: welche Nachbarn wechseln mit
 function mini(k, big = false) {
   const on = new Set(SHAPES[k].off.map(([r, c]) => (r + 2) * 5 + c + 2));
   return `<span class="mini${big ? ' big' : ''}" aria-hidden="true">${[...Array(25).keys()].map(i => `<b class="${i === 12 ? 'me' : on.has(i) ? 'y' : ''}"></b>`).join('')}</span>`;
 }
-function status() { api.status(`${taps} ${taps === 1 ? 'Zug' : 'Züge'} · Bestwert ${par}`); $('bUndo').disabled = !hist.length; }
-function saveCur() { api.saveCur({g, taps, hints, noteI, hist: hist.slice(-60), coachOn, coachUsed, restMode}); }
+function status() { api.status(`${taps} ${taps === 1 ? 'Zug' : 'Züge'} · Ziel: ${par}`); $('bUndo').disabled = !hist.length; }
+function saveCur() { api.saveCur({v: 7, g, taps, hints, noteI, hist: hist.slice(-60), coachOn, coachUsed, restMode}); }
 function paint(idx) {
   idx.forEach((j, n) => {
     const el = document.querySelector(`.cell[data-i="${j}"] .cookie`); if (!el) return;
@@ -138,11 +145,11 @@ function onTap(e) {
     let stars = taps <= par ? 3 : taps <= par + 4 ? 2 : 1; stars = Math.max(1, stars - hints);
     if (coachUsed) stars = Math.min(stars, 2);
     api.win({stars, melody: mel,
-      text: taps <= par ? `Meisterhaft – ${taps} Züge, genau der Bestwert!` : `Glasiert in ${taps} Zügen. Der Bestwert wäre ${par}.`});
+      text: taps <= par ? `Meisterhaft – in ${taps} Zügen, ohne einen einzigen Umweg!` : `Glasiert in ${taps} Zügen. Mit der Jagd geht es in ${par}.`});
   }, 500);
 }
 function showHint() {
-  const sol = solve(g); if (!sol || !sol.length) return;
+  const a = advise(); const sol = a ? a.picks : []; if (!sol.length) return;
   hints++; saveCur();
   const el = document.querySelector(`.cell[data-i="${sol[0]}"]`); el && el.classList.add('hint');
   api.status(`Tipp: das leuchtende Plätzchen (kostet einen Stern)`);
@@ -155,15 +162,7 @@ function showHint() {
 const rowOf = i => Math.floor(i / N), colOf = i => i % N;
 function advise() {
   const t = g.findIndex(v => !v); if (t < 0) return null;
-  if (!restMode) {
-    let best = null;
-    for (let i = 0; i < N * N; i++) {
-      const A = aff[i]; if (!A.includes(t) || A.some(j => j < t)) continue;
-      const score = Math.abs(rowOf(i) - (rowOf(t) + 1)) * 100 + Math.abs(colOf(i) - colOf(t)) * 10 + A.filter(j => rowOf(j) === rowOf(t)).length;
-      if (!best || score < best.score) best = {i, score};
-    }
-    if (best) return {kind: 'jagd', target: t, picks: [best.i]};
-  }
+  if (rowOf(t) < N - 1) return {kind: 'jagd', target: t, picks: [t + N]};
   const sol = solve(g) || [];
   const top = Math.min(...sol.map(rowOf));
   return {kind: 'rest', target: t, picks: sol.filter(i => rowOf(i) === top)};
@@ -181,17 +180,13 @@ function coach() {
   a.picks.forEach(i => cell(i)?.classList.add('cpick'));
   const r = rowOf(a.target) + 1, i = a.picks[0], name = SHAPES[shape[i]].name;
   if (a.kind === 'jagd') {
-    const below = rowOf(i) === rowOf(a.target) + 1 && colOf(i) === colOf(a.target);
-    const diag = rowOf(i) === rowOf(a.target) + 1 && Math.abs(colOf(i) - colOf(a.target)) === 1;
-    box.innerHTML = `<b>Jagd-Methode, Reihe ${r}:</b> Das erste unglasierte Plätzchen ist <span class="k-t">rot gestrichelt</span>. ` +
-      (below ? `Tippe den ${name} <span class="k-p">direkt darunter</span>: Er erwischt das rote, lässt aber alles darüber in Ruhe.`
-       : diag ? `Tippe den ${name} <span class="k-p">schräg darunter</span>: Er reicht schräg nach oben genau an das rote heran.`
-       : `Tippe das <span class="k-p">gold markierte</span> Plätzchen (${name}): Es erwischt das rote, ohne fertige Plätzchen davor zu stören.`) +
-      ` So wandert das Problem Schritt für Schritt nach unten.`;
+    box.innerHTML = `<b>Jagd, Reihe ${r}:</b> Das erste unglasierte Plätzchen ist <span class="k-t">rot gestrichelt</span>. ` +
+      `Tippe den ${name} <span class="k-p">direkt darunter</span>. Jede Form reicht genau eins nach oben – so wird das rote glasiert, ` +
+      `und alles darüber bleibt fertig. Was unten durcheinandergerät, erledigst du in der nächsten Reihe.`;
   } else {
-    box.innerHTML = `<b>Rest-Trick:</b> Mit der Jagd kommt man hier nicht weiter – die übrigen unglasierten Plätzchen liegen am Rand. ` +
-      `Tippe jetzt die <span class="k-p">gold markierten</span> Plätzchen${a.picks.length > 1 ? ' (Reihenfolge egal)' : ''}. ` +
-      `Das sieht erst nach Chaos aus, aber jeder dieser Züge bringt dich der Lösung näher.`;
+    box.innerHTML = `<b>Unten ist etwas übrig.</b> Das passiert nur, wenn weiter oben ein Plätzchen getippt wurde, das gar nicht nötig war. ` +
+      `Am einfachsten: <b>Neu</b> drücken und nur jagen – das geht bei jedem Blech garantiert auf. ` +
+      `Oder du tippst die <span class="k-p">gold markierten</span> Plätzchen – die hat das Spiel für dich ausgerechnet.`;
   }
 }
 function setCoach(on) {
@@ -206,25 +201,23 @@ function demo(rows, label) {
 const COURSE = [
   ['Zwei Grundregeln', `
     <p><b>1. Die Reihenfolge ist egal.</b> Ob du erst A und dann B tippst oder umgekehrt – am Ende sieht das Blech gleich aus.</p>
-    <p><b>2. Zweimal ist wie keinmal.</b> Tippst du ein Plätzchen zweimal, ist alles wieder wie vorher. Jedes Plätzchen brauchst du also höchstens <b>einmal</b>.</p>
-    <p>Das heißt: Die Frage ist nie „in welcher Reihenfolge?“, sondern nur „<b>welche</b> Plätzchen tippe ich an?“</p>`],
+    <p><b>2. Zweimal ist wie keinmal.</b> Tippst du ein Plätzchen zweimal, ist alles wieder wie vorher. Jedes Plätzchen brauchst du also höchstens <b>einmal</b>.</p>`],
   ['Die Jagd: Reihe für Reihe', `
-    <p>Arbeite dich <b>von oben nach unten</b> vor. Suche das erste unglasierte Plätzchen und tippe den Taler <b>direkt darunter</b>.</p>
+    <p>Fang <b>oben</b> an. Suche das erste unglasierte Plätzchen und tippe das Plätzchen <b>direkt darunter</b>.</p>
     <div class="demos">${demo(['oxo', 'oOo', 'ooo'], 'Vorher: oben fehlt eins')}${demo(['ooo', 'xxx', 'oxo'], 'Nachher: oben fertig')}</div>
-    <p>Oben ist jetzt alles fertig – das Problem ist nach unten gewandert. Mach mit der nächsten Reihe genauso weiter. Fertige Reihen rührst du nie wieder an.</p>`],
-  ['Sterne und Spritzgebäck', `
-    <p>Bei anderen Formen gilt dieselbe Idee: Tippe ein Plätzchen <b>unterhalb</b>, das das unglasierte erwischt, aber <b>nichts darüber</b> verändert.</p>
-    <p><b>Zimtstern:</b> Er reicht schräg nach oben – tippe ihn <b>schräg darunter</b>.<br>
-    <b>Spritzgebäck:</b> Es wirkt nur in seiner eigenen Reihe. Nimm es, wenn in einer Reihe mehrere nebeneinander fehlen.</p>
-    <p>Prüfen kannst du jeden Zug mit dem Finger: drücken, schauen, ob oben etwas rot umrandet ist – wenn ja, wegziehen.</p>`],
-  ['Der Rest-Trick', `
-    <p>Oft bleiben am Ende <b>nur ganz unten</b> ein paar unglasierte Plätzchen übrig – darunter ist ja nichts mehr zum Tippen.</p>
-    <p>Dann hilft ein Trick: Ganz <b>oben</b> bestimmte Plätzchen antippen und danach <b>noch einmal jagen</b>. Welche oben die richtigen sind, hängt vom Rest unten ab – das ist der knifflige Teil, den Profis auswendig lernen.</p>
-    <p>Die <b>Lernhilfe</b> rechnet dir aus, welche es sind.</p>`],
+    <p>Oben ist jetzt alles fertig – das Durcheinander ist nach unten gewandert. Ist die erste Reihe fertig, mach mit der zweiten genauso weiter, dann mit der dritten …</p>`],
+  ['Warum das immer klappt', `
+    <p>Schau dir die Schemata unter dem Blech an: <b>Jede Form reicht genau ein Plätzchen nach oben</b> – nie weiter, nie schräg nach oben.</p>
+    <p>Tippst du also direkt unter ein unglasiertes Plätzchen, wechselt in der Reihe darüber <b>nur dieses eine</b>. Alles, was schon fertig ist, bleibt fertig.</p>
+    <p>Und die letzte Reihe? Jedes Blech in diesem Spiel ist so gebacken, dass sie <b>von selbst aufgeht</b>, wenn du nur jagst. Darauf kannst du dich verlassen.</p>`],
+  ['Wo bleibt das Knifflige?', `
+    <p>Mit der Jagd schaffst du jedes Blech. Für <b>3 Sterne</b> darfst du aber keinen einzigen Zug zu viel machen – also nichts tippen, was die Jagd nicht braucht.</p>
+    <p>Der Profi-Trick: Schau <b>vorher</b>, was ein Tipp unten anrichtet (Finger drauf halten!). So siehst du schon beim Tippen, welche Plätzchen in der nächsten Reihe dran sein werden.</p>
+    <p>Bleibt unten doch etwas übrig, wurde oben etwas Unnötiges getippt – dann einfach <b>Neu</b> und sauber jagen.</p>`],
   ['Die Lernhilfe', `
-    <p>Schaltest du die Lernhilfe ein, denkt das Spiel mit:</p>
-    <p><span class="k-t">Rot gestrichelt</span> = das Plätzchen, um das es gerade geht.<br><span class="k-p">Gold</span> = der Vorschlag, wo du tippen kannst.<br>Darunter steht, <b>warum</b>.</p>
-    <p>Du kannst jederzeit selbst etwas anderes tippen – die Lernhilfe rechnet dann neu. Mit Lernhilfe gibt es höchstens 2 Sterne.</p>`],
+    <p>Schaltest du die Lernhilfe ein, jagt das Spiel mit dir:</p>
+    <p><span class="k-t">Rot gestrichelt</span> = das erste unglasierte Plätzchen.<br><span class="k-p">Gold</span> = das Plätzchen direkt darunter, das du tippen kannst.</p>
+    <p>Nach ein paar Blechen brauchst du sie nicht mehr. Mit Lernhilfe gibt es höchstens 2 Sterne.</p>`],
 ];
 function course(n) {
   const [title, body] = COURSE[n], last = n === COURSE.length - 1;
@@ -243,5 +236,5 @@ function course(n) {
 return {id:'blech', title:'Glasur-Blech', sub:'Glasiere alle Plätzchen – die Form verrät, wer mitwechselt',
   desc:'Knobeln: jedes Plätzchen nimmt Nachbarn mit',
   start: begin, stop() {}, _test: {generate, solve, levelCfg, apply: (st, i) => apply(st, i),
-    coachSolve(L) { const gen = generate(L); g = gen.state.slice(); restMode = false; let n = 0; for (;;) { const a = advise(); if (!a) return n; if (a.kind === 'rest') restMode = true; apply(g, a.picks[0]); if (++n > 400) return -1; } }}};
+    coachSolve(L) { const gen = generate(L); g = gen.state.slice(); let n = 0; for (;;) { const a = advise(); if (!a) return n === gen.par ? n : -2; if (a.kind === 'rest') return -3; apply(g, a.picks[0]); if (++n > 400) return -1; } }}};
 })();

@@ -65,7 +65,7 @@ Das Prinzip mit den wechselnden Nachbarn erschließt sich ohne Erklärung nicht.
 
 **Folge:** v6 (D26, D27).
 
-## Runde 6 – Prototyp v6 (ausstehend)
+## Runde 6 – Prototyp v6 (24.11.2026)
 **Automatisch geprüft:**
 - Die Lernhilfe löst Blech-Level 1–40 vollständig.
 - Spritzbeutel-Level 1–40 haben gültige Wege.
@@ -75,3 +75,23 @@ Das Prinzip mit den wechselnden Nachbarn erschließt sich ohne Erklärung nicht.
 - Lösungsweg-Kurs: Ist die Jagd-Methode verständlich?
 - Lernhilfe: Helfen die Begründungen? Lernt man dabei etwas?
 - Spritzbeutel: Lässt sich der Finger gut steuern? Wie ist die Schwierigkeit mit und ohne Start-Stern (ab Level 7)?
+
+**Feedback:**
+- Allgemein: Die Spielerin löst gern Rätsel. Knifflig ist okay, aber es muss machbar, lösbar und verständlich sein.
+- Glasieren ist „lustig“, aber ohne die „wirklich sehr gute Hilfe“ wüsste der Tester nicht, wie er vorgehen soll.
+- Er möchte es behalten, aber der Weg soll klarer werden. Offen blieb: Warum führt der „Rest-Trick“ zur Lösung? Woher weiß man ohne das Spiel, welche Plätzchen die goldenen sind?
+- Spritzbeutel: „lustig und eher einfach. Funktioniert gut.“
+
+**Analyse:** Beim klassischen Lights-Out lässt sich der Rest-Trick nur mit linearer Algebra oder auswendig gelernten Tabellen lösen. Eine bessere Erklärung kann das nicht verständlich machen, man muss das Spiel selbst ändern.
+
+**Folge:** v7 (D28–D30).
+
+## Runde 7 – Prototyp v7 (ausstehend)
+**Automatisch geprüft:**
+- Die Jagd löst jedes Blech-Level 1–40 genau in der Zielzahl, ohne Rest.
+- Per Skript: Level 14 (alle drei Formen) mit der Lernhilfe gelöst.
+- Spritzbeutel bis 8×8 gültig.
+
+**Zu prüfen:**
+- Glasur-Blech: Lässt es sich mit der einen Regel („direkt darunter tippen“) ohne Hilfe lösen? Bleibt es trotzdem spannend?
+- Spritzbeutel: Ist es jetzt schwer genug?

@@ -24,12 +24,12 @@ for (let L = 1; L <= 40; L++) {
   const sol = Blech._test.solve(state); const st = state.slice();
   sol.forEach(i => Blech._test.apply(st, i));
   worst = Math.max(worst, Date.now() - t);
-  if (!st.every(v => v) || sol.length !== par) { console.log('Blech FEHLER', L); process.exit(1); }
-  if (L % 8 === 0) console.log('  Blech L' + L, Math.sqrt(state.length) + 'x' + Math.sqrt(state.length), 'Bestwert', par);
+  if (!st.every(v => v) || sol.length > par) { console.log('Blech FEHLER', L); process.exit(1); }
+  if (L % 8 === 0) console.log('  Blech L' + L, Math.sqrt(state.length) + 'x' + Math.sqrt(state.length), 'Ziel (Jagd)', par, '/ mathematisches Minimum', sol.length);
 }
 console.log('OK Blech 1-40, langsamstes Level', worst, 'ms');
-for (let L = 1; L <= 40; L++) { const n = Blech._test.coachSolve(L); if (n < 0) { console.log('Lernhilfe kommt nicht ans Ziel', L); process.exit(1); } if (L % 10 === 0) console.log('  Lernhilfe L' + L, n, 'Züge'); }
-console.log('OK Lernhilfe löst Blech 1-40');
+for (let L = 1; L <= 40; L++) { const n = Blech._test.coachSolve(L); if (n < 0) { console.log('Jagd löst Blech nicht in Zielzahl', L, n); process.exit(1); } if (L % 10 === 0) console.log('  Lernhilfe L' + L, n, 'Züge'); }
+console.log('OK Jagd löst jedes Blech 1-40 genau in der Zielzahl');
 for (let L = 1; L <= 40; L++) {
   const {R, C, path} = Spritz._test.generate(L), cfg = Spritz._test.levelCfg(L);
   const ok = new Set(path).size === path.length && path.every((p, k) => !k || (Math.abs(p - path[k-1]) === C) || (Math.abs(p - path[k-1]) === 1 && Math.floor(p / C) === Math.floor(path[k-1] / C)));

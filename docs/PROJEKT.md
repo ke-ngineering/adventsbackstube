@@ -4,13 +4,16 @@
 > Wer (Mensch oder Claude) die Entwicklung fortsetzt, liest zuerst diese Datei.
 > Nach jeder Arbeitssitzung: Status, Entscheidungen und Agenda hier aktualisieren.
 
-Stand: 23.11.2026 (Prototyp v6)
+Stand: 24.11.2026 (Prototyp v7)
 
 ## 1. Vision
 
 Ein Adventskalender-Handyspiel als Geschenk. Die Spielerin mag Knobel-/„Daddel“-Spiele
 (Flaschen-Sortierspiel, Garten-Spiel mit Klick-Reihenfolgen). Ziel: vom 1.–24. Dezember jeden Tag etwas Neues,
 mit genug Inhalt für spürbar lange Spielsessions (ca. 20–30 Min neue Tagesinhalte + Endlos-Modus).
+
+**Leitlinie Schwierigkeit (D28):** Die Spielerin löst gern Rätsel – knifflig ist ausdrücklich erwünscht, aber jedes Rätsel muss
+**verständlich, machbar und lösbar** sein. Kein Rätsel, das nur mit Mathematik oder Auswendiglernen geht.
 
 **Themenfelder** für Inhalte/Anspielungen: Backen & Kochen, Musik/Chor, Handarbeit, Radfahren; Rezepte aus München und Hamburg.
 
@@ -48,6 +51,9 @@ mit genug Inhalt für spürbar lange Spielsessions (ca. 20–30 Min neue Tagesin
 | D25 | 23.11. | `main` geschützt: Änderungen nur per **Pull Request**, Auftraggeber merged | Kontrolle darüber, was live geht |
 | D26 | 23.11. | Glasur-Blech **behalten** + Strategiekurs „Lösungsweg“ + interaktive „Lernhilfe“ | Tester findet es interessant, aber „wie Rubik's Cube“ – Vorgehen soll erklärt werden |
 | D27 | 23.11. | **Spritzbeutel** als 4. Station (Ein-Strich-Rätsel: Spritzgebäck in einem Zug) | Idee aus der Diskussion; sofort verständlich, Gegenpol zum mathematischen Blech |
+| D28 | 24.11. | Leitlinie: knifflig ja, aber **verständlich, machbar, lösbar** | Profil der Spielerin (mag Rätsel) |
+| D29 | 24.11. | Glasur-Blech: Formen reichen **genau eins nach oben**, Level nur aus Tippern ab Reihe 2 → **Jagd löst jedes Blech**; Rest-Trick entfällt; Kurs neu („Warum das immer klappt“) | Tester: ohne Hilfe kein Vorgehen erkennbar, Rest-Trick undurchschaubar |
+| D30 | 24.11. | Spritzbeutel schwerer: 4×4 → 8×8, Start-Stern nur L1–2 | Tester: „lustig und eher einfach“ |
 | D12 | 23.11. | Persönliche Inhalte (Name, Nachrichten) **verschlüsselt** im Repo; Schlüssel steht nur im Link-Teil nach `#`, den sie bekommt (wird nie an Server übertragen) | Personalisierung trotz öffentlichem Repo |
 
 ## 3. Spielkonzept
@@ -67,15 +73,18 @@ mit genug Inhalt für spürbar lange Spielsessions (ca. 20–30 Min neue Tagesin
    Vorschau beim Drücken (betroffene Plätzchen rot umrandet, Ausführen erst beim Loslassen), Legende in Worten.
    **Lösungsweg & Lernhilfe (v6):** Knopf „Lösungsweg“ = 5-seitiger Strategiekurs (Grundregeln, Jagd-Methode mit Vorher/Nachher-Bild,
    Sterne & Spritzgebäck, Rest-Trick, Lernhilfe). Knopf „Lernhilfe“ = Spiel denkt mit: markiert das Ziel (rot gestrichelt) und den
-   Vorschlag (gold) und begründet ihn. Logik: Jagd = Plätzchen tippen, das das erste unglasierte erwischt, ohne etwas davor zu ändern
-   (terminiert garantiert); danach Rest-Trick aus der Löser-Lösung (oberste Reihe zuerst). Mit Lernhilfe höchstens 2 Sterne.
+   Vorschlag (gold) und begründet ihn. Mit Lernhilfe höchstens 2 Sterne.
+   **v7 – Jagd geht immer auf (D29):** Alle Formen nehmen genau das Plätzchen **direkt darüber** mit und reichen sonst nie nach oben
+   (Taler = Kreuz, Zimtstern = oben + zwei schräg unten, Spritzgebäck = oben + 2 links + 2 rechts). Level werden nur aus Tippern ab
+   Reihe 2 erzeugt → die Jagd („immer direkt unter das erste unglasierte tippen“) löst jedes Blech garantiert, die letzte Reihe geht
+   von selbst auf. Kein Rest-Trick mehr nötig. 3 Sterne = Zugzahl der Jagd (keinen Zug zu viel). Lernhilfe/Tipp = Feld direkt darunter.
 3. **Omas Rezeptbuch** ✅ v4 – Zutaten-Schalen spielen Töne vor, nachtippen; Folge wächst Zeile für Zeile bis zur Ziellänge (6 → 18).
    **Eigene Wendung:** Ungerade Level = echtes Adventslied (Schalen = Tonleiter, aufsteigend sortiert), gerade Level = zufällige Folge.
    Fehler wiederholen die Zeile (kein Game Over), kosten aber Sterne. „Nochmal hören“ jederzeit.
 4. **Spritzbeutel** ✅ v6 – Mit dem Finger eine Teigspur durch alle Punkte auf dem Backpapier ziehen: nur waagerecht/senkrecht, jeden
    Punkt genau einmal; Lücken im Papier werden übersprungen. Zurückziehen / Antippen eines Spurpunkts nimmt zurück. Jeder neue Punkt
    spielt die nächste Note des Lieds. Am Ende wird das Gebäck „gebacken“ (goldbraun) und die Enden in Schokolade getaucht.
-   Level aus zufälligem Weg (Warnsdorff-Heuristik) → immer lösbar; 3×3 → 7×7, 8–30 % Lücken; Start-Stern bis L6, danach selbst finden.
+   Level aus zufälligem Weg (Warnsdorff-Heuristik) → immer lösbar; v7 schwerer (D30): 4×4 → 8×8, 8–30 % Lücken; Start-Stern nur L1–2.
    Tipp zeigt gestrichelt einen möglichen Anfang (kostet einen Stern).
 
 ### Advents-Rahmen (geplant)
@@ -118,7 +127,8 @@ Ziel: **spielbar ab Di, 1.12.2026**, Link vorher an sie (z. B. am 1. Advent, 29.
 | 23.11. | Konzept, Stil, Repo, Prototyp Gewürzregal (v2: schwerer + Animation; v3: Klang, Melodie-Gläser, Fortsetzen), GitHub Pages live | ✅ |
 | 23.11. | Mechanik 2 Glasur-Blech + Mechanik 3 Rezeptbuch, Backstube-Startseite (v4) | ✅ (vorgezogen) |
 | 23.11. | v5/v6: Glasur-Blech verständlich (Anleitung, Kurs, Lernhilfe), 4. Station Spritzbeutel | ✅ |
-| 24.11. | Feedback v6; Kalender mit 24 Türchen & Datumssperre | ⏳ |
+| 24.11. | v7: Blech-Jagd geht immer auf, Spritzbeutel schwerer | ✅ |
+| 24.11. | Kalender mit 24 Türchen & Datumssperre | ⏳ |
 | 25.11. | Tagesplan, Wendungen, Rezeptseiten | ⏳ |
 | 26.11. | Tagesplan 1–24 (Mechanik, Levelzahl, Wendungen, Goodies); Rezeptseiten | ⏳ |
 | 27.11. | Persönliche Inhalte einbauen; Spielstand-Backup-Code; PWA-Manifest + Icon | ⏳ |
@@ -139,7 +149,8 @@ Ziel: **spielbar ab Di, 1.12.2026**, Link vorher an sie (z. B. am 1. Advent, 29.
 - Tests: `python3 tools/test_generator.py` (alle Generatoren/Löser in Node), `tools/screenshots.py` (Playwright, 390 px).
 
 ## 7. Offene Fragen
-- Prototyp v6 testen: Lösungsweg/Lernhilfe verständlich? Spritzbeutel: Steuerung mit dem Finger, Schwierigkeit?
+- Prototyp v7 testen: Ist das Glasur-Blech mit der Jagd jetzt ohne Hilfe lösbar? Ist es noch spannend genug? Spritzbeutel schwer genug?
+- Option „Meisterbleche“ (Rest-Trick nötig) für später, falls die Jagd zu mechanisch wird
 - Weiterhin offen: Rezeptbuch (Tempo, Lieder erkannt, Melodien korrekt?)
 - Wie verteilen sich die 4 Stationen auf die 24 Adventstage? → danach gemeinsam evaluieren, was das eigentliche Spiel braucht (Schwierigkeitskurve, Wendungen, Animation).
 - Feedback zum Prototyp (Gefühl, Schwierigkeit, Optik)?
