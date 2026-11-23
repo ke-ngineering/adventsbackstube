@@ -209,7 +209,7 @@ footer{text-align:center;font-size:13px;color:var(--soft);padding:10px 14px 16px
 
 /* ---- Glasur-Blech v8: Lehrplan, Labor, Rezeptkarte ---- */
 .cell{position:relative}
-.colname{position:absolute;top:-2px;left:50%;transform:translate(-50%,-60%);font-size:12px;font-weight:700;color:#6e7782;background:#f3e6cc;border-radius:6px;padding:0 5px;z-index:2;line-height:1.3}
+.colname{position:absolute;top:-2px;left:50%;transform:translate(-50%,-62%);font-size:14px;font-weight:700;color:#fff;background:var(--red);border-radius:7px;padding:0 6px;z-index:2;line-height:1.35;box-shadow:0 1px 2px rgba(0,0,0,.25)}
 .legend .lesson{flex-basis:100%;text-align:center;font-weight:700;color:var(--red);font-size:15px}
 .fp{display:inline-flex;gap:3px;vertical-align:middle;padding:3px;background:#6e7782;border-radius:6px}
 .fp i{width:14px;height:14px;border-radius:50%;background:#fffaf2}
@@ -228,3 +228,9 @@ footer{text-align:center;font-size:13px;color:var(--soft);padding:10px 14px 16px
 .lcell .cookie{width:88%}
 .lcell .colname{font-size:10px;transform:translate(-50%,-75%)}
 .lab-msg{min-height:2.8em;font-weight:600;text-align:center;margin-bottom:4px}
+
+.steps{margin:6px 0 8px;padding-left:22px}.steps li{color:var(--soft)}
+.steps li.done{text-decoration:line-through}.steps li.done::marker{color:#4f9d69}
+.steps li.now{color:var(--ink);font-weight:700}.steps li.now::marker{color:var(--red)}
+.coach p{margin:6px 0}
+.btn.small{font-size:14px;min-height:38px;padding:6px 12px}

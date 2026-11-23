@@ -4,7 +4,7 @@
 > Wer (Mensch oder Claude) die Entwicklung fortsetzt, liest zuerst diese Datei.
 > Nach jeder Arbeitssitzung: Status, Entscheidungen und Agenda hier aktualisieren.
 
-Stand: 24.11.2026 (Prototyp v8)
+Stand: 24.11.2026 (Prototyp v9)
 
 ## 1. Vision
 
@@ -55,6 +55,7 @@ mit genug Inhalt für spürbar lange Spielsessions (ca. 20–30 Min neue Tagesin
 | D29 | 24.11. | Glasur-Blech: Formen reichen **genau eins nach oben**, Level nur aus Tippern ab Reihe 2 → **Jagd löst jedes Blech**; Rest-Trick entfällt; Kurs neu („Warum das immer klappt“) | Tester: ohne Hilfe kein Vorgehen erkennbar, Rest-Trick undurchschaubar |
 | D30 | 24.11. | Spritzbeutel schwerer: 4×4 → 8×8, Start-Stern nur L1–2 | Tester: „lustig und eher einfach“ |
 | D31 | 24.11. | **Rest-Trick bleibt** und wird gelehrt: Lehrplan klein → groß (2×2 …5×5), Fingerabdruck-Labor, Rezeptkarte, Kurs mit „Warum“; ersetzt D29 (Rest-Trick abschaffen) | Tester: Rest-Trick behalten, aber durchschaubar machen, „dass man das Denken lernen kann“; Recherche: übliche Lernmethode = Jagd + Tabelle, Tabelle durch Beobachten auf leerem Brett |
+| D32 | 24.11. | Rest-Trick-Begriffe erklären (A/B/C, Labor), Schrittliste in der Lernhilfe, Lektionen 3 und 6 als geführte Übungslevel | Tester: „Was ist das Labor? Was ist A?“ |
 | D12 | 23.11. | Persönliche Inhalte (Name, Nachrichten) **verschlüsselt** im Repo; Schlüssel steht nur im Link-Teil nach `#`, den sie bekommt (wird nie an Server übertragen) | Personalisierung trotz öffentlichem Repo |
 
 ## 3. Spielkonzept
@@ -87,6 +88,9 @@ mit genug Inhalt für spürbar lange Spielsessions (ca. 20–30 Min neue Tagesin
    Fingerabdrücke, Überlagerung, So geht's + Warum + Profi-Tipp, Lernhilfe); Lektionen öffnen sich automatisch in L3 und L6.
    Ziel (3 Sterne) = Zugzahl Jagd + Rest-Trick + Jagd; „kürzer geht es nicht“ = mathematisches Minimum (Löser).
    Nicht geeignet für Rest-Lektionen (nie ein Rest): 3×2, 4×4, 5×3 (nur Taler).
+   **v9 – Begriffe klarer (D32):** Buchstaben A, B, C … deutlich (rote Schildchen) über der obersten Reihe ab Level 6;
+   Knopf heißt „Abdruck-Labor“; Lernhilfe zeigt beim Rest-Trick die 4 Schritte mit aktuellem Schritt, erklärt A/B/C, „Warum“,
+   und hat einen Knopf „Im Labor ausprobieren“. Lektions-Level 3 und 6 = **Übungslevel**: Lernhilfe automatisch an, ohne Sternabzug.
 3. **Omas Rezeptbuch** ✅ v4 – Zutaten-Schalen spielen Töne vor, nachtippen; Folge wächst Zeile für Zeile bis zur Ziellänge (6 → 18).
    **Eigene Wendung:** Ungerade Level = echtes Adventslied (Schalen = Tonleiter, aufsteigend sortiert), gerade Level = zufällige Folge.
    Fehler wiederholen die Zeile (kein Game Over), kosten aber Sterne. „Nochmal hören“ jederzeit.
@@ -158,7 +162,7 @@ Ziel: **spielbar ab Di, 1.12.2026**, Link vorher an sie (z. B. am 1. Advent, 29.
 - Tests: `python3 tools/test_generator.py` (alle Generatoren/Löser in Node), `tools/screenshots.py` (Playwright, 390 px).
 
 ## 7. Offene Fragen
-- Prototyp v8 testen: Lehrplan Glasur-Blech Level 1–11 durchspielen – lernt man den Rest-Trick? Labor verständlich? Spritzbeutel schwer genug?
+- Prototyp v9 testen: Lehrplan Glasur-Blech Level 1–11 durchspielen – lernt man den Rest-Trick? Labor verständlich? Spritzbeutel schwer genug?
 - Weiterhin offen: Rezeptbuch (Tempo, Lieder erkannt, Melodien korrekt?)
 - Wie verteilen sich die 4 Stationen auf die 24 Adventstage? → danach gemeinsam evaluieren, was das eigentliche Spiel braucht (Schwierigkeitskurve, Wendungen, Animation).
 - Feedback zum Prototyp (Gefühl, Schwierigkeit, Optik)?
