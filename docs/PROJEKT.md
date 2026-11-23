@@ -4,7 +4,7 @@
 > Wer (Mensch oder Claude) die Entwicklung fortsetzt, liest zuerst diese Datei.
 > Nach jeder Arbeitssitzung: Status, Entscheidungen und Agenda hier aktualisieren.
 
-Stand: 24.11.2026 (Prototyp v7)
+Stand: 24.11.2026 (Prototyp v8)
 
 ## 1. Vision
 
@@ -54,6 +54,7 @@ mit genug Inhalt für spürbar lange Spielsessions (ca. 20–30 Min neue Tagesin
 | D28 | 24.11. | Leitlinie: knifflig ja, aber **verständlich, machbar, lösbar** | Profil der Spielerin (mag Rätsel) |
 | D29 | 24.11. | Glasur-Blech: Formen reichen **genau eins nach oben**, Level nur aus Tippern ab Reihe 2 → **Jagd löst jedes Blech**; Rest-Trick entfällt; Kurs neu („Warum das immer klappt“) | Tester: ohne Hilfe kein Vorgehen erkennbar, Rest-Trick undurchschaubar |
 | D30 | 24.11. | Spritzbeutel schwerer: 4×4 → 8×8, Start-Stern nur L1–2 | Tester: „lustig und eher einfach“ |
+| D31 | 24.11. | **Rest-Trick bleibt** und wird gelehrt: Lehrplan klein → groß (2×2 …5×5), Fingerabdruck-Labor, Rezeptkarte, Kurs mit „Warum“; ersetzt D29 (Rest-Trick abschaffen) | Tester: Rest-Trick behalten, aber durchschaubar machen, „dass man das Denken lernen kann“; Recherche: übliche Lernmethode = Jagd + Tabelle, Tabelle durch Beobachten auf leerem Brett |
 | D12 | 23.11. | Persönliche Inhalte (Name, Nachrichten) **verschlüsselt** im Repo; Schlüssel steht nur im Link-Teil nach `#`, den sie bekommt (wird nie an Server übertragen) | Personalisierung trotz öffentlichem Repo |
 
 ## 3. Spielkonzept
@@ -74,10 +75,18 @@ mit genug Inhalt für spürbar lange Spielsessions (ca. 20–30 Min neue Tagesin
    **Lösungsweg & Lernhilfe (v6):** Knopf „Lösungsweg“ = 5-seitiger Strategiekurs (Grundregeln, Jagd-Methode mit Vorher/Nachher-Bild,
    Sterne & Spritzgebäck, Rest-Trick, Lernhilfe). Knopf „Lernhilfe“ = Spiel denkt mit: markiert das Ziel (rot gestrichelt) und den
    Vorschlag (gold) und begründet ihn. Mit Lernhilfe höchstens 2 Sterne.
-   **v7 – Jagd geht immer auf (D29):** Alle Formen nehmen genau das Plätzchen **direkt darüber** mit und reichen sonst nie nach oben
-   (Taler = Kreuz, Zimtstern = oben + zwei schräg unten, Spritzgebäck = oben + 2 links + 2 rechts). Level werden nur aus Tippern ab
-   Reihe 2 erzeugt → die Jagd („immer direkt unter das erste unglasierte tippen“) löst jedes Blech garantiert, die letzte Reihe geht
-   von selbst auf. Kein Rest-Trick mehr nötig. 3 Sterne = Zugzahl der Jagd (keinen Zug zu viel). Lernhilfe/Tipp = Feld direkt darunter.
+   **v8 – Lehrplan mit Rest-Trick (D31, ersetzt D29):** Formen reichen genau eins nach oben (Taler = Kreuz, Zimtstern = oben +
+   zwei schräg unten, Spritzgebäck = oben + 2 links + 2 rechts), Bleche sind rechteckig (R×C). Lehrplan in `PLAN` (blech.js):
+   L1–2 ausprobieren (2×2, 2×3) · L3–5 Lektion 1 Jagd (3×3, 4×3, 4×4) · L6–11 Lektion 2 Rest-Trick: 2×2 (Abdruck = Feld darunter)
+   → 4×2 → 4×3 (Abdrücke spiegelverkehrt) → 3×3 (Abdrücke kombinieren, erzwungen) → 5×4 → klassisches 5×5 · L12–16 Zimtstern und
+   Spritzgebäck einführen (erst Jagd, dann Rest) · ab L17 „Meisterbleche“ 6×6/7×7.
+   **Fingerabdruck-Labor:** frisch glasiertes Blech, oben tippen, das Spiel jagt animiert → Abdruck wird auf der **Rezeptkarte**
+   gespeichert (pro Blech-Typ = Größe + Formen; `save.games.blech.cards`). Mehrere oben → Überlagerung sichtbar.
+   **Rezeptkarte** unter dem Blech (Rest-Level), zeigt auch „Jetzt unten übrig“. **Lernhilfe**: Jagd → direkt darunter; Rest →
+   passende obere Plätzchen (kleinste Abdruck-Kombination) + Begründung. **Kurs** 7 Seiten (Grundregeln, Jagd, Und unten?,
+   Fingerabdrücke, Überlagerung, So geht's + Warum + Profi-Tipp, Lernhilfe); Lektionen öffnen sich automatisch in L3 und L6.
+   Ziel (3 Sterne) = Zugzahl Jagd + Rest-Trick + Jagd; „kürzer geht es nicht“ = mathematisches Minimum (Löser).
+   Nicht geeignet für Rest-Lektionen (nie ein Rest): 3×2, 4×4, 5×3 (nur Taler).
 3. **Omas Rezeptbuch** ✅ v4 – Zutaten-Schalen spielen Töne vor, nachtippen; Folge wächst Zeile für Zeile bis zur Ziellänge (6 → 18).
    **Eigene Wendung:** Ungerade Level = echtes Adventslied (Schalen = Tonleiter, aufsteigend sortiert), gerade Level = zufällige Folge.
    Fehler wiederholen die Zeile (kein Game Over), kosten aber Sterne. „Nochmal hören“ jederzeit.
@@ -127,7 +136,7 @@ Ziel: **spielbar ab Di, 1.12.2026**, Link vorher an sie (z. B. am 1. Advent, 29.
 | 23.11. | Konzept, Stil, Repo, Prototyp Gewürzregal (v2: schwerer + Animation; v3: Klang, Melodie-Gläser, Fortsetzen), GitHub Pages live | ✅ |
 | 23.11. | Mechanik 2 Glasur-Blech + Mechanik 3 Rezeptbuch, Backstube-Startseite (v4) | ✅ (vorgezogen) |
 | 23.11. | v5/v6: Glasur-Blech verständlich (Anleitung, Kurs, Lernhilfe), 4. Station Spritzbeutel | ✅ |
-| 24.11. | v7: Blech-Jagd geht immer auf, Spritzbeutel schwerer | ✅ |
+| 24.11. | v7: Spritzbeutel schwerer · v8: Glasur-Blech mit Lehrplan, Labor, Rezeptkarte | ✅ |
 | 24.11. | Kalender mit 24 Türchen & Datumssperre | ⏳ |
 | 25.11. | Tagesplan, Wendungen, Rezeptseiten | ⏳ |
 | 26.11. | Tagesplan 1–24 (Mechanik, Levelzahl, Wendungen, Goodies); Rezeptseiten | ⏳ |
@@ -149,8 +158,7 @@ Ziel: **spielbar ab Di, 1.12.2026**, Link vorher an sie (z. B. am 1. Advent, 29.
 - Tests: `python3 tools/test_generator.py` (alle Generatoren/Löser in Node), `tools/screenshots.py` (Playwright, 390 px).
 
 ## 7. Offene Fragen
-- Prototyp v7 testen: Ist das Glasur-Blech mit der Jagd jetzt ohne Hilfe lösbar? Ist es noch spannend genug? Spritzbeutel schwer genug?
-- Option „Meisterbleche“ (Rest-Trick nötig) für später, falls die Jagd zu mechanisch wird
+- Prototyp v8 testen: Lehrplan Glasur-Blech Level 1–11 durchspielen – lernt man den Rest-Trick? Labor verständlich? Spritzbeutel schwer genug?
 - Weiterhin offen: Rezeptbuch (Tempo, Lieder erkannt, Melodien korrekt?)
 - Wie verteilen sich die 4 Stationen auf die 24 Adventstage? → danach gemeinsam evaluieren, was das eigentliche Spiel braucht (Schwierigkeitskurve, Wendungen, Animation).
 - Feedback zum Prototyp (Gefühl, Schwierigkeit, Optik)?
