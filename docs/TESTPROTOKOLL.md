@@ -108,7 +108,7 @@ Das Prinzip mit den wechselnden Nachbarn erschließt sich ohne Erklärung nicht.
 
 **Folge:** v8 (D31).
 
-## Runde 8 – Prototyp v8 (ausstehend)
+## Runde 8 – Prototyp v8 (24.11.2026)
 **Automatisch geprüft:**
 - Jede Blech-Stufe von 1 bis 40 erzeugt (Lehrplan-Level je mit Modus, Ziel und Minimum).
 - Die Lernhilfe löst alle 40 Level genau in der Zielzahl.
@@ -117,3 +117,14 @@ Das Prinzip mit den wechselnden Nachbarn erschließt sich ohne Erklärung nicht.
 **Zu prüfen:**
 - Lernt man mit Lektion, Labor und Rezeptkarte den Rest-Trick so, dass man ihn ab dem 3×3-Level selbst anwenden kann?
 - Ist das Tempo des Lehrplans richtig?
+
+**Feedback:** „Sehr schön! Das ist ein richtiges Knobelspiel. Ich checke noch nicht wirklich, wie es geht, aber ich mag es irgendwie.“
+Stolperstein in der Lernhilfe: „Das ist der Fingerabdruck von A – probier es im Labor aus! Tippe oben A“ – **Was ist das Labor? Was ist A?**
+
+**Folge:** v9 (D32).
+
+## Runde 9 – Prototyp v9 (ausstehend)
+**Zu prüfen:**
+- Sind A/B/C und das Abdruck-Labor jetzt klar?
+- Hilft die Schrittliste in der Lernhilfe, den Ablauf zu verstehen?
+- Fühlen sich die geführten Übungslevel 3 und 6 wie ein gutes Tutorial an?

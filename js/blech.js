@@ -19,10 +19,10 @@ const ALL = ['taler', 'stern', 'stange'];
 const PLAN = [null,
   {R:2, C:2, kinds:['taler'], mode:'free', k:1, title:'Das erste Blech'},
   {R:2, C:3, kinds:['taler'], mode:'free', k:2, title:'Ausprobieren'},
-  {R:3, C:3, kinds:['taler'], mode:'jagd', k:2, title:'Lektion 1: Die Jagd', lesson:'jagd'},
+  {R:3, C:3, kinds:['taler'], mode:'jagd', k:2, title:'Lektion 1: Die Jagd (Übung mit Lernhilfe)', lesson:'jagd', tutorial:true},
   {R:4, C:3, kinds:['taler'], mode:'jagd', k:3, title:'Jagd üben'},
   {R:4, C:4, kinds:['taler'], mode:'jagd', k:5, title:'Jagd üben'},
-  {R:2, C:2, kinds:['taler'], mode:'rest', k:2, title:'Lektion 2: Der Rest-Trick', lesson:'rest'},
+  {R:2, C:2, kinds:['taler'], mode:'rest', k:2, title:'Lektion 2: Der Rest-Trick (Übung mit Lernhilfe)', lesson:'rest', tutorial:true},
   {R:4, C:2, kinds:['taler'], mode:'rest', k:3, title:'Rest-Trick: längeres Blech'},
   {R:4, C:3, kinds:['taler'], mode:'rest', k:4, title:'Rest-Trick: Abdrücke spiegelverkehrt'},
   {R:3, C:3, kinds:['taler'], mode:'rest', k:3, combo:true, title:'Rest-Trick: Abdrücke kombinieren'},
@@ -41,7 +41,7 @@ function levelCfg(L) {
 }
 const LETTERS = 'ABCDEFG';
 
-let api, lvl, cfg, R, C, shape, aff, fps, g, taps, hints, par, best, noteI, mel, hist, coachOn = false, coachUsed = false, restPlan = [];
+let api, lvl, cfg, R, C, shape, aff, fps, g, taps, hints, par, best, noteI, mel, hist, coachOn = false, coachUsed = false, restPlan = [], secondPass = false;
 
 /* ---- Regeln & Werkzeuge ---- */
 const rowOf = i => Math.floor(i / C), colOf = i => i % C;
@@ -134,15 +134,15 @@ const bits = (arr, cls = '') => `<span class="fp ${cls}">${arr.map(v => `<i clas
 function begin(L, resume, a) {
   api = a; lvl = L; mel = melodyFor(L + 1);
   const gen = generate(L); g = gen.state; par = gen.par; best = gen.best;
-  taps = 0; hints = 0; noteI = 0; hist = []; coachOn = false; coachUsed = false; restPlan = [];
+  taps = 0; hints = 0; noteI = 0; hist = []; coachOn = !!cfg.tutorial; coachUsed = false; restPlan = []; secondPass = false;
   const c = resume ? api.getCur() : null;
   if (c && c.v === 8 && Array.isArray(c.g) && c.g.length === g.length) {
-    g = c.g; taps = c.taps || 0; hints = c.hints || 0; noteI = c.noteI || 0; hist = c.hist || []; coachOn = !!c.coachOn; coachUsed = !!c.coachUsed; restPlan = c.restPlan || [];
+    g = c.g; taps = c.taps || 0; hints = c.hints || 0; noteI = c.noteI || 0; hist = c.hist || []; coachOn = !!c.coachOn; coachUsed = !!c.coachUsed; restPlan = c.restPlan || []; secondPass = !!c.secondPass;
   } else api.saveCur(null);
   const maxW = Math.min(460, C * 92 + 40);
   api.stage.innerHTML = `
     <div class="blech" id="blech" style="--n:${C};aspect-ratio:${C}/${R};width:min(100%,${maxW}px)">${g.map((v, i) =>
-      `<button class="cell" data-i="${i}" aria-label="${SHAPES[shape[i]].name}${i < C ? ' ' + LETTERS[i] : ''}">${i < C && cfg.mode === 'rest' ? `<span class="colname">${LETTERS[i]}</span>` : ''}<span class="cookie s-${shape[i]}${v ? ' on' : ''}"></span></button>`).join('')}</div>
+      `<button class="cell" data-i="${i}" aria-label="${SHAPES[shape[i]].name}${i < C ? ' ' + LETTERS[i] : ''}">${i < C && L >= 6 ? `<span class="colname">${LETTERS[i]}</span>` : ''}<span class="cookie s-${shape[i]}${v ? ' on' : ''}"></span></button>`).join('')}</div>
     <div class="coach" id="coach" aria-live="polite" hidden></div>
     <div class="rcard" id="rcard" hidden></div>`;
   const bl = $('blech'), clearPv = () => bl.querySelectorAll('.pv').forEach(x => x.classList.remove('pv'));
@@ -154,12 +154,12 @@ function begin(L, resume, a) {
     kinds.map(k => `<span class="pat">${mini(k)}<span><b>${SHAPES[k].name}</b> wechselt ${SHAPES[k].how}</span></span>`).join('');
   api.controls.innerHTML = `<button class="btn" id="bUndo">↶ Zurück</button><button class="btn" id="hint">Tipp</button><button class="btn" id="restart">Neu</button>` +
     `<button class="btn" id="bHelp">Regeln</button><button class="btn" id="bCourse">Lösungsweg</button>` +
-    (L >= 6 ? `<button class="btn" id="bLab">Labor</button>` : '') + `<button class="btn" id="bCoach" aria-pressed="false">Lernhilfe</button>`;
+    (L >= 6 ? `<button class="btn" id="bLab">Abdruck-Labor</button>` : '') + `<button class="btn" id="bCoach" aria-pressed="false">Lernhilfe</button>`;
   $('bHelp').onclick = () => explain(kinds);
   $('bCourse').onclick = () => course(0);
   $('bLab') && ($('bLab').onclick = lab);
   $('bCoach').onclick = () => setCoach(!coachOn);
-  $('bUndo').onclick = () => { if (!hist.length) return; const i = hist.pop(); apply(g, i); taps--; restPlan = []; Snd.tap(.7); paint(aff[i]); saveCur(); refresh(); };
+  $('bUndo').onclick = () => { if (!hist.length) return; const i = hist.pop(); apply(g, i); taps--; restPlan = []; secondPass = false; Snd.tap(.7); paint(aff[i]); saveCur(); refresh(); };
   $('hint').onclick = showHint;
   $('restart').onclick = () => api.restart();
   refresh();
@@ -171,10 +171,10 @@ function begin(L, resume, a) {
 }
 function refresh() { status(); coach(); showCard(); }
 function status() {
-  api.status(`${taps} ${taps === 1 ? 'Zug' : 'Züge'} · Ziel: ${par}` + (coachOn ? ' · Lernhilfe an (max. 2 Sterne)' : ''));
+  api.status(`${taps} ${taps === 1 ? 'Zug' : 'Züge'} · Ziel: ${par}` + (coachOn ? (cfg.tutorial ? ' · Übungslevel: Lernhilfe kostenlos' : ' · Lernhilfe an (max. 2 Sterne)') : ''));
   $('bUndo').disabled = !hist.length;
 }
-function saveCur() { if (api) api.saveCur({v: 8, g, taps, hints, noteI, hist: hist.slice(-80), coachOn, coachUsed, restPlan}); }
+function saveCur() { if (api) api.saveCur({v: 8, g, taps, hints, noteI, hist: hist.slice(-80), coachOn, coachUsed, restPlan, secondPass}); }
 function paint(idx) {
   idx.forEach((j, n) => {
     const el = document.querySelector(`#blech .cell[data-i="${j}"] .cookie`); if (!el) return;
@@ -190,6 +190,7 @@ function onTap(e) {
   if (restPlan.includes(i)) restPlan = restPlan.filter(x => x !== i); else restPlan = [];
   const n = mel.notes; Snd.note(n[noteI % n.length][0], .4); noteI++;
   paint(aff[i]); saveCur(); refresh();
+  if (g.every(v => v)) secondPass = false;
   if (g.every(v => v)) setTimeout(() => {
     let stars = taps <= par ? 3 : taps <= par + 4 ? 2 : 1; stars = Math.max(1, stars - hints);
     if (coachUsed) stars = Math.min(stars, 2);
@@ -206,7 +207,7 @@ function advise() {
   if (restPlan.length) return {kind: 'plan', target: -1, picks: restPlan.slice()};
   if (rowOf(t) < R - 1) return {kind: 'jagd', target: t, picks: [t + C]};
   const left = leftover(g), S = restSet(left) || [];
-  restPlan = S.slice(); saveCur();
+  restPlan = S.slice(); secondPass = true; saveCur();
   return {kind: 'rest', target: t, picks: S, left};
 }
 function coach() {
@@ -219,21 +220,27 @@ function coach() {
   const cell = i => document.querySelector(`#blech .cell[data-i="${i}"]`);
   if (a.target >= 0) cell(a.target)?.classList.add('ctarget');
   a.picks.forEach(i => cell(i)?.classList.add('cpick'));
+  const steps = now => `<ol class="steps">${['Jagen, bis nur unten etwas übrig ist', 'Rest unten ablesen', 'Passende Plätzchen oben tippen', 'Noch einmal von oben jagen']
+    .map((s, k) => `<li class="${k < now ? 'done' : k === now ? 'now' : ''}">${s}</li>`).join('')}</ol>`;
   if (a.kind === 'jagd') {
-    box.innerHTML = `<b>Jagd, Reihe ${rowOf(a.target) + 1}:</b> Das erste unglasierte Plätzchen ist <span class="k-t">rot gestrichelt</span>. ` +
+    box.innerHTML = (secondPass ? `<b>Rest-Trick</b>${steps(3)}` : '') +
+      `<b>Jagd, Reihe ${rowOf(a.target) + 1}:</b> Das erste unglasierte Plätzchen ist <span class="k-t">rot gestrichelt</span>. ` +
       `Tippe <span class="k-p">direkt darunter</span>. Jede Form reicht genau eins nach oben – so wird das rote glasiert, und alles darüber bleibt fertig.`;
   } else {
     const names = a.picks.map(j => LETTERS[j]).join(' und ');
     const known = card(), allKnown = a.picks.every(j => known[j]);
-    box.innerHTML = (a.kind === 'rest'
-      ? `<b>Rest-Trick:</b> Die Jagd ist unten angekommen. Übrig bleibt ${bits(a.left)}. `
-      : `<b>Rest-Trick, weiter:</b> `) +
-      `Das ist der Fingerabdruck von <b>${names}</b>${a.picks.length > 1 ? ' zusammen (überlagert)' : ''}` +
-      (allKnown ? ' – schau auf deine Rezeptkarte.' : ' – probier es im <b>Labor</b> aus!') +
-      ` Tippe oben <span class="k-p">${names}</span>${a.picks.length > 1 ? ' (Reihenfolge egal)' : ''} und jage danach noch einmal von oben. Der gleiche Abdruck kommt dann ein zweites Mal unten an – und zweimal ist wie keinmal.`;
+    box.innerHTML = `<b>Rest-Trick</b>${steps(2)}` +
+      (a.left ? `<p>Unten übrig: ${bits(a.left)}</p>` : '') +
+      `<p>Tippe oben <span class="k-p">${names}</span>${a.picks.length > 1 ? ' (Reihenfolge egal)' : ''}. ` +
+      `<b>${a.picks.length > 1 ? 'A, B, C …' : names}</b> ${a.picks.length > 1 ? 'sind' : 'ist'} ${a.picks.length > 1 ? 'die Plätzchen' : 'das Plätzchen'} der <b>obersten Reihe</b> – die Buchstaben stehen darüber.</p>` +
+      `<p><b>Warum ${names}?</b> Tippt man auf einem fertigen Blech oben ${names} und jagt nach unten, bleibt genau dieses Muster übrig – ` +
+      `das ist ${a.picks.length > 1 ? 'die Überlagerung ihrer' : 'sein'} <b>„Fingerabdruck${a.picks.length > 1 ? 'e' : ''}“</b>. Kommt dieses Muster beim nächsten Jagen ein zweites Mal unten an, heben sich beide auf: zweimal ist wie keinmal.</p>` +
+      `<p>${allKnown ? 'Steht auch auf deiner Rezeptkarte unten. ' : ''}Selbst nachprüfen kannst du das im <b>Abdruck-Labor</b>: Dort probierst du auf einem frischen Blech aus, welchen Abdruck jedes obere Plätzchen hinterlässt.</p>` +
+      `<button class="btn small" id="coachLab">Im Labor ausprobieren</button>`;
+    $('coachLab').onclick = lab;
   }
 }
-function setCoach(on) { coachOn = on; if (on) coachUsed = true; saveCur(); refresh(); }
+function setCoach(on) { coachOn = on; if (on && !cfg.tutorial) coachUsed = true; saveCur(); refresh(); }
 function showHint() {
   const a = advise(); if (!a || !a.picks.length) return;
   hints++; saveCur();
@@ -248,8 +255,8 @@ function showCard() {
   if (cfg.mode !== 'rest' && !Object.keys(known).length) { box.hidden = true; return; }
   box.hidden = false;
   const atBottom = g.findIndex(v => !v) >= (R - 1) * C;
-  box.innerHTML = `<div class="rc-head"><b>Rezeptkarte</b> – Fingerabdrücke für dieses Blech</div>
-    <div class="rc-list">${[...Array(C).keys()].map(j => `<div class="rc-item"><b>${LETTERS[j]}</b> ${known[j] ? bits(known[j]) : '<span class="rc-q">? – im Labor testen</span>'}</div>`).join('')}</div>
+  box.innerHTML = `<div class="rc-head"><b>Rezeptkarte</b> – was jedes Plätzchen der obersten Reihe (A, B, C …) nach der Jagd unten hinterlässt</div>
+    <div class="rc-list">${[...Array(C).keys()].map(j => `<div class="rc-item"><b>${LETTERS[j]}</b> ${known[j] ? bits(known[j]) : '<span class="rc-q">? – noch nicht im Abdruck-Labor getestet</span>'}</div>`).join('')}</div>
     ${atBottom ? `<div class="rc-now">Jetzt unten übrig: ${bits(leftover(g), 'now')}</div>` : ''}`;
 }
 
@@ -327,7 +334,8 @@ const COURSE = [
   ['Rest-Trick 1: Fingerabdrücke', `
     <p>Nimm ein <b>frisch glasiertes</b> Blech, tippe oben ein Plätzchen – sagen wir <b>A</b> – und jage nach unten.</p>
     <div class="demos">${demo(['Oo', 'oo'], 'A tippen')}${demo(['xx', 'xo'], 'danach')}${demo(['oo', 'xo'], 'nach der Jagd')}</div>
-    <p>Unten bleibt immer <b>dasselbe Muster</b> übrig – der <b>Fingerabdruck von A</b>. Jedes obere Plätzchen hat seinen eigenen. Im <b>Labor</b> kannst du sie für jedes Blech ausprobieren; sie landen auf deiner <b>Rezeptkarte</b>.</p>`],
+    <p>(Die Plätzchen der obersten Reihe heißen von links nach rechts <b>A, B, C …</b> – die Buchstaben stehen im Spiel über dem Blech.)</p>
+    <p>Unten bleibt immer <b>dasselbe Muster</b> übrig – der <b>Fingerabdruck von A</b>. Jedes obere Plätzchen hat seinen eigenen. Im <b>Abdruck-Labor</b> (Knopf unter dem Blech) probierst du das für jedes Blech selbst aus; die Abdrücke landen auf deiner <b>Rezeptkarte</b>.</p>`],
   ['Rest-Trick 2: Abdrücke überlagern sich', `
     <p>Tippst du oben <b>A und B</b> und jagst, bleibt unten die <b>Überlagerung</b> beider Abdrücke übrig.</p>
     <p>Wo beide Abdrücke dasselbe Plätzchen treffen, heben sie sich auf – <b>zweimal ist wie keinmal</b> (Grundregel 2!).</p>
