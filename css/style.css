@@ -150,3 +150,16 @@ footer{text-align:center;font-size:13px;color:var(--soft);padding:10px 14px 16px
 .pad.shake{animation:shake .32s ease}
 .pname{font-size:13px;font-weight:600;color:#7a5440}
 .bk-msg{text-align:center;font-weight:600;min-height:1.5em;font-size:17px}
+
+/* Vorschau & Anleitung (v5) */
+.cell.pv{background:rgba(200,40,58,.16);box-shadow:inset 0 0 0 3px var(--red)}
+.mini.big{grid-template-columns:repeat(5,9px);gap:2px}.mini.big b{width:9px;height:9px;border-radius:2px}
+.legend .pat{font-size:14px;line-height:1.3}
+.legend .pat b{color:var(--ink);font-weight:600}
+.dialog.help{text-align:left;max-width:380px}
+.dialog.help h2{text-align:center;margin-bottom:10px}
+.how{padding-left:20px;margin:0 0 10px}.how li{margin-bottom:6px}
+.how-row{display:flex;gap:12px;align-items:center;background:light-dark(#fbefd6,#3a3150);border-radius:12px;padding:8px 12px;margin:6px 0}
+.how-tip{font-size:14px;color:var(--soft);margin:10px 0 16px}
+.dialog.help .btn{display:block;margin:0 auto}
+.how-row .mini,.pat .mini{flex:none}.how-row{gap:16px}
