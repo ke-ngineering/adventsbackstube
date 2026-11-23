@@ -58,7 +58,7 @@ function win({stars, text, melody}) {
   const p = prog(cur.id);
   p.best[curL] = Math.max(p.best[curL] || 0, stars);
   p.level = Math.max(p.level, curL + 1); p.cur = null; persist();
-  Snd.phrase(melody.notes, 'brass', .2);
+  Snd.stop(); setTimeout(() => Snd.phrase(melody.notes, 'brass', .2), 350); // kurz absetzen, damit nichts überlappt
   $('winTitle').textContent = {regal: 'Regal sortiert!', blech: 'Blech glasiert!', spritz: 'Spritzgebäck gebacken!', buch: 'Rezept gemerkt!'}[cur.id];
   $('winStars').innerHTML = '★'.repeat(stars) + `<span class="off">${'★'.repeat(3 - stars)}</span>`;
   $('winText').textContent = text;

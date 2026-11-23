@@ -4,7 +4,7 @@
 > Wer (Mensch oder Claude) die Entwicklung fortsetzt, liest zuerst diese Datei.
 > Nach jeder Arbeitssitzung: Status, Entscheidungen und Agenda hier aktualisieren.
 
-Stand: 24.11.2026 (Prototyp v10)
+Stand: 24.11.2026 (Prototyp v11)
 
 ## 1. Vision
 
@@ -61,12 +61,15 @@ mit genug Inhalt für spürbar lange Spielsessions (ca. 20–30 Min neue Tagesin
 | D35 | 24.11. | Ton: iPhone-Stummschalter umgehen (audioSession), Testklang beim Einschalten | Tester hört keinen Ton mehr; Engine im Test intakt → vermutlich Geräteeinstellung |
 | D36 | 24.11. | Zutaten fallen realistisch je nach Art (fließen/rieseln/stäuben/purzeln) mit passenden Geräuschen | Tester: „bei flüssigen fließen, bei anderen purzeln … Mohn würde rieseln“ |
 | D37 | 24.11. | Ton-Fehlersuche: WebKit-Zustand `interrupted` behandeln, Freischalt-Puffer, Ton-Testseite `#tontest` | Kein Ton in Safari (Mac) und Chrome (iOS) – beide WebKit |
+| D38 | 24.11. | „Gewürzregal“ heißt jetzt **„Vorratsregal“** (interne id bleibt `regal`) | Tester: Es sind nicht nur Gewürze (Honig, Kirschen …) |
+| D39 | 24.11. | Keine überlappenden Melodien: letztes volles Glas spielt kein Teilstück, Gewinn-Melodie startet nach kurzer Pause und stoppt laufende Klänge | Tester: Teilstück + ganze Melodie überlagern sich |
+| D40 | 24.11. | iPhone-Ton-Einstellung (audioSession) nur noch auf iPhone/iPad setzen, nicht auf dem Mac | Ton auf iOS jetzt ok, auf Mac-Safari weiterhin still – Ausschluss einer möglichen Ursache |
 | D12 | 23.11. | Persönliche Inhalte (Name, Nachrichten) **verschlüsselt** im Repo; Schlüssel steht nur im Link-Teil nach `#`, den sie bekommt (wird nie an Server übertragen) | Personalisierung trotz öffentlichem Repo |
 
 ## 3. Spielkonzept
 
 ### Mechaniken
-1. **Gewürzregal** – Zutaten liegen geschichtet in Gläsern (4 pro Glas). Antippen = Glas wählen, zweites Antippen = umfüllen.
+1. **Vorratsregal** (bis v10 „Gewürzregal“, D38) – Zutaten liegen geschichtet in Gläsern (4 pro Glas). Antippen = Glas wählen, zweites Antippen = umfüllen.
    Umfüllen nur auf gleiche Zutat oder ins leere Glas. Ziel: jedes Glas sortenrein. ✅ Prototyp v2.
    Schwierigkeit (v2, nach Feedback „viel zu leicht“): Start mit 6 Zutaten (8 Gläser), steigt bis 12 Zutaten (14 Gläser) ab L25;
    ab L12 jedes 3. Level hohe Gläser (5 Schichten); Generator bevorzugt stark gemischte Level (kaum gleiche Nachbarschichten).
@@ -163,7 +166,7 @@ Ziel: **spielbar ab Di, 1.12.2026**, Link vorher an sie (z. B. am 1. Advent, 29.
   (`regal.js`, `blech.js`, `spritz.js`, `buch.js`) + `js/app.js` (Backstube, Levelleiste, Gewinn-Dialog). Keine Abhängigkeiten außer Google Font Fredoka.
 - Modul-Schnittstelle: `{id, title, sub, desc, start(level, resume, api), stop()}`; `api` = stage/controls/legend/status/getCur/saveCur/restart/win.
 - Cache: Dateien mit `?v=N` einbinden und `VERSION` in core.js hochzählen.
-- Spielstand: `localStorage`-Key `adventsbackstube.v1` → `{level, best, cur, sound, last, games:{blech:{level,best,cur}, buch:{…}}}`; Gewürzregal nutzt die obersten Felder (abwärtskompatibel), `last` = zuletzt geöffnete Station. Bleibt im Browser erhalten, solange Browserdaten nicht gelöscht werden / kein privater Modus.
+- Spielstand: `localStorage`-Key `adventsbackstube.v1` → `{level, best, cur, sound, last, games:{blech:{level,best,cur}, buch:{…}}}`; Vorratsregal (`regal`) nutzt die obersten Felder (abwärtskompatibel), `last` = zuletzt geöffnete Station. Bleibt im Browser erhalten, solange Browserdaten nicht gelöscht werden / kein privater Modus.
 - Klang: Web Audio, alles synthetisch (`Snd`-Modul). iPhone: `navigator.audioSession.type = 'playback'`, damit der Stummschalter Web Audio nicht stummschaltet (Safari 16.4+). Einschalten des Tons spielt einen Testklang. WebKit-Fix: Ton wird bei jedem Zustand ≠ `running` (auch `interrupted`) fortgesetzt, Freischalten mit stillem Puffer beim ersten Antippen, Fortsetzen nach Tab-Wechsel. **Ton-Test:** Seite mit `#tontest` öffnen → Diagnose + 3 Testtöne (Spiel-Klang, einfacher Ton, Audio-Datei). Melodien als `[MIDI-Note, Dauer in Achteln]` in `MELODIES`; nur gemeinfreie Lieder (derzeit: Stille Nacht, Gruber 1818).
 - Level-Generator: Seeded RNG (mulberry32), Seed aus Levelnummer → jedes Level ist für sie immer gleich.
   DFS-Solver prüft Lösbarkeit (Knotenlimit 60k), sonst neuer Versuch; Notfall: Extraglas.
@@ -171,7 +174,7 @@ Ziel: **spielbar ab Di, 1.12.2026**, Link vorher an sie (z. B. am 1. Advent, 29.
 - Tests: `python3 tools/test_generator.py` (alle Generatoren/Löser in Node), `tools/screenshots.py` (Playwright, 390 px).
 
 ## 7. Offene Fragen
-- Ton: Ergebnis des Ton-Tests (`#tontest`) in Safari (Mac) und Chrome (iOS) – welche der 3 Testtöne sind hörbar?
+- Ton auf Mac-Safari: Ergebnis des Ton-Tests (`#tontest`) – welche der 3 Testtöne sind hörbar, welcher Zustand wird angezeigt?
 - Prototyp v10 testen: Lehrplan Glasur-Blech Level 1–11 durchspielen – lernt man den Rest-Trick? Labor verständlich? Spritzbeutel schwer genug?
 - Weiterhin offen: Rezeptbuch (Tempo, Lieder erkannt, Melodien korrekt?)
 - Wie verteilen sich die 4 Stationen auf die 24 Adventstage? → danach gemeinsam evaluieren, was das eigentliche Spiel braucht (Schwierigkeitskurve, Wendungen, Animation).
