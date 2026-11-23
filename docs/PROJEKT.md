@@ -43,6 +43,7 @@ mit genug Inhalt für spürbar lange Spielsessions (ca. 20–30 Min neue Tagesin
 | D20 | 23.11. | **Backstube** als Startseite mit 3 Stationen; Spiel öffnet beim nächsten Start dort, wo sie aufgehört hat | Navigation zwischen Mechaniken; Grundlage für späteren Adventskalender |
 | D21 | 23.11. | Glasur-Blech mit **Form-abhängigen Mustern** + exaktem Bestwert | Eigene Idee statt reinem Lights-Out |
 | D22 | 23.11. | Rezeptbuch mit **Liedern als Folge**; Melodien-Sammlung erweitert: Morgen kommt der Weihnachtsmann, Jingle Bells, Deck the Halls (alle gemeinfrei) | Musik/Chor-Bezug; Wiedererkennen hilft beim Merken |
+| D23 | 23.11. | Claude arbeitet **ausschließlich** im Repo `adventsbackstube` (Regel ganz oben in CLAUDE.md) | Weitere GitHub-Projekte des Auftraggebers schützen |
 | D12 | 23.11. | Persönliche Inhalte (Name, Nachrichten) **verschlüsselt** im Repo; Schlüssel steht nur im Link-Teil nach `#`, den sie bekommt (wird nie an Server übertragen) | Personalisierung trotz öffentlichem Repo |
 
 ## 3. Spielkonzept

@@ -1,5 +1,10 @@
 # Hinweise für Claude (und andere Entwickler)
 
+> **Arbeitsbereich: ausschließlich das Repository `ke-ngineering/adventsbackstube`.**
+> Der Auftraggeber hat weitere Projekte auf GitHub. Diese niemals lesen, klonen, ändern, durchsuchen oder
+> Commits/Issues/Pull Requests darin anlegen – auch nicht „nur kurz zum Nachschauen“. Wird für eine Aufgabe ein
+> anderes Repository nötig, zuerst ausdrücklich beim Auftraggeber nachfragen.
+
 1. **Zuerst `docs/PROJEKT.md` lesen** – dort stehen Vision, Entscheidungen, Agenda, Status und offene Fragen.
 2. Mit dem Auftraggeber auf **Deutsch** kommunizieren; er ist kein Spieleentwickler – Entscheidungen gemeinsam treffen, Optionen kurz erklären.
 3. Nach jeder Sitzung `docs/PROJEKT.md` aktualisieren (Decision Log, Agenda-Status, offene Fragen) und committen.
