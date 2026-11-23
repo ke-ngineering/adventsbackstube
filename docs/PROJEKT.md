@@ -4,7 +4,7 @@
 > Wer (Mensch oder Claude) die Entwicklung fortsetzt, liest zuerst diese Datei.
 > Nach jeder Arbeitssitzung: Status, Entscheidungen und Agenda hier aktualisieren.
 
-Stand: 23.11.2026 (Prototyp v5)
+Stand: 23.11.2026 (Prototyp v6)
 
 ## 1. Vision
 
@@ -46,6 +46,8 @@ mit genug Inhalt für spürbar lange Spielsessions (ca. 20–30 Min neue Tagesin
 | D23 | 23.11. | Claude arbeitet **ausschließlich** im Repo `adventsbackstube` (Regel ganz oben in CLAUDE.md) | Weitere GitHub-Projekte des Auftraggebers schützen |
 | D24 | 23.11. | Glasur-Blech verständlicher: Anleitung, Formen-Vorstellung, Druck-Vorschau, 3×3-Einstieg | Tester: „lustig, aber ich versteh es nicht“ |
 | D25 | 23.11. | `main` geschützt: Änderungen nur per **Pull Request**, Auftraggeber merged | Kontrolle darüber, was live geht |
+| D26 | 23.11. | Glasur-Blech **behalten** + Strategiekurs „Lösungsweg“ + interaktive „Lernhilfe“ | Tester findet es interessant, aber „wie Rubik's Cube“ – Vorgehen soll erklärt werden |
+| D27 | 23.11. | **Spritzbeutel** als 4. Station (Ein-Strich-Rätsel: Spritzgebäck in einem Zug) | Idee aus der Diskussion; sofort verständlich, Gegenpol zum mathematischen Blech |
 | D12 | 23.11. | Persönliche Inhalte (Name, Nachrichten) **verschlüsselt** im Repo; Schlüssel steht nur im Link-Teil nach `#`, den sie bekommt (wird nie an Server übertragen) | Personalisierung trotz öffentlichem Repo |
 
 ## 3. Spielkonzept
@@ -63,9 +65,18 @@ mit genug Inhalt für spürbar lange Spielsessions (ca. 20–30 Min neue Tagesin
    (kosten je 1 Stern). Jeder Tipper spielt die nächste Note eines Lieds. Größe 3×3 (L1–2, 1–2 Züge) → 7×7; Formen ab L6 (Stern), L12 (Spritzgebäck).
    **Verständlichkeit (v5):** Anleitung beim ersten Öffnen + Knopf „Wie geht das?“, neue Formen werden beim ersten Auftreten vorgestellt,
    Vorschau beim Drücken (betroffene Plätzchen rot umrandet, Ausführen erst beim Loslassen), Legende in Worten.
+   **Lösungsweg & Lernhilfe (v6):** Knopf „Lösungsweg“ = 5-seitiger Strategiekurs (Grundregeln, Jagd-Methode mit Vorher/Nachher-Bild,
+   Sterne & Spritzgebäck, Rest-Trick, Lernhilfe). Knopf „Lernhilfe“ = Spiel denkt mit: markiert das Ziel (rot gestrichelt) und den
+   Vorschlag (gold) und begründet ihn. Logik: Jagd = Plätzchen tippen, das das erste unglasierte erwischt, ohne etwas davor zu ändern
+   (terminiert garantiert); danach Rest-Trick aus der Löser-Lösung (oberste Reihe zuerst). Mit Lernhilfe höchstens 2 Sterne.
 3. **Omas Rezeptbuch** ✅ v4 – Zutaten-Schalen spielen Töne vor, nachtippen; Folge wächst Zeile für Zeile bis zur Ziellänge (6 → 18).
    **Eigene Wendung:** Ungerade Level = echtes Adventslied (Schalen = Tonleiter, aufsteigend sortiert), gerade Level = zufällige Folge.
    Fehler wiederholen die Zeile (kein Game Over), kosten aber Sterne. „Nochmal hören“ jederzeit.
+4. **Spritzbeutel** ✅ v6 – Mit dem Finger eine Teigspur durch alle Punkte auf dem Backpapier ziehen: nur waagerecht/senkrecht, jeden
+   Punkt genau einmal; Lücken im Papier werden übersprungen. Zurückziehen / Antippen eines Spurpunkts nimmt zurück. Jeder neue Punkt
+   spielt die nächste Note des Lieds. Am Ende wird das Gebäck „gebacken“ (goldbraun) und die Enden in Schokolade getaucht.
+   Level aus zufälligem Weg (Warnsdorff-Heuristik) → immer lösbar; 3×3 → 7×7, 8–30 % Lücken; Start-Stern bis L6, danach selbst finden.
+   Tipp zeigt gestrichelt einen möglichen Anfang (kostet einen Stern).
 
 ### Advents-Rahmen (geplant)
 - Kalender-Startseite mit 24 Türchen; Türchen öffnet sich ab dem jeweiligen Datum (lokales Datum).
@@ -106,7 +117,8 @@ Ziel: **spielbar ab Di, 1.12.2026**, Link vorher an sie (z. B. am 1. Advent, 29.
 |--------|-------------|--------|
 | 23.11. | Konzept, Stil, Repo, Prototyp Gewürzregal (v2: schwerer + Animation; v3: Klang, Melodie-Gläser, Fortsetzen), GitHub Pages live | ✅ |
 | 23.11. | Mechanik 2 Glasur-Blech + Mechanik 3 Rezeptbuch, Backstube-Startseite (v4) | ✅ (vorgezogen) |
-| 24.11. | Feedback v4; Kalender mit 24 Türchen & Datumssperre | ⏳ |
+| 23.11. | v5/v6: Glasur-Blech verständlich (Anleitung, Kurs, Lernhilfe), 4. Station Spritzbeutel | ✅ |
+| 24.11. | Feedback v6; Kalender mit 24 Türchen & Datumssperre | ⏳ |
 | 25.11. | Tagesplan, Wendungen, Rezeptseiten | ⏳ |
 | 26.11. | Tagesplan 1–24 (Mechanik, Levelzahl, Wendungen, Goodies); Rezeptseiten | ⏳ |
 | 27.11. | Persönliche Inhalte einbauen; Spielstand-Backup-Code; PWA-Manifest + Icon | ⏳ |
@@ -116,7 +128,7 @@ Ziel: **spielbar ab Di, 1.12.2026**, Link vorher an sie (z. B. am 1. Advent, 29.
 
 ## 6. Technik
 - `index.html` (Gerüst) + `css/style.css` + `js/core.js` (Spielstand, Zutaten, Klang, Melodien, Hilfen) + je ein Modul pro Mechanik
-  (`regal.js`, `blech.js`, `buch.js`) + `js/app.js` (Backstube, Levelleiste, Gewinn-Dialog). Keine Abhängigkeiten außer Google Font Fredoka.
+  (`regal.js`, `blech.js`, `spritz.js`, `buch.js`) + `js/app.js` (Backstube, Levelleiste, Gewinn-Dialog). Keine Abhängigkeiten außer Google Font Fredoka.
 - Modul-Schnittstelle: `{id, title, sub, desc, start(level, resume, api), stop()}`; `api` = stage/controls/legend/status/getCur/saveCur/restart/win.
 - Cache: Dateien mit `?v=N` einbinden und `VERSION` in core.js hochzählen.
 - Spielstand: `localStorage`-Key `adventsbackstube.v1` → `{level, best, cur, sound, last, games:{blech:{level,best,cur}, buch:{…}}}`; Gewürzregal nutzt die obersten Felder (abwärtskompatibel), `last` = zuletzt geöffnete Station. Bleibt im Browser erhalten, solange Browserdaten nicht gelöscht werden / kein privater Modus.
@@ -127,7 +139,9 @@ Ziel: **spielbar ab Di, 1.12.2026**, Link vorher an sie (z. B. am 1. Advent, 29.
 - Tests: `python3 tools/test_generator.py` (alle Generatoren/Löser in Node), `tools/screenshots.py` (Playwright, 390 px).
 
 ## 7. Offene Fragen
-- Prototyp v4 testen: Glasur-Blech (verständlich? Schwierigkeit?) und Rezeptbuch (Tempo? Lieder erkannt? Melodien korrekt?) → danach gemeinsam evaluieren, was das eigentliche Spiel braucht (Schwierigkeitskurve, Wendungen, Animation).
+- Prototyp v6 testen: Lösungsweg/Lernhilfe verständlich? Spritzbeutel: Steuerung mit dem Finger, Schwierigkeit?
+- Weiterhin offen: Rezeptbuch (Tempo, Lieder erkannt, Melodien korrekt?)
+- Wie verteilen sich die 4 Stationen auf die 24 Adventstage? → danach gemeinsam evaluieren, was das eigentliche Spiel braucht (Schwierigkeitskurve, Wendungen, Animation).
 - Feedback zum Prototyp (Gefühl, Schwierigkeit, Optik)?
 - Rezeptauswahl bestätigen / eigene Rezepte?
 - Soll der Link schon am 29.11. (1. Advent) kommen, mit einem Vorab-Türchen?
