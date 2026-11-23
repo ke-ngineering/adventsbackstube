@@ -65,7 +65,7 @@ Das Prinzip mit den wechselnden Nachbarn erschließt sich ohne Erklärung nicht.
 
 **Folge:** v6 (D26, D27).
 
-## Runde 6 – Prototyp v6 (ausstehend)
+## Runde 6 – Prototyp v6 (24.11.2026)
 **Automatisch geprüft:**
 - Die Lernhilfe löst Blech-Level 1–40 vollständig.
 - Spritzbeutel-Level 1–40 haben gültige Wege.
@@ -75,3 +75,45 @@ Das Prinzip mit den wechselnden Nachbarn erschließt sich ohne Erklärung nicht.
 - Lösungsweg-Kurs: Ist die Jagd-Methode verständlich?
 - Lernhilfe: Helfen die Begründungen? Lernt man dabei etwas?
 - Spritzbeutel: Lässt sich der Finger gut steuern? Wie ist die Schwierigkeit mit und ohne Start-Stern (ab Level 7)?
+
+**Feedback:**
+- Allgemein: Die Spielerin löst gern Rätsel. Knifflig ist okay, aber es muss machbar, lösbar und verständlich sein.
+- Glasieren ist „lustig“, aber ohne die „wirklich sehr gute Hilfe“ wüsste der Tester nicht, wie er vorgehen soll.
+- Er möchte es behalten, aber der Weg soll klarer werden. Offen blieb: Warum führt der „Rest-Trick“ zur Lösung? Woher weiß man ohne das Spiel, welche Plätzchen die goldenen sind?
+- Spritzbeutel: „lustig und eher einfach. Funktioniert gut.“
+
+**Analyse:** Beim klassischen Lights-Out lässt sich der Rest-Trick nur mit linearer Algebra oder auswendig gelernten Tabellen lösen. Eine bessere Erklärung kann das nicht verständlich machen, man muss das Spiel selbst ändern.
+
+**Folge:** v7 (D28–D30).
+
+## Runde 7 – Prototyp v7 (24.11.2026, nicht live gegangen)
+**Automatisch geprüft:**
+- Die Jagd löst jedes Blech-Level 1–40 genau in der Zielzahl, ohne Rest.
+- Per Skript: Level 14 (alle drei Formen) mit der Lernhilfe gelöst.
+- Spritzbeutel bis 8×8 gültig.
+
+**Zu prüfen:**
+- Glasur-Blech: Lässt es sich mit der einen Regel („direkt darunter tippen“) ohne Hilfe lösen? Bleibt es trotzdem spannend?
+- Spritzbeutel: Ist es jetzt schwer genug?
+
+**Feedback (vor dem Merge):** „Bitte lasse den Rest-Trick im Spiel! Aber mache ihn durchschaubar.“ Vorschläge des Testers: Mit 2×2 ganz simpel anfangen, dann 3×2 und so weiter, damit man das Denken lernen kann. Oder recherchieren, wie man Lights Out lösen lernt, und die Schwierigkeit danach aufbauen. Später sollen schwierigere Probleme Freude am Lösen machen.
+
+**Recherche:** Üblich ist die Lösung in zwei Schritten: Lichter Reihe für Reihe nach unten jagen, dann die letzte Reihe über eine Tabelle lösen, also bestimmte Felder der obersten Reihe drücken und nochmal jagen. Solche Tabellen entstehen, wenn man auf einem leeren Brett ein Licht der obersten Reihe nach unten jagt und beobachtet, was übrig bleibt (Wikipedia, Jaap's Puzzle Page, GNOME Lights Off). Lehrmaterial empfiehlt, mit 2×2, 2×3, 3×3 und 2×4 zu beginnen (Duke CompSci 101).
+
+**Analyse der Blechgrößen** (nur Taler, Fingerabdrücke berechnet):
+- 2×2 und 4×2: Der Abdruck ist das Feld direkt darunter, ideal als Einstieg.
+- 4×3: Einzelpunkte, spiegelverkehrt.
+- 3×3: Abdrücke müssen kombiniert werden.
+- 3×2, 4×4 und 5×3: Nach der Jagd bleibt nie ein lösbarer Rest. Für Rest-Lektionen ungeeignet.
+
+**Folge:** v8 (D31).
+
+## Runde 8 – Prototyp v8 (ausstehend)
+**Automatisch geprüft:**
+- Jede Blech-Stufe von 1 bis 40 erzeugt (Lehrplan-Level je mit Modus, Ziel und Minimum).
+- Die Lernhilfe löst alle 40 Level genau in der Zielzahl.
+- Per Skript: Lektion 2 → Labor → Abdruck A auf 2×2 gespeichert. Level 9 (3×3, Kombination A+C) mit Lernhilfe gelöst.
+
+**Zu prüfen:**
+- Lernt man mit Lektion, Labor und Rezeptkarte den Rest-Trick so, dass man ihn ab dem 3×3-Level selbst anwenden kann?
+- Ist das Tempo des Lehrplans richtig?

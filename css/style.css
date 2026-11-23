@@ -206,3 +206,25 @@ footer{text-align:center;font-size:13px;color:var(--soft);padding:10px 14px 16px
 .pic-spritz{background:#f7ecd6;align-items:center;justify-content:center}
 .pic-spritz i{display:none}
 .pic-spritz::before{content:"";width:54px;height:34px;border:7px solid #d79a4c;border-radius:20px 20px 20px 4px;border-bottom-color:transparent;transform:rotate(-8deg)}
+
+/* ---- Glasur-Blech v8: Lehrplan, Labor, Rezeptkarte ---- */
+.cell{position:relative}
+.colname{position:absolute;top:-2px;left:50%;transform:translate(-50%,-60%);font-size:12px;font-weight:700;color:#6e7782;background:#f3e6cc;border-radius:6px;padding:0 5px;z-index:2;line-height:1.3}
+.legend .lesson{flex-basis:100%;text-align:center;font-weight:700;color:var(--red);font-size:15px}
+.fp{display:inline-flex;gap:3px;vertical-align:middle;padding:3px;background:#6e7782;border-radius:6px}
+.fp i{width:14px;height:14px;border-radius:50%;background:#fffaf2}
+.fp i.x{background:#c98a3d}
+.fp.now{box-shadow:0 0 0 2px var(--red)}
+.rcard{max-width:460px;margin:10px auto 0;background:var(--card);border-radius:14px;padding:10px 14px;font-size:14px;box-shadow:0 3px 0 rgba(0,0,0,.12)}
+.rc-head{margin-bottom:6px}
+.rc-list{display:flex;flex-wrap:wrap;gap:8px 14px}
+.rc-item{display:flex;align-items:center;gap:6px}
+.rc-q{color:var(--soft);font-style:italic}
+.rc-now{margin-top:8px;font-weight:600}
+.labgrid{display:grid;grid-template-columns:repeat(var(--n),var(--cs));gap:5px;justify-content:center;padding:14px 10px 10px;margin:10px auto;width:max-content;background:#f3e6cc;border:8px solid #6e7782;border-radius:12px}
+.lcell{all:unset;position:relative;width:var(--cs);height:var(--cs);display:grid;place-items:center;border-radius:50%}
+.lcell.top{cursor:pointer;box-shadow:0 0 0 2px rgba(200,40,58,.35)}
+.lcell.tap{background:rgba(240,180,30,.6)}
+.lcell .cookie{width:88%}
+.lcell .colname{font-size:10px;transform:translate(-50%,-75%)}
+.lab-msg{min-height:2.8em;font-weight:600;text-align:center;margin-bottom:4px}
