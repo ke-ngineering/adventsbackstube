@@ -9,7 +9,7 @@ Aufruf: python3 tools/test_generator.py
 import pathlib, subprocess, tempfile
 root = pathlib.Path(__file__).resolve().parent.parent
 src = ''.join((root / 'js' / f).read_text() + '\n' for f in ['core.js', 'regal.js', 'blech.js', 'spritz.js', 'buch.js'])
-stub = "const location={hash:'',search:''},localStorage={getItem:()=>null,setItem:()=>{}},window={};\n"
+stub = "const location={hash:'',search:''},localStorage={getItem:()=>null,setItem:()=>{}},window={},document={addEventListener(){},hidden:false},navigator={userAgent:'test'};\n"
 test = r"""
 let worst = 0;
 for (let L = 1; L <= 60; L++) {
