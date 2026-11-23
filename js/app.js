@@ -81,6 +81,41 @@ $('snd').onclick = () => { Snd.toggle(); setSndBtn(); };
 setSndBtn();
 $('ver').textContent = VERSION;
 
+
+// Ton-Test: Seite mit #tontest öffnen → Diagnose, welche Art von Ton auf diesem Gerät funktioniert
+function wavBeep(freq = 660, dur = .4, rate = 22050) {
+  const n = Math.floor(rate * dur), buf = new ArrayBuffer(44 + n * 2), v = new DataView(buf);
+  const w = (o, s) => [...s].forEach((ch, i) => v.setUint8(o + i, ch.charCodeAt(0)));
+  w(0, 'RIFF'); v.setUint32(4, 36 + n * 2, true); w(8, 'WAVEfmt '); v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 1, true);
+  v.setUint32(24, rate, true); v.setUint32(28, rate * 2, true); v.setUint16(32, 2, true); v.setUint16(34, 16, true); w(36, 'data'); v.setUint32(40, n * 2, true);
+  for (let i = 0; i < n; i++) v.setInt16(44 + i * 2, Math.sin(2 * Math.PI * freq * i / rate) * Math.min(1, (n - i) / 2000) * 12000, true);
+  let bin = ''; new Uint8Array(buf).forEach(b => bin += String.fromCharCode(b));
+  return 'data:audio/wav;base64,' + btoa(bin);
+}
+function tonTest() {
+  const row = (k, v, ok) => `<tr><td>${k}</td><td class="${ok === undefined ? '' : ok ? 'ok' : 'bad'}">${v}</td></tr>`;
+  const info = () => `<table class="tontest">
+    ${row('Ton im Spiel', Snd.on ? 'an' : 'AUS – oben rechts einschalten', Snd.on)}
+    ${row('Web Audio vorhanden', (window.AudioContext || window.webkitAudioContext) ? 'ja' : 'nein', !!(window.AudioContext || window.webkitAudioContext))}
+    ${row('Zustand', Snd.state, Snd.state === 'running')}
+    ${row('iPhone-Stummschalter-Schutz', navigator.audioSession ? 'verfügbar (' + navigator.audioSession.type + ')' : 'nicht verfügbar')}
+    ${row('Browser', navigator.userAgent.split(' ').slice(-2).join(' '))}</table>`;
+  api.help('Ton-Test', `<p>Tippe nacheinander auf die drei Knöpfe und merke dir, <b>welche du hörst</b>.</p>
+    <div id="ttInfo">${info()}</div>
+    <div class="course-nav" style="flex-wrap:wrap">
+      <button class="btn" id="tt1">1 · Spiel-Klang</button><button class="btn" id="tt2">2 · Einfacher Ton</button><button class="btn" id="tt3">3 · Audio-Datei</button>
+    </div><p id="ttMsg" class="how-tip"></p>`);
+  const upd = msg => { $('ttInfo').innerHTML = info(); $('ttMsg').textContent = msg; };
+  $('tt1').onclick = () => { if (!Snd.on) Snd.toggle(); Snd.phrase([[72, 1], [76, 1], [79, 2]], 'bell', .18); setTimeout(() => upd('Spiel-Klang abgespielt (Glockenspiel).'), 250); };
+  $('tt2').onclick = () => {
+    try { const C = window.AudioContext || window.webkitAudioContext, c = new C(), o = c.createOscillator(), g = c.createGain();
+      g.gain.value = .3; o.frequency.value = 660; o.connect(g).connect(c.destination); o.start(); o.stop(c.currentTime + .4);
+      setTimeout(() => upd('Einfacher Ton: Zustand ' + c.state), 250); } catch (e) { upd('Einfacher Ton: Fehler – ' + e.message); }
+  };
+  $('tt3').onclick = () => { const a = new Audio(wavBeep()); a.play().then(() => upd('Audio-Datei läuft.')).catch(e => upd('Audio-Datei blockiert: ' + e.message)); };
+}
+if (/tontest/.test(location.hash + location.search)) setTimeout(tonTest, 300);
+
 // Beim Öffnen dort weitermachen, wo sie aufgehört hat
 if (save.last && GAMES.some(g => g.id === save.last)) open(save.last); else showHub();
 }

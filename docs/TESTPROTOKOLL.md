@@ -140,4 +140,9 @@ Stolperstein in der Lernhilfe: „Das ist der Fingerabdruck von A – probier es
 **Folge:** v10 (D33–D35).
 
 ## Runde 10 – Prototyp v10 (ausstehend)
-**Zu prüfen:** Ist das Labor-Tempo gut zum Mitgehen? Ist die Bonus-Lerneinheit verständlich? Kommt der Ton wieder (Testklang beim Einschalten)?
+**Zwischenfeedback:** Der Tester spielt auf dem Laptop in **Safari** (Mac), auf dem iPhone in **Chrome**. In beiden ist kein Ton zu hören. Beide Browser nutzen WebKit.
+Wunsch zum Gewürzregal: Flüssige Zutaten sollen fließen, andere herunterpurzeln (grobe wie Kirschen) oder rieseln (Mohn).
+
+**Analyse Ton:** WebKit kann den AudioContext in den Zustand `interrupted` versetzen. Der Code hat bisher nur `suspended` fortgesetzt, das war ein echter Fehler. Behoben, dazu Freischalt-Puffer und Ton-Testseite (D37).
+
+**Zu prüfen:** Labor-Tempo, Bonus-Lerneinheit, Ton (Ton-Test `#tontest`), die neuen Fall-Effekte im Gewürzregal.

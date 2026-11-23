@@ -59,6 +59,8 @@ mit genug Inhalt für spürbar lange Spielsessions (ca. 20–30 Min neue Tagesin
 | D33 | 24.11. | Labor-Vorführung langsam mit Erklärung je Schritt | Tester: „etwas langsamer vorführen, damit man mitgehen kann“ |
 | D34 | 24.11. | Optionale Bonus-Lerneinheit „Warum der Rest-Trick funktioniert“ (Folien-Erklärung), angeboten ab Level 10 | Tester: „wieso das funktioniert … als kleine Lerneinheit zwischendurch, optional“ |
 | D35 | 24.11. | Ton: iPhone-Stummschalter umgehen (audioSession), Testklang beim Einschalten | Tester hört keinen Ton mehr; Engine im Test intakt → vermutlich Geräteeinstellung |
+| D36 | 24.11. | Zutaten fallen realistisch je nach Art (fließen/rieseln/stäuben/purzeln) mit passenden Geräuschen | Tester: „bei flüssigen fließen, bei anderen purzeln … Mohn würde rieseln“ |
+| D37 | 24.11. | Ton-Fehlersuche: WebKit-Zustand `interrupted` behandeln, Freischalt-Puffer, Ton-Testseite `#tontest` | Kein Ton in Safari (Mac) und Chrome (iOS) – beide WebKit |
 | D12 | 23.11. | Persönliche Inhalte (Name, Nachrichten) **verschlüsselt** im Repo; Schlüssel steht nur im Link-Teil nach `#`, den sie bekommt (wird nie an Server übertragen) | Personalisierung trotz öffentlichem Repo |
 
 ## 3. Spielkonzept
@@ -68,7 +70,7 @@ mit genug Inhalt für spürbar lange Spielsessions (ca. 20–30 Min neue Tagesin
    Umfüllen nur auf gleiche Zutat oder ins leere Glas. Ziel: jedes Glas sortenrein. ✅ Prototyp v2.
    Schwierigkeit (v2, nach Feedback „viel zu leicht“): Start mit 6 Zutaten (8 Gläser), steigt bis 12 Zutaten (14 Gläser) ab L25;
    ab L12 jedes 3. Level hohe Gläser (5 Schichten); Generator bevorzugt stark gemischte Level (kaum gleiche Nachbarschichten).
-   Umfüll-Animation: Glas fliegt zum Ziel, kippt, Strahl fließt, Schichten wachsen. Testmodus: URL mit `#test` (alle Level springbar).
+   Umfüll-Animation: Glas fliegt zum Ziel, kippt, Schichten wachsen. v10: **je nach Zutat** (`ING[].kind`): Honig fließt als Strahl (Gluckern), Zucker/Mohn/Lavendel rieseln als Körnchen (Rieseln), Kakao/Zimt stäuben (leises Stäuben), Kirschen/Mandeln/Pistazien/Orangeat/Rosinen/Marzipan purzeln als Stückchen mit Drehung und Hüpfer (Plopp-Geräusche). Testmodus: URL mit `#test` (alle Level springbar).
    Geplante Wendungen: festgefrorenes Glas (erst nach X Zügen frei), verdeckte Schichten, Zuglimit.
 2. **Glasur-Blech** ✅ v4 – Raster aus Plätzchen; Antippen wechselt Plätzchen + Nachbarn (glasiert ↔ unglasiert). Ziel: alle glasiert.
    **Eigene Wendung:** Die Form bestimmt das Muster – Taler = Kreuz, Zimtstern = schräg, Spritzgebäck = waagerechte 5er-Reihe
@@ -162,14 +164,14 @@ Ziel: **spielbar ab Di, 1.12.2026**, Link vorher an sie (z. B. am 1. Advent, 29.
 - Modul-Schnittstelle: `{id, title, sub, desc, start(level, resume, api), stop()}`; `api` = stage/controls/legend/status/getCur/saveCur/restart/win.
 - Cache: Dateien mit `?v=N` einbinden und `VERSION` in core.js hochzählen.
 - Spielstand: `localStorage`-Key `adventsbackstube.v1` → `{level, best, cur, sound, last, games:{blech:{level,best,cur}, buch:{…}}}`; Gewürzregal nutzt die obersten Felder (abwärtskompatibel), `last` = zuletzt geöffnete Station. Bleibt im Browser erhalten, solange Browserdaten nicht gelöscht werden / kein privater Modus.
-- Klang: Web Audio, alles synthetisch (`Snd`-Modul). iPhone: `navigator.audioSession.type = 'playback'`, damit der Stummschalter Web Audio nicht stummschaltet (Safari 16.4+). Einschalten des Tons spielt einen Testklang. Melodien als `[MIDI-Note, Dauer in Achteln]` in `MELODIES`; nur gemeinfreie Lieder (derzeit: Stille Nacht, Gruber 1818).
+- Klang: Web Audio, alles synthetisch (`Snd`-Modul). iPhone: `navigator.audioSession.type = 'playback'`, damit der Stummschalter Web Audio nicht stummschaltet (Safari 16.4+). Einschalten des Tons spielt einen Testklang. WebKit-Fix: Ton wird bei jedem Zustand ≠ `running` (auch `interrupted`) fortgesetzt, Freischalten mit stillem Puffer beim ersten Antippen, Fortsetzen nach Tab-Wechsel. **Ton-Test:** Seite mit `#tontest` öffnen → Diagnose + 3 Testtöne (Spiel-Klang, einfacher Ton, Audio-Datei). Melodien als `[MIDI-Note, Dauer in Achteln]` in `MELODIES`; nur gemeinfreie Lieder (derzeit: Stille Nacht, Gruber 1818).
 - Level-Generator: Seeded RNG (mulberry32), Seed aus Levelnummer → jedes Level ist für sie immer gleich.
   DFS-Solver prüft Lösbarkeit (Knotenlimit 60k), sonst neuer Versuch; Notfall: Extraglas.
 - Hosting-Optionen: GitHub Pages (bevorzugt, Link + „Zum Startbildschirm“) oder claude.ai-Artifact-Link (Vorschau).
 - Tests: `python3 tools/test_generator.py` (alle Generatoren/Löser in Node), `tools/screenshots.py` (Playwright, 390 px).
 
 ## 7. Offene Fragen
-- Ton: Auf welchem Gerät/Browser testet der Tester? (Stummschalter iPhone / Medienlautstärke Android / Ton-Knopf)
+- Ton: Ergebnis des Ton-Tests (`#tontest`) in Safari (Mac) und Chrome (iOS) – welche der 3 Testtöne sind hörbar?
 - Prototyp v10 testen: Lehrplan Glasur-Blech Level 1–11 durchspielen – lernt man den Rest-Trick? Labor verständlich? Spritzbeutel schwer genug?
 - Weiterhin offen: Rezeptbuch (Tempo, Lieder erkannt, Melodien korrekt?)
 - Wie verteilen sich die 4 Stationen auf die 24 Adventstage? → danach gemeinsam evaluieren, was das eigentliche Spiel braucht (Schwierigkeitskurve, Wendungen, Animation).

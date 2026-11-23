@@ -115,14 +115,38 @@ async function animatePour(a, b, n, ing) {
   src.classList.add('flying');
   src.style.transform = `translate(${dx}px, ${dy}px) rotate(${dir * 72}deg)`;
   await wait(300);
-  // Strahl
+  // Je nach Zutat: Honig fließt als Strahl, Zucker/Mohn rieseln, Kakao/Zimt stäuben, Kirschen & Co. purzeln als Stückchen
   const lh = sg.querySelector('.layer')?.getBoundingClientRect().height || 30;
-  const stream = document.createElement('div');
-  stream.className = 'stream';
-  stream.style.cssText = `left:${tx - 4}px;top:${ty}px;${layerStyle(ing)}`;
-  document.body.appendChild(stream);
   const fillTop = dr.bottom - 7 - (s[b].length + n) * (lh + 2);
-  requestAnimationFrame(() => { stream.style.height = Math.max(10, fillTop - ty + lh) + 'px'; });
+  const fall = Math.max(10, fillTop - ty + lh * .6), kind = ING[ing].kind || 'grain';
+  const fx = document.createElement('div'); fx.className = 'pourfx'; document.body.appendChild(fx);
+  if (kind === 'liquid') {
+    const stream = document.createElement('div');
+    stream.className = 'stream';
+    stream.style.cssText = `left:${tx - 4}px;top:${ty}px;${layerStyle(ing)}`;
+    fx.appendChild(stream);
+    requestAnimationFrame(() => { stream.style.height = fall + 'px'; });
+    setTimeout(() => { stream.style.transition = 'opacity .15s, transform .15s'; stream.style.opacity = '0'; stream.style.transform = 'translateY(30px)'; }, 460);
+  } else {
+    const chunk = kind === 'chunk', count = chunk ? n * 3 : n * 18 + 10, span = 440;
+    for (let k = 0; k < count; k++) {
+      const p = document.createElement('i');
+      const sz = chunk ? (ING[ing].shape === 'small' ? 7 : 10) : kind === 'powder' ? 3 : 3.5;
+      p.className = 'pt ' + (chunk ? 'chunk ' + (ING[ing].shape || 'round') : kind);
+      p.style.cssText = `left:${tx - sz / 2 + (Math.random() - .5) * (chunk ? 6 : 5)}px;top:${ty}px;width:${sz}px;height:${chunk && ING[ing].shape === 'oval' ? sz * .65 : sz}px;background:${ING[ing].c}`;
+      fx.appendChild(p);
+      const delay = chunk ? k * (span / count) + Math.random() * 30 : Math.random() * span;
+      const drift = (Math.random() - .5) * (chunk ? 14 : kind === 'powder' ? 16 : 8), rot = chunk ? (Math.random() - .5) * 540 : 0;
+      const frames = chunk
+        ? [{transform: 'translate(0,0) rotate(0deg)', opacity: 1},
+           {transform: `translate(${drift}px,${fall}px) rotate(${rot}deg)`, opacity: 1, offset: .82},
+           {transform: `translate(${drift * 1.2}px,${fall - 6}px) rotate(${rot * 1.1}deg)`, opacity: 1, offset: .92},
+           {transform: `translate(${drift * 1.3}px,${fall}px) rotate(${rot * 1.15}deg)`, opacity: 0}]
+        : [{transform: 'translate(0,0)', opacity: kind === 'powder' ? .8 : 1},
+           {transform: `translate(${drift}px,${fall}px)`, opacity: kind === 'powder' ? .2 : .9}];
+      p.animate(frames, {duration: chunk ? 380 : 300 + Math.random() * 120, delay, easing: 'cubic-bezier(.45,0,.9,.6)', fill: 'both'});
+    }
+  }
   // Quelle leert sich, Ziel füllt sich
   const srcLayers = [...sg.querySelectorAll('.layer')].slice(-n);
   srcLayers.forEach(el => { el.style.transition = 'height .42s ease-in, margin .42s'; el.style.height = '0px'; el.style.marginTop = '-2px'; });
@@ -132,11 +156,10 @@ async function animatePour(a, b, n, ing) {
     dg.appendChild(el);
     setTimeout(() => { el.style.height = ''; }, 60 + i * 110);
   }
-  await wait(460);
-  stream.style.transition = 'opacity .15s, transform .15s'; stream.style.opacity = '0'; stream.style.transform = 'translateY(30px)';
+  await wait(ING[ing].kind === 'chunk' ? 560 : 480);
   src.style.transform = '';
   await wait(280);
-  stream.remove(); src.classList.remove('flying');
+  fx.remove(); src.classList.remove('flying');
 }
 
 async function onTap(e) {
@@ -147,7 +170,7 @@ async function onTap(e) {
   if (canPour(s, sel, i)) {
     const a = sel, ing = top(s[a]), n = pourCount(s, a, i);
     busy = true;
-    Snd.pour(.42 + n * .04);
+    Snd.pour(.42 + n * .04, ING[ing].kind, n * 3);
     await animatePour(a, i, n, ing);
     if (!$('shelves')) return; // inzwischen Spiel verlassen
     hist.push(s.map(j => j.slice())); pour(s, a, i); moves++; sel = null; busy = false; render(); flash(i, 'pop');
