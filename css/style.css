@@ -234,3 +234,11 @@ footer{text-align:center;font-size:13px;color:var(--soft);padding:10px 14px 16px
 .steps li.now{color:var(--ink);font-weight:700}.steps li.now::marker{color:var(--red)}
 .coach p{margin:6px 0}
 .btn.small{font-size:14px;min-height:38px;padding:6px 12px}
+
+/* v10: Labor langsam, Bonus-Lerneinheit */
+.lcell.ltarget{box-shadow:0 0 0 3px var(--red)}
+.lcell.lpick{background:rgba(240,180,30,.6);animation:hint .9s ease-in-out infinite}
+.demos.eqn{align-items:center;gap:8px;flex-wrap:wrap}
+.demos.eqn .dgrid{grid-template-columns:repeat(var(--n),18px)}.demos.eqn .dgrid i{width:18px;height:18px}
+.op{font-size:24px;font-weight:700;color:var(--soft)}
+.why-title{font-weight:700;font-size:18px;text-align:center;margin:-4px 0 8px;color:var(--red)}

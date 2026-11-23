@@ -166,7 +166,8 @@ function begin(L, resume, a) {
   // Lektionen und neue Formen beim ersten Mal
   const p = prog('blech'); p.seen = p.seen || []; p.lessons = p.lessons || [];
   const fresh = kinds.filter(k => !p.seen.includes(k));
-  if (cfg.lesson && !p.lessons.includes(cfg.lesson)) { p.lessons.push(cfg.lesson); p.seen.push(...fresh); persist(); course(cfg.lesson === 'jagd' ? 1 : 2, true); }
+  if (L >= 10 && !p.lessons.includes('warum') && !fresh.length) { p.lessons.push('warum'); persist(); offerWhy(); }
+  else if (cfg.lesson && !p.lessons.includes(cfg.lesson)) { p.lessons.push(cfg.lesson); p.seen.push(...fresh); persist(); course(cfg.lesson === 'jagd' ? 1 : 2, true); }
   else if (fresh.length) { p.seen.push(...fresh); persist(); explain(p.seen.length === fresh.length ? kinds : fresh, p.seen.length !== fresh.length); }
 }
 function refresh() { status(); coach(); showCard(); }
@@ -264,12 +265,12 @@ function showCard() {
 function lab() {
   let st = Array(R * C).fill(1), chosen = new Set(), busy = false;
   const cellSize = Math.max(26, Math.min(44, Math.floor(280 / C)));
-  const draw = (mark = -1) => {
-    $('labGrid').innerHTML = st.map((v, i) => `<button class="lcell${i < C ? ' top' : ''}${i === mark ? ' tap' : ''}" data-i="${i}" ${i < C ? '' : 'tabindex="-1"'}>` +
+  const draw = (mark = -1, target = -1, pick = -1) => {
+    $('labGrid').innerHTML = st.map((v, i) => `<button class="lcell${i < C ? ' top' : ''}${i === mark ? ' tap' : ''}${i === target ? ' ltarget' : ''}${i === pick ? ' lpick' : ''}" data-i="${i}" ${i < C ? '' : 'tabindex="-1"'}>` +
       `${i < C ? `<span class="colname">${LETTERS[i]}</span>` : ''}<span class="cookie s-${shape[i]}${v ? ' on' : ''}"></span></button>`).join('');
   };
   api.help('Fingerabdruck-Labor', `
-    <p>Hier ist dein Blech <b>frisch glasiert</b>. Tippe ein Plätzchen in der <b>obersten Reihe</b> an und drücke dann <b>„Jagen“</b>. Das Spiel jagt für dich nach unten – was unten übrig bleibt, ist der <b>Fingerabdruck</b> dieses Plätzchens.</p>
+    <p>Hier ist dein Blech <b>frisch glasiert</b>. Tippe ein Plätzchen in der <b>obersten Reihe</b> an und drücke dann <b>„Jagen“</b>. Das Spiel jagt langsam für dich nach unten (Schritt für Schritt zum Mitgehen) – was unten übrig bleibt, ist der <b>Fingerabdruck</b> dieses Plätzchens.</p>
     <div class="labgrid" id="labGrid" style="--n:${C};--cs:${cellSize}px"></div>
     <div class="lab-msg" id="labMsg">Tippe oben ein Plätzchen (A${C > 1 ? '–' + LETTERS[C - 1] : ''}).</div>
     <div class="course-nav"><button class="btn" id="labReset">Leeren</button><button class="btn red" id="labGo">Jagen ▶</button></div>`);
@@ -280,12 +281,26 @@ function lab() {
     apply(st, i); chosen.has(i) ? chosen.delete(i) : chosen.add(i); Snd.tap(); draw();
     $('labMsg').textContent = chosen.size ? `Oben getippt: ${[...chosen].sort().map(j => LETTERS[j]).join(' + ')}. Jetzt „Jagen“!` : 'Tippe oben ein Plätzchen.';
   };
+  $('labGo').addEventListener('pointerdown', () => { if (busy) speed = 2; });
   $('labReset').onclick = () => { if (busy) return; st = Array(R * C).fill(1); chosen = new Set(); draw(); $('labMsg').textContent = 'Frisch glasiert. Tippe oben ein Plätzchen.'; };
+  let speed = 1; // 1 = langsam zum Mitgehen, 2 = schneller
   $('labGo').onclick = async () => {
     if (busy || !chosen.size) return; busy = true;
+    $('labGo').textContent = 'Schneller';
+    const step = () => wait(speed === 1 ? 950 : 300);
+    const gone = () => !$('labGrid') || !$('help').classList.contains('on'); // Labor geschlossen → Vorführung abbrechen
     for (let r = 0; r < R - 1; r++) for (let c = 0; c < C; c++) if (!st[r * C + c]) {
-      const i = (r + 1) * C + c; apply(st, i); Snd.tap(1.2); draw(i); await wait(260);
+      if (gone()) { busy = false; return; }
+      const i = (r + 1) * C + c;
+      draw(-1, r * C + c, i);
+      $('labMsg').innerHTML = `Reihe ${r + 1}: Dieses Plätzchen ist <span class="k-t">unglasiert</span> → <span class="k-p">direkt darunter</span> tippen …`;
+      await step(); if (gone()) { busy = false; return; }
+      apply(st, i); Snd.tap(1.2); draw(i);
+      $('labMsg').innerHTML = `Reihe ${r + 1}: getippt. Oben ist es jetzt glasiert, darunter hat sich etwas verändert.`;
+      await step();
     }
+    if (gone()) { busy = false; return; }
+    $('labGo').textContent = 'Jagen ▶'; speed = 1;
     draw(); busy = false;
     const left = leftover(st), ch = [...chosen].sort();
     if (ch.length === 1) {
@@ -360,6 +375,7 @@ function course(n, lesson = false) {
   api.help(`Lösungsweg ${n + 1}/${COURSE.length}: ${title}`, `${body}
     <div class="course-nav">
       ${n > 0 && !(lesson && (n === 1 || n === 2)) ? '<button class="btn" id="cPrev">‹ Zurück</button>' : '<button class="btn" id="cClose">Schließen</button>'}
+      ${n === 5 && !lesson ? '<button class="btn" id="cWhy">Bonus: Warum?</button>' : ''}
       ${endOfLesson ? (n === 5 ? '<button class="btn red" id="cLab">Ins Labor</button>' : '<button class="btn red" id="cClose2">Los geht’s</button>')
         : last ? '<button class="btn red" id="cCoach">Lernhilfe einschalten</button>' : '<button class="btn red" id="cNext">Weiter ›</button>'}
     </div>`);
@@ -370,7 +386,55 @@ function course(n, lesson = false) {
   $('cPrev') && ($('cPrev').onclick = () => course(n - 1, lesson));
   $('cNext') && ($('cNext').onclick = () => course(n + 1, lesson));
   $('cLab') && ($('cLab').onclick = () => lab());
+  $('cWhy') && ($('cWhy').onclick = () => why(0));
   $('cCoach') && ($('cCoach').onclick = () => { close(); setCoach(true); });
+}
+
+/* ---- Bonus-Lerneinheit (optional): Warum funktioniert der Rest-Trick? Erklärung mit „Folien“ ---- */
+const plus = '<span class="op">+</span>', eq = '<span class="op">=</span>';
+const WHY = [
+  ['Die Folien-Idee', `
+    <p>Stell dir jedes Blech als <b>durchsichtige Folie</b> vor. Auf die Folie malen wir nur die <b>unglasierten</b> Plätzchen.</p>
+    <p>Legt man zwei Folien übereinander, ist ein Plätzchen unglasiert, wenn es auf <b>genau einer</b> Folie unglasiert ist. Ist es auf beiden unglasiert, heben sich beide auf – <b>zweimal ist wie keinmal</b>.</p>
+    <div class="demos eqn">${demo(['xo', 'oo'], 'Folie 1')}${plus}${demo(['xx', 'oo'], 'Folie 2')}${eq}${demo(['ox', 'oo'], 'übereinander')}</div>`],
+  ['Jeder Tipp ist eine Folie', `
+    <p>Ein Tipp auf ein Plätzchen macht nichts anderes, als eine kleine Folie mit dem <b>Muster der Form</b> auf das Blech zu legen.</p>
+    <div class="demos eqn">${demo(['xo', 'oo'], 'dein Blech')}${plus}${demo(['xx', 'xo'], 'Tipp auf A')}${eq}${demo(['ox', 'xo'], 'danach')}</div>
+    <p>Deshalb ist die <b>Reihenfolge egal</b>: Folien kann man in jeder Reihenfolge stapeln – das Ergebnis ist dasselbe.</p>`],
+  ['Die Jagd arbeitet auf jeder Folie getrennt', `
+    <p>Die Jagd schaut nur: „Ist hier etwas unglasiert? Dann direkt darunter tippen.“</p>
+    <p>Liegen zwei Folien übereinander, kommt beim Jagen <b>dasselbe</b> heraus, als hättest du jede Folie <b>einzeln</b> gejagt und die Ergebnisse danach übereinandergelegt.</p>
+    <p>Das hast du im Labor schon gesehen: A allein, B allein – und A + B zusammen ergibt genau die Überlagerung der beiden Abdrücke.</p>`],
+  ['Der Trick – mit Folien erklärt', `
+    <p><b>Folie 1</b> ist dein Blech. Nach der Jagd bleibt unten ein Rest.<br><b>Folie 2</b> ist ein frisches Blech, auf dem nur A getippt ist. Nach der Jagd bleibt unten der Abdruck von A.</p>
+    <div class="demos eqn">${demo(['oo', 'xo'], 'dein Rest')}${plus}${demo(['oo', 'xo'], 'Abdruck A')}${eq}${demo(['oo', 'oo'], 'nichts mehr!')}</div>
+    <p>Wenn du oben A tippst, legst du genau Folie 2 auf dein Blech. Jagst du dann, werden beide Folien gejagt und überlagert: Ist der Rest <b>gleich</b> dem Abdruck, heben sie sich auf – <b>alles glasiert</b>.</p>`],
+  ['Und das Durcheinander oben?', `
+    <p>Wenn du oben A tippst, ist die oberste Reihe ja erst einmal wieder kaputt. Das macht nichts:</p>
+    <p>Die Jagd räumt <b>immer</b> alle Reihen bis auf die unterste auf – das ist ihre Aufgabe. Offen ist also nur, was ganz unten passiert. Und genau dort heben sich Rest und Abdruck gegenseitig auf.</p>
+    <p><b>Zusammengefasst:</b> Rest ablesen → Plätzchen mit gleichem Abdruck oben tippen → jagen → fertig. Jetzt weißt du nicht nur <i>wie</i>, sondern auch <i>warum</i>.</p>`],
+];
+function why(n) {
+  const [title, body] = WHY[n], last = n === WHY.length - 1;
+  api.help(`Bonus: Warum es funktioniert (${n + 1}/${WHY.length})`, `<div class="why-title">${title}</div>${body}
+    <div class="course-nav">
+      ${n > 0 ? '<button class="btn" id="wPrev">‹ Zurück</button>' : '<button class="btn" id="wClose">Später</button>'}
+      ${last ? '<button class="btn red" id="wDone">Verstanden!</button>' : '<button class="btn red" id="wNext">Weiter ›</button>'}
+    </div>`);
+  $('helpOk').hidden = true;
+  const close = () => $('help').classList.remove('on');
+  $('wClose') && ($('wClose').onclick = close);
+  $('wDone') && ($('wDone').onclick = close);
+  $('wPrev') && ($('wPrev').onclick = () => why(n - 1));
+  $('wNext') && ($('wNext').onclick = () => why(n + 1));
+}
+function offerWhy() {
+  api.help('Bonus-Lerneinheit', `<p>Du hast den Rest-Trick jetzt ein paar Mal angewendet. Möchtest du wissen, <b>warum</b> er funktioniert?</p>
+    <p>5 kurze Seiten mit Bildern – ganz ohne Mathe, versprochen. Du findest sie auch später jederzeit unter „Lösungsweg“.</p>
+    <div class="course-nav"><button class="btn" id="wLater">Später</button><button class="btn red" id="wYes">Ja, zeig’s mir</button></div>`);
+  $('helpOk').hidden = true;
+  $('wLater').onclick = () => $('help').classList.remove('on');
+  $('wYes').onclick = () => why(0);
 }
 
 return {id:'blech', title:'Glasur-Blech', sub:'Glasiere alle Plätzchen – mit Jagd und Rest-Trick',

@@ -1,6 +1,6 @@
 /* Adventsbackstube – gemeinsame Grundlagen: Spielstand, Zutaten, Klang, Melodien, Hilfsfunktionen.
    Wird von allen Spiel-Modulen (regal.js, blech.js, buch.js) und app.js genutzt. */
-const VERSION = 'v9';
+const VERSION = 'v10';
 const TEST = /test/.test(location.hash + location.search);
 const $ = id => document.getElementById(id);
 const wait = ms => new Promise(r => setTimeout(r, ms));
@@ -53,7 +53,9 @@ const Snd = (() => {
   const ensure = () => {
     if (!on) return null;
     try {
-      if (!ctx) { ctx = new (window.AudioContext || window.webkitAudioContext)(); master = ctx.createGain(); master.gain.value = .55; master.connect(ctx.destination); }
+      // iPhone/iPad: Ton auch bei Stummschalter abspielen (Safari 16.4+), sonst bleibt Web Audio stumm
+      try { if (navigator.audioSession && navigator.audioSession.type !== 'playback') navigator.audioSession.type = 'playback'; } catch (e) {}
+      if (!ctx) { ctx = new (window.AudioContext || window.webkitAudioContext)(); master = ctx.createGain(); master.gain.value = .7; master.connect(ctx.destination); }
       if (ctx.state === 'suspended') ctx.resume();
     } catch (e) { return null; }
     return ctx;
@@ -108,7 +110,7 @@ const Snd = (() => {
   // einzelner Ton (Glockenspiel), z. B. beim Antippen
   function note(n, len = .35) { const c = ensure(); if (!c) return; bell(n, c.currentTime + .01, len); }
   function stop() { playing.forEach(o => { try { o.stop(); } catch (e) {} }); playing = []; }
-  function toggle() { on = !on; save.sound = on; persist(); if (!on) stop(); else tap(); return on; }
+  function toggle() { on = !on; save.sound = on; persist(); if (!on) stop(); else phrase([[72, 1], [76, 1], [79, 2]], 'bell', .14); return on; } // Einschalten spielt einen kleinen Klang zum Testen
   return {tap, pour, nope, note, phrase, stop, toggle, get on() { return on; }};
 })();
 

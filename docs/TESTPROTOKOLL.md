@@ -123,8 +123,21 @@ Stolperstein in der Lernhilfe: „Das ist der Fingerabdruck von A – probier es
 
 **Folge:** v9 (D32).
 
-## Runde 9 – Prototyp v9 (ausstehend)
+## Runde 9 – Prototyp v9 (24.11.2026)
 **Zu prüfen:**
 - Sind A/B/C und das Abdruck-Labor jetzt klar?
 - Hilft die Schrittliste in der Lernhilfe, den Ablauf zu verstehen?
 - Fühlen sich die geführten Übungslevel 3 und 6 wie ein gutes Tutorial an?
+
+**Feedback:**
+- „Das Labor ist cool!“ Beim „Jagen“ soll es aber langsamer vorführen, damit man mitgehen kann.
+- „Jetzt verstehe ich, wie die Lösungsmechanik laufen soll. Das macht Spaß!“ Warum es funktioniert, ist noch nicht ganz klar. Wunsch: eine optionale kleine Lerneinheit später zwischendurch.
+- Spritzgebäck: „okay! Funktioniert, nicht zu schwer.“
+- Ton: Der Tester hört keinen Sound mehr, vor ein paar Versionen war noch etwas zu hören.
+
+**Analyse Ton:** Im automatischen Test startet die Ton-Engine bei jedem Antippen ohne Fehler (AudioContext „running“). Wahrscheinlich liegt es am Gerät: Beim iPhone schaltet der Stummschalter Web Audio stumm, bei Android zählt die Medienlautstärke. Auch ein ausgeschalteter Ton-Knopf im Spiel kommt infrage.
+
+**Folge:** v10 (D33–D35).
+
+## Runde 10 – Prototyp v10 (ausstehend)
+**Zu prüfen:** Ist das Labor-Tempo gut zum Mitgehen? Ist die Bonus-Lerneinheit verständlich? Kommt der Ton wieder (Testklang beim Einschalten)?
