@@ -45,6 +45,7 @@ mit genug Inhalt für spürbar lange Spielsessions (ca. 20–30 Min neue Tagesin
 | D22 | 23.11. | Rezeptbuch mit **Liedern als Folge**; Melodien-Sammlung erweitert: Morgen kommt der Weihnachtsmann, Jingle Bells, Deck the Halls (alle gemeinfrei) | Musik/Chor-Bezug; Wiedererkennen hilft beim Merken |
 | D23 | 23.11. | Claude arbeitet **ausschließlich** im Repo `adventsbackstube` (Regel ganz oben in CLAUDE.md) | Weitere GitHub-Projekte des Auftraggebers schützen |
 | D24 | 23.11. | Glasur-Blech verständlicher: Anleitung, Formen-Vorstellung, Druck-Vorschau, 3×3-Einstieg | Tester: „lustig, aber ich versteh es nicht“ |
+| D25 | 23.11. | `main` geschützt: Änderungen nur per **Pull Request**, Auftraggeber merged | Kontrolle darüber, was live geht |
 | D12 | 23.11. | Persönliche Inhalte (Name, Nachrichten) **verschlüsselt** im Repo; Schlüssel steht nur im Link-Teil nach `#`, den sie bekommt (wird nie an Server übertragen) | Personalisierung trotz öffentlichem Repo |
 
 ## 3. Spielkonzept
