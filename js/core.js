@@ -1,6 +1,6 @@
 /* Adventsbackstube – gemeinsame Grundlagen: Spielstand, Zutaten, Klang, Melodien, Hilfsfunktionen.
    Wird von allen Spiel-Modulen (regal.js, blech.js, buch.js) und app.js genutzt. */
-const VERSION = 'v10';
+const VERSION = 'v11';
 const TEST = /(^|[#?&])test/.test(location.hash + location.search);
 const $ = id => document.getElementById(id);
 const wait = ms => new Promise(r => setTimeout(r, ms));
@@ -33,7 +33,7 @@ const TIPS = [
 const layerStyle = x => `background:${ING[x].bg},${ING[x].c}`;
 
 /* ---- Spielstand (localStorage) ----
-   Gewürzregal nutzt aus Kompatibilitätsgründen die obersten Felder (level, best, cur),
+   Vorratsregal (id 'regal') nutzt aus Kompatibilitätsgründen die obersten Felder (level, best, cur),
    weitere Spiele liegen unter save.games[id] = {level, best, cur}. */
 const KEY = 'adventsbackstube.v1';
 let save = {level:1, best:{}};
@@ -54,7 +54,8 @@ const Snd = (() => {
     if (!on) return null;
     try {
       // iPhone/iPad: Ton auch bei Stummschalter abspielen (Safari 16.4+), sonst bleibt Web Audio stumm
-      try { if (navigator.audioSession && navigator.audioSession.type !== 'playback') navigator.audioSession.type = 'playback'; } catch (e) {}
+      const iOS = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+      try { if (iOS && navigator.audioSession && navigator.audioSession.type !== 'playback') navigator.audioSession.type = 'playback'; } catch (e) {}
       if (!ctx) { ctx = new (window.AudioContext || window.webkitAudioContext)(); master = ctx.createGain(); master.gain.value = .7; master.connect(ctx.destination); }
       if (ctx.state !== 'running') { const pr = ctx.resume(); if (pr && pr.catch) pr.catch(() => {}); } // WebKit kennt auch 'interrupted'
     } catch (e) { return null; }

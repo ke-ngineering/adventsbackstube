@@ -15,7 +15,7 @@ Status: ✅ umgesetzt · 🔨 in Arbeit · 💡 Idee · ❌ verworfen
 | 💡 | **Bestellzettel**: Ein Rezept verlangt bestimmte Zutaten (z. B. Zimt, Mandeln, Zucker für Zimtsterne). Werden diese Gläser zuerst gefüllt, gibt es Bonussterne. | Zusätzliche Strategieebene im selben Spiel |
 | 💡 | **Plätzchendose / Backstube wächst**: Sterne füllen eine Dose. Die Küche bekommt nach und nach Deko (Lichterkette, Adventskranz, Schwibbogen). | Sichtbarer Fortschritt über 24 Tage |
 
-## Wendungen fürs Gewürzregal (eine neue pro Woche)
+## Wendungen fürs Vorratsregal (eine neue pro Woche)
 | Status | Idee |
 |---|---|
 | 💡 | **Verdeckte Zutaten**: Untere Schichten sind als „?“ verdeckt, bis sie freiliegen. |
@@ -38,7 +38,7 @@ Status: ✅ umgesetzt · 🔨 in Arbeit · 💡 Idee · ❌ verworfen
 | ✅ | Spielstand inklusive angefangenem Level im Browser speichern |
 | 💡 | Spielstand-Code zum Sichern und Wiederherstellen |
 | 💡 | Leichte Vibration beim vollen Glas (falls das Handy es unterstützt) |
-| ✅ | Hinweis-Knopf im Glasur-Blech (kostet einen Stern) · 💡 auch fürs Gewürzregal |
+| ✅ | Hinweis-Knopf im Glasur-Blech (kostet einen Stern) · 💡 auch fürs Vorratsregal |
 
 ## Neu aus v4
 | Status | Idee |

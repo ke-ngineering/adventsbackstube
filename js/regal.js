@@ -1,4 +1,4 @@
-/* Mechanik 1: Gewürzregal – Zutaten in Gläser sortieren.
+/* Mechanik 1: Vorratsregal (früher „Gewürzregal“) – Zutaten in Gläser sortieren.
    Jedes volle Glas spielt das nächste Stück der Level-Melodie (Glockenspiel). */
 const Regal = (() => {
 let CAP = 4;
@@ -175,7 +175,7 @@ async function onTap(e) {
     if (!$('shelves')) return; // inzwischen Spiel verlassen
     hist.push(s.map(j => j.slice())); pour(s, a, i); moves++; sel = null; busy = false; render(); flash(i, 'pop');
     const now = countDone();
-    if (now > doneCount) { Snd.phrase(parts[doneCount] || [], 'bell'); doneCount = now; }
+    if (now > doneCount) { if (!solved(s)) Snd.phrase(parts[doneCount] || [], 'bell'); doneCount = now; } // letztes Glas: gleich das ganze Lied statt Teilstück
     saveCur();
     if (solved(s)) setTimeout(() => {
       const stars = undos === 0 ? 3 : undos <= 3 ? 2 : 1;
@@ -186,7 +186,7 @@ async function onTap(e) {
   else { Snd.nope(); flash(sel, 'shake'); }
 }
 
-return {id:'regal', title:'Gewürzregal', sub:'Sortiere jede Zutat in ihr eigenes Glas',
+return {id:'regal', title:'Vorratsregal', sub:'Sortiere jede Zutat in ihr eigenes Glas',
   desc:'Zutaten sortieren – jedes volle Glas spielt ein Stück Musik',
   start: begin, stop() { busy = false; },
   _test: {generate, solvable, levelCfg, get CAP() { return CAP; }}};

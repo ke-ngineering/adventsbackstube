@@ -146,3 +146,11 @@ Wunsch zum Gewürzregal: Flüssige Zutaten sollen fließen, andere herunterpurze
 **Analyse Ton:** WebKit kann den AudioContext in den Zustand `interrupted` versetzen. Der Code hat bisher nur `suspended` fortgesetzt, das war ein echter Fehler. Behoben, dazu Freischalt-Puffer und Ton-Testseite (D37).
 
 **Zu prüfen:** Labor-Tempo, Bonus-Lerneinheit, Ton (Ton-Test `#tontest`), die neuen Fall-Effekte im Gewürzregal.
+
+**Feedback v10:**
+- „Sehr schön die Geräusche.“ Auf iOS in Chrome sind sie jetzt hörbar, der WebKit-Fix wirkt.
+- Name: Im Gewürzregal sind nicht nur Gewürze (Honig, Kirschen …). Umbenennen?
+- Beim letzten Zug erklingt das letzte Melodie-Teilstück und gleichzeitig die ganze Melodie. Das überlagert sich.
+- Auf dem MacBook in Safari ist weiterhin kein Ton zu hören.
+
+**Folge:** v11 (D38–D40). Für Mac-Safari wird das Ergebnis des Ton-Tests gebraucht.
