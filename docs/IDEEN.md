@@ -47,4 +47,7 @@ Status: ✅ umgesetzt · 🔨 in Arbeit · 💡 Idee · ❌ verworfen
 | 💡 | Glasur-Blech: „Doppelglasur“ – manche Plätzchen brauchen zwei Schichten (3 Zustände statt 2) |
 | 💡 | Rezeptbuch: „Kanon“-Level, in denen die Folge rückwärts nachgetippt wird |
 | 💡 | Rezeptbuch: Liederquiz – nach dem Level aus drei Liedtiteln den richtigen wählen, für einen Bonusstern |
-| 💡 | Glasur-Blech: interaktives Tutorial-Level mit Pfeil („Tippe hier!“), falls Anleitung + Vorschau nicht reichen |
+| ✅ | Glasur-Blech: Strategiekurs („Lösungsweg“) + interaktive Lernhilfe mit Begründungen (v6) |
+| ✅ | **Spritzbeutel** als eigene Station: Spritzgebäck in einem Zug (v6) |
+| 💡 | Spritzbeutel: Formen-Level, bei denen die Spur ein Motiv ergibt (Stern, Brezel, Herz) |
+| 💡 | Spritzbeutel: Zwei Teigfarben, bei denen Hell- und Dunkel-Punkte abwechselnd durchlaufen werden müssen |

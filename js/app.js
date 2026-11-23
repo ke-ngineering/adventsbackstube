@@ -1,7 +1,7 @@
 /* App-Rahmen: Backstube (Startseite), Spielwechsel, Levelleiste, Gewinn-Dialog, Ton-Schalter.
    Jedes Spiel-Modul liefert {id, title, sub, desc, start(level, resume, api), stop()}. */
 {
-const GAMES = [Regal, Blech, Buch];
+const GAMES = [Regal, Blech, Spritz, Buch];
 let cur = null, curL = 1;
 
 const api = {
@@ -12,7 +12,7 @@ const api = {
   getCur: () => { const p = prog(cur.id); return p.cur && p.cur.lvl === curL ? p.cur : null; },
   saveCur: o => { prog(cur.id).cur = o ? Object.assign({lvl: curL}, o) : null; persist(); },
   restart: () => startLevel(false),
-  help: (title, html) => { $('helpTitle').textContent = title; $('helpBody').innerHTML = html; $('help').classList.add('on'); $('helpOk').focus(); },
+  help: (title, html) => { $('helpOk').hidden = false; $('helpTitle').textContent = title; $('helpBody').innerHTML = html; $('help').classList.add('on'); $('helpOk').focus(); },
   win,
 };
 
@@ -59,7 +59,7 @@ function win({stars, text, melody}) {
   p.best[curL] = Math.max(p.best[curL] || 0, stars);
   p.level = Math.max(p.level, curL + 1); p.cur = null; persist();
   Snd.phrase(melody.notes, 'brass', .2);
-  $('winTitle').textContent = {regal: 'Regal sortiert!', blech: 'Blech glasiert!', buch: 'Rezept gemerkt!'}[cur.id];
+  $('winTitle').textContent = {regal: 'Regal sortiert!', blech: 'Blech glasiert!', spritz: 'Spritzgebäck gebacken!', buch: 'Rezept gemerkt!'}[cur.id];
   $('winStars').innerHTML = '★'.repeat(stars) + `<span class="off">${'★'.repeat(3 - stars)}</span>`;
   $('winText').textContent = text;
   $('tip').textContent = TIPS[(curL - 1) % TIPS.length];

@@ -54,8 +54,24 @@ Das Prinzip mit den wechselnden Nachbarn erschließt sich ohne Erklärung nicht.
 
 **Folge:** v5 (D24). Anleitung, Vorschau beim Drücken, 3×3-Einstieg und Vorstellung jeder neuen Form.
 
-## Runde 5 – Prototyp v5 (ausstehend)
-**Zu prüfen:**
-- Wird das Glasur-Blech mit Anleitung und Vorschau verständlich?
-- Ist der Einstieg über Level 1–5 angenehm?
-- Weiteres Feedback zu Rezeptbuch, Melodien und Backstube aus Runde 4
+## Runde 5 – Prototyp v5 (23.11.2026)
+**Getestet:** Glasur-Blech mit Anleitung, Vorschau beim Drücken und 3×3-Einstieg.
+
+**Feedback:**
+- „Die Erklärung ist nützlich!“ Die Regeln sind jetzt verstanden.
+- Aber: „Ich weiß nicht, wie ich das lösen soll. Erscheint mir wie Rubik's Cube.“ Lights-Out ist ohne Strategie kaum intuitiv lösbar.
+- Entscheidung des Testers: Das Blech **behalten**, weil es interessant ist, aber einen Lernmodus einbauen, der das Vorgehen Schritt für Schritt erklärt.
+- Die Spritzbeutel-Idee (Ein-Strich-Rätsel) gefällt. Sie soll ein **eigener Spielteil** werden: „Man muss Spritzgebäck erstellen.“
+
+**Folge:** v6 (D26, D27).
+
+## Runde 6 – Prototyp v6 (ausstehend)
+**Automatisch geprüft:**
+- Die Lernhilfe löst Blech-Level 1–40 vollständig.
+- Spritzbeutel-Level 1–40 haben gültige Wege.
+- Per Skript gespielt: Strategiekurs durchgeklickt, Blech Level 8 mit Lernhilfe gelöst (2 Sterne), Spritzbeutel Level 1 mit simuliertem Finger gelöst.
+
+**Zu prüfen durch den Tester:**
+- Lösungsweg-Kurs: Ist die Jagd-Methode verständlich?
+- Lernhilfe: Helfen die Begründungen? Lernt man dabei etwas?
+- Spritzbeutel: Lässt sich der Finger gut steuern? Wie ist die Schwierigkeit mit und ohne Start-Stern (ab Level 7)?

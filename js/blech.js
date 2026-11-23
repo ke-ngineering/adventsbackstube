@@ -17,7 +17,7 @@ function levelCfg(L) {
   return {N, kinds, k};
 }
 
-let api, lvl, N, shape, aff, g, taps, hints, par, noteI, mel, hist;
+let api, lvl, N, shape, aff, g, taps, hints, par, noteI, mel, hist, coachOn = false, coachUsed = false, restMode = false;
 
 function affected(i) {
   const r = Math.floor(i / N), c = i % N;
@@ -76,23 +76,27 @@ function begin(L, resume, a) {
   api = a; lvl = L; mel = melodyFor(L + 1);
   const gen = generate(L); g = gen.state; par = gen.par; taps = 0; hints = 0; noteI = 0; hist = [];
   const c = resume ? api.getCur() : null;
-  if (c && Array.isArray(c.g) && c.g.length === g.length) { g = c.g; taps = c.taps || 0; hints = c.hints || 0; noteI = c.noteI || 0; hist = c.hist || []; }
+  coachOn = false; coachUsed = false; restMode = false;
+  if (c && Array.isArray(c.g) && c.g.length === g.length) { g = c.g; taps = c.taps || 0; hints = c.hints || 0; noteI = c.noteI || 0; hist = c.hist || []; coachOn = !!c.coachOn; coachUsed = !!c.coachUsed; restMode = !!c.restMode; }
   else api.saveCur(null);
   api.stage.innerHTML = `<div class="blech" id="blech" style="--n:${N}">${g.map((v, i) =>
-    `<button class="cell" data-i="${i}" aria-label="${SHAPES[shape[i]].name}"><span class="cookie s-${shape[i]}${v ? ' on' : ''}"></span></button>`).join('')}</div>`;
+    `<button class="cell" data-i="${i}" aria-label="${SHAPES[shape[i]].name}"><span class="cookie s-${shape[i]}${v ? ' on' : ''}"></span></button>`).join('')}</div>
+    <div class="coach" id="coach" aria-live="polite" hidden></div>`;
   $('blech').onclick = onTap;
   const bl = $('blech'), clearPv = () => bl.querySelectorAll('.pv').forEach(x => x.classList.remove('pv'));
   bl.onpointerdown = e => { const c = e.target.closest('.cell'); if (!c) return; clearPv(); aff[+c.dataset.i].forEach(j => bl.querySelector(`.cell[data-i="${j}"]`).classList.add('pv')); };
   bl.onpointerup = bl.onpointercancel = bl.onpointerleave = () => setTimeout(clearPv, 260);
   const kinds = [...new Set(shape)];
   api.legend.innerHTML = kinds.map(k => `<span class="pat">${mini(k)}<span><b>${SHAPES[k].name}</b> wechselt ${SHAPES[k].how}</span></span>`).join('');
-  api.controls.innerHTML = `<button class="btn" id="bUndo">↶ Rückgängig</button><button class="btn" id="hint">Tipp</button><button class="btn" id="restart">Neu starten</button><button class="btn" id="bHelp">Wie geht das?</button>`;
+  api.controls.innerHTML = `<button class="btn" id="bUndo">↶ Zurück</button><button class="btn" id="hint">Tipp</button><button class="btn" id="restart">Neu</button><button class="btn" id="bHelp">Regeln</button><button class="btn" id="bCourse">Lösungsweg</button><button class="btn" id="bCoach" aria-pressed="false">Lernhilfe</button>`;
   $('bHelp').onclick = () => explain(kinds);
-  $('bUndo').onclick = () => { if (!hist.length) return; const i = hist.pop(); apply(g, i); taps--; Snd.tap(.7); paint(aff[i]); saveCur(); status(); };
+  $('bCourse').onclick = () => course(0);
+  $('bCoach').onclick = () => setCoach(!coachOn);
+  $('bUndo').onclick = () => { if (!hist.length) return; const i = hist.pop(); apply(g, i); taps--; Snd.tap(.7); paint(aff[i]); saveCur(); status(); coach(); };
   $('hint').onclick = showHint;
   $('restart').onclick = () => api.restart();
 
-  status();
+  status(); coach();
   // Anleitung beim ersten Mal, neue Formen kurz vorstellen
   const p = prog('blech'); p.seen = p.seen || [];
   const fresh = kinds.filter(k => !p.seen.includes(k));
@@ -115,7 +119,7 @@ function mini(k, big = false) {
   return `<span class="mini${big ? ' big' : ''}" aria-hidden="true">${[...Array(25).keys()].map(i => `<b class="${i === 12 ? 'me' : on.has(i) ? 'y' : ''}"></b>`).join('')}</span>`;
 }
 function status() { api.status(`${taps} ${taps === 1 ? 'Zug' : 'Züge'} · Bestwert ${par}`); $('bUndo').disabled = !hist.length; }
-function saveCur() { api.saveCur({g, taps, hints, noteI, hist: hist.slice(-60)}); }
+function saveCur() { api.saveCur({g, taps, hints, noteI, hist: hist.slice(-60), coachOn, coachUsed, restMode}); }
 function paint(idx) {
   idx.forEach((j, n) => {
     const el = document.querySelector(`.cell[data-i="${j}"] .cookie`); if (!el) return;
@@ -129,9 +133,10 @@ function onTap(e) {
   document.querySelectorAll('.cell.hint').forEach(x => x.classList.remove('hint'));
   apply(g, i); taps++; hist.push(i);
   const notes = mel.notes; Snd.note(notes[noteI % notes.length][0], .4); noteI++;
-  paint(aff[i]); saveCur(); status();
+  paint(aff[i]); saveCur(); status(); coach();
   if (g.every(v => v)) setTimeout(() => {
     let stars = taps <= par ? 3 : taps <= par + 4 ? 2 : 1; stars = Math.max(1, stars - hints);
+    if (coachUsed) stars = Math.min(stars, 2);
     api.win({stars, melody: mel,
       text: taps <= par ? `Meisterhaft – ${taps} Züge, genau der Bestwert!` : `Glasiert in ${taps} Zügen. Der Bestwert wäre ${par}.`});
   }, 500);
@@ -143,7 +148,100 @@ function showHint() {
   api.status(`Tipp: das leuchtende Plätzchen (kostet einen Stern)`);
 }
 
+/* ---- Lernhilfe: Jagd-Methode + Rest-Trick ----
+   Jagd: erstes unglasiertes Plätzchen (Leserichtung) suchen und ein Plätzchen tippen, das es erwischt,
+   ohne irgendein Plätzchen DAVOR zu verändern → der Fehler wandert garantiert nach hinten/unten.
+   Geht das nicht mehr, Rest-Trick: Plätzchen aus einer (vom Löser berechneten) Lösung, oberste Reihe zuerst. */
+const rowOf = i => Math.floor(i / N), colOf = i => i % N;
+function advise() {
+  const t = g.findIndex(v => !v); if (t < 0) return null;
+  if (!restMode) {
+    let best = null;
+    for (let i = 0; i < N * N; i++) {
+      const A = aff[i]; if (!A.includes(t) || A.some(j => j < t)) continue;
+      const score = Math.abs(rowOf(i) - (rowOf(t) + 1)) * 100 + Math.abs(colOf(i) - colOf(t)) * 10 + A.filter(j => rowOf(j) === rowOf(t)).length;
+      if (!best || score < best.score) best = {i, score};
+    }
+    if (best) return {kind: 'jagd', target: t, picks: [best.i]};
+  }
+  const sol = solve(g) || [];
+  const top = Math.min(...sol.map(rowOf));
+  return {kind: 'rest', target: t, picks: sol.filter(i => rowOf(i) === top)};
+}
+function coach() {
+  const box = $('coach'); if (!box) return;
+  document.querySelectorAll('.cell.cpick,.cell.ctarget').forEach(x => x.classList.remove('cpick', 'ctarget'));
+  $('bCoach').setAttribute('aria-pressed', coachOn); $('bCoach').classList.toggle('active', coachOn);
+  if (!coachOn) { box.hidden = true; return; }
+  const a = advise(); box.hidden = false;
+  if (!a) { box.innerHTML = '<b>Alles glasiert!</b>'; return; }
+  if (a.kind === 'rest' && !restMode) { restMode = true; saveCur(); }
+  const cell = i => document.querySelector(`.cell[data-i="${i}"]`);
+  cell(a.target)?.classList.add('ctarget');
+  a.picks.forEach(i => cell(i)?.classList.add('cpick'));
+  const r = rowOf(a.target) + 1, i = a.picks[0], name = SHAPES[shape[i]].name;
+  if (a.kind === 'jagd') {
+    const below = rowOf(i) === rowOf(a.target) + 1 && colOf(i) === colOf(a.target);
+    const diag = rowOf(i) === rowOf(a.target) + 1 && Math.abs(colOf(i) - colOf(a.target)) === 1;
+    box.innerHTML = `<b>Jagd-Methode, Reihe ${r}:</b> Das erste unglasierte Plätzchen ist <span class="k-t">rot gestrichelt</span>. ` +
+      (below ? `Tippe den ${name} <span class="k-p">direkt darunter</span>: Er erwischt das rote, lässt aber alles darüber in Ruhe.`
+       : diag ? `Tippe den ${name} <span class="k-p">schräg darunter</span>: Er reicht schräg nach oben genau an das rote heran.`
+       : `Tippe das <span class="k-p">gold markierte</span> Plätzchen (${name}): Es erwischt das rote, ohne fertige Plätzchen davor zu stören.`) +
+      ` So wandert das Problem Schritt für Schritt nach unten.`;
+  } else {
+    box.innerHTML = `<b>Rest-Trick:</b> Mit der Jagd kommt man hier nicht weiter – die übrigen unglasierten Plätzchen liegen am Rand. ` +
+      `Tippe jetzt die <span class="k-p">gold markierten</span> Plätzchen${a.picks.length > 1 ? ' (Reihenfolge egal)' : ''}. ` +
+      `Das sieht erst nach Chaos aus, aber jeder dieser Züge bringt dich der Lösung näher.`;
+  }
+}
+function setCoach(on) {
+  coachOn = on; if (on) coachUsed = true; saveCur(); coach();
+  if (on) api.status(`${taps} ${taps === 1 ? 'Zug' : 'Züge'} · Lernhilfe an (höchstens 2 Sterne)`); else status();
+}
+// kleines Beispiel-Blech für den Kurs: o = glasiert, x = unglasiert, großgeschrieben = hier tippen
+function demo(rows, label) {
+  return `<figure class="demo"><span class="dgrid" style="--n:${rows[0].length}">${rows.join('').split('').map(ch =>
+    `<i class="${ch.toLowerCase() === 'x' ? 'x' : 'o'}${ch === ch.toUpperCase() ? ' t' : ''}"></i>`).join('')}</span><figcaption>${label}</figcaption></figure>`;
+}
+const COURSE = [
+  ['Zwei Grundregeln', `
+    <p><b>1. Die Reihenfolge ist egal.</b> Ob du erst A und dann B tippst oder umgekehrt – am Ende sieht das Blech gleich aus.</p>
+    <p><b>2. Zweimal ist wie keinmal.</b> Tippst du ein Plätzchen zweimal, ist alles wieder wie vorher. Jedes Plätzchen brauchst du also höchstens <b>einmal</b>.</p>
+    <p>Das heißt: Die Frage ist nie „in welcher Reihenfolge?“, sondern nur „<b>welche</b> Plätzchen tippe ich an?“</p>`],
+  ['Die Jagd: Reihe für Reihe', `
+    <p>Arbeite dich <b>von oben nach unten</b> vor. Suche das erste unglasierte Plätzchen und tippe den Taler <b>direkt darunter</b>.</p>
+    <div class="demos">${demo(['oxo', 'oOo', 'ooo'], 'Vorher: oben fehlt eins')}${demo(['ooo', 'xxx', 'oxo'], 'Nachher: oben fertig')}</div>
+    <p>Oben ist jetzt alles fertig – das Problem ist nach unten gewandert. Mach mit der nächsten Reihe genauso weiter. Fertige Reihen rührst du nie wieder an.</p>`],
+  ['Sterne und Spritzgebäck', `
+    <p>Bei anderen Formen gilt dieselbe Idee: Tippe ein Plätzchen <b>unterhalb</b>, das das unglasierte erwischt, aber <b>nichts darüber</b> verändert.</p>
+    <p><b>Zimtstern:</b> Er reicht schräg nach oben – tippe ihn <b>schräg darunter</b>.<br>
+    <b>Spritzgebäck:</b> Es wirkt nur in seiner eigenen Reihe. Nimm es, wenn in einer Reihe mehrere nebeneinander fehlen.</p>
+    <p>Prüfen kannst du jeden Zug mit dem Finger: drücken, schauen, ob oben etwas rot umrandet ist – wenn ja, wegziehen.</p>`],
+  ['Der Rest-Trick', `
+    <p>Oft bleiben am Ende <b>nur ganz unten</b> ein paar unglasierte Plätzchen übrig – darunter ist ja nichts mehr zum Tippen.</p>
+    <p>Dann hilft ein Trick: Ganz <b>oben</b> bestimmte Plätzchen antippen und danach <b>noch einmal jagen</b>. Welche oben die richtigen sind, hängt vom Rest unten ab – das ist der knifflige Teil, den Profis auswendig lernen.</p>
+    <p>Die <b>Lernhilfe</b> rechnet dir aus, welche es sind.</p>`],
+  ['Die Lernhilfe', `
+    <p>Schaltest du die Lernhilfe ein, denkt das Spiel mit:</p>
+    <p><span class="k-t">Rot gestrichelt</span> = das Plätzchen, um das es gerade geht.<br><span class="k-p">Gold</span> = der Vorschlag, wo du tippen kannst.<br>Darunter steht, <b>warum</b>.</p>
+    <p>Du kannst jederzeit selbst etwas anderes tippen – die Lernhilfe rechnet dann neu. Mit Lernhilfe gibt es höchstens 2 Sterne.</p>`],
+];
+function course(n) {
+  const [title, body] = COURSE[n], last = n === COURSE.length - 1;
+  api.help(`Lösungsweg ${n + 1}/${COURSE.length}: ${title}`, `${body}
+    <div class="course-nav">
+      ${n > 0 ? '<button class="btn" id="cPrev">‹ Zurück</button>' : '<button class="btn" id="cClose">Schließen</button>'}
+      ${last ? '<button class="btn red" id="cCoach">Lernhilfe einschalten</button>' : '<button class="btn red" id="cNext">Weiter ›</button>'}
+    </div>`);
+  $('helpOk').hidden = true;
+  $('cClose') && ($('cClose').onclick = () => $('help').classList.remove('on'));
+  $('cPrev') && ($('cPrev').onclick = () => course(n - 1));
+  $('cNext') && ($('cNext').onclick = () => course(n + 1));
+  $('cCoach') && ($('cCoach').onclick = () => { $('help').classList.remove('on'); setCoach(true); });
+}
+
 return {id:'blech', title:'Glasur-Blech', sub:'Glasiere alle Plätzchen – die Form verrät, wer mitwechselt',
   desc:'Knobeln: jedes Plätzchen nimmt Nachbarn mit',
-  start: begin, stop() {}, _test: {generate, solve, levelCfg, apply: (st, i) => apply(st, i)}};
+  start: begin, stop() {}, _test: {generate, solve, levelCfg, apply: (st, i) => apply(st, i),
+    coachSolve(L) { const gen = generate(L); g = gen.state.slice(); restMode = false; let n = 0; for (;;) { const a = advise(); if (!a) return n; if (a.kind === 'rest') restMode = true; apply(g, a.picks[0]); if (++n > 400) return -1; } }}};
 })();
