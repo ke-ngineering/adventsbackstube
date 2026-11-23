@@ -30,9 +30,21 @@ Keine personenbezogenen Daten. Die Spielerin heißt hier nur „Spielerin“, de
 
 **Folge:** v3 (siehe Entscheidungen D14–D17). Die Versionsnummer steht jetzt in der Fußzeile, damit man sieht, welche Version läuft.
 
-## Runde 3 – Prototyp v3 (ausstehend)
-**Zu prüfen:**
-- Zeigt die Fußzeile „Prototyp v3“?
-- Ist die Animation sichtbar?
-- Wie wirken die Geräusche und die Melodie-Gläser?
-- Geht nach dem Schließen und erneuten Öffnen der Stand mitten im Level weiter?
+## Runde 3 – Prototyp v3 (23.11.2026)
+**Getestet:** Animation immer an, Geräusche, Melodie-Gläser, Fortsetzen im Level. Aufruf mit `?v=3`, um den Cache zu umgehen.
+
+**Feedback:** „Das funktioniert jetzt.“ Die Animation ist sichtbar. Weiter mit den nächsten Mechaniken.
+
+**Folge:** v4 mit Glasur-Blech, Rezeptbuch und Backstube-Startseite (D19–D22).
+
+## Runde 4 – Prototyp v4 (ausstehend)
+**Automatisch geprüft:**
+- Regal-Level 1–60 lösbar.
+- Blech-Level 1–40: Der Löser findet den Bestwert, die Lösung glasiert alles.
+- Rezeptbuch-Level 1–30 gültig.
+- Blech und Rezeptbuch in Level 1 per Skript komplett durchgespielt, inklusive Gewinn-Dialog und Sternen.
+
+**Zu prüfen durch den Tester:**
+- Glasur-Blech: Ist das Form-Muster verständlich (Legende)? Wie ist die Schwierigkeit? Sind die Tipps hilfreich?
+- Rezeptbuch: Passt das Tempo? Erkennt man die Lieder? Stimmen die Melodien (Stille Nacht, Morgen kommt der Weihnachtsmann, Jingle Bells, Deck the Halls)?
+- Backstube: Funktioniert der Wechsel zwischen den Stationen? Öffnet das Spiel beim Neustart dort, wo man war?

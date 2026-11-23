@@ -27,8 +27,8 @@ Status: ✅ umgesetzt · 🔨 in Arbeit · 💡 Idee · ❌ verworfen
 ## Weitere Mechaniken (laut Plan)
 | Status | Idee |
 |---|---|
-| 💡 | **Glasur-Blech** (Lights-Out-Prinzip): Antippen glasiert ein Plätzchen und seine Nachbarn. |
-| 💡 | **Omas Rezeptbuch** (Reihenfolge merken): Zutaten leuchten auf und müssen nachgetippt werden. Mit Tönen ist das wie Nachsingen! |
+| ✅ | **Glasur-Blech** (Lights-Out-Prinzip): Antippen glasiert ein Plätzchen und seine Nachbarn. Eigene Wendung: Die Form bestimmt das Muster (Taler, Zimtstern, Spritzgebäck). |
+| ✅ | **Omas Rezeptbuch** (Reihenfolge merken): Zutaten leuchten auf und müssen nachgetippt werden. Eigene Wendung: Jedes zweite Level ist ein echtes Lied. |
 | 💡 | **Strickmuster** (Handarbeit): Farbreihen zu einem Muster anordnen, eventuell als spätere Mechanik |
 
 ## Technik & Komfort
@@ -38,4 +38,12 @@ Status: ✅ umgesetzt · 🔨 in Arbeit · 💡 Idee · ❌ verworfen
 | ✅ | Spielstand inklusive angefangenem Level im Browser speichern |
 | 💡 | Spielstand-Code zum Sichern und Wiederherstellen |
 | 💡 | Leichte Vibration beim vollen Glas (falls das Handy es unterstützt) |
-| 💡 | Hinweis-Knopf (der Solver kennt einen Lösungsweg) |
+| ✅ | Hinweis-Knopf im Glasur-Blech (kostet einen Stern) · 💡 auch fürs Gewürzregal |
+
+## Neu aus v4
+| Status | Idee |
+|---|---|
+| 💡 | Glasur-Blech: weitere Formen, z. B. Herz (wechselt die Spalte) oder Brezel (wechselt nur die Ecken) |
+| 💡 | Glasur-Blech: „Doppelglasur“ – manche Plätzchen brauchen zwei Schichten (3 Zustände statt 2) |
+| 💡 | Rezeptbuch: „Kanon“-Level, in denen die Folge rückwärts nachgetippt wird |
+| 💡 | Rezeptbuch: Liederquiz – nach dem Level aus drei Liedtiteln den richtigen wählen, für einen Bonusstern |

@@ -6,431 +6,56 @@
 <title>Adventsbackstube</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
-<style>
-/* VOICE: warm, verspielt, gemütlich – eine Backstube am Adventsabend
-   IDEA: ein Küchenregal voller Vorratsgläser, die man einräumt
-   PICTURE: Fliesenwand mit zwei Holzborden, Gläser mit Zutatenschichten; volle Gläser bekommen Karodeckel + Etikett
-   COLOUR and TYPE: Butterfliesen / Nussholz / Weihnachtsrot; nachts Pflaumenblau mit Lampenschein. Fredoka rund.
-   LAYOUT: kleiner Kopf, großes Regal mittig, Knöpfe darunter, Zutatenleiste unten */
-:root{color-scheme:light dark;
-  --bg:light-dark(#f3dc9c,#231d33);
-  --tile:light-dark(rgba(255,255,255,.45),rgba(255,255,255,.05));
-  --ink:light-dark(#3b2216,#f6e9d8);
-  --soft:light-dark(#7a5440,#c9b7a6);
-  --wood:light-dark(#8a5533,#6b4329);
-  --woodlight:light-dark(#b27448,#8c5a39);
-  --red:#c8283a;
-  --card:light-dark(#fff8ea,#2f2742);
-  --glass:light-dark(rgba(255,255,255,.42),rgba(255,255,255,.10));
-  --rim:light-dark(rgba(255,255,255,.9),rgba(255,255,255,.35));
-  --glow:light-dark(rgba(255,240,200,.0),rgba(255,196,110,.20));
-}
-:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
-*{box-sizing:border-box;min-width:0}
-html,body{height:100%}
-body{margin:0;color:var(--ink);font:16px/1.45 Fredoka,"Trebuchet MS",system-ui,sans-serif;overflow-x:clip;
-  background:
-   radial-gradient(ellipse 70% 45% at 50% 0,var(--glow),transparent 70%),
-   linear-gradient(var(--tile) 2px,transparent 2px) 0 0/44px 44px,
-   linear-gradient(90deg,var(--tile) 2px,transparent 2px) 0 0/44px 44px,
-   var(--bg);
-  display:flex;flex-direction:column;min-height:100dvh}
-header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px max(4vw,14px) 6px;max-width:760px;width:100%;margin:0 auto}
-h1{font-size:clamp(26px,6vw,36px);line-height:1.05;margin:0;font-weight:700;text-wrap:balance}
-.sub{color:var(--soft);font-size:15px;margin-top:2px}
-.stars{background:var(--card);border-radius:999px;padding:6px 14px;font-weight:600;white-space:nowrap;box-shadow:0 2px 0 rgba(0,0,0,.12)}
-.stars b{color:#e0a100}
-.hud{display:flex;gap:8px;align-items:center}
-.snd .x{display:none}.snd.off .x{display:inline}.snd.off .w{display:none}.snd.off{opacity:.6}
-.song{font-size:14px;color:var(--soft);margin-top:6px;font-style:italic}
-.levelbar{display:flex;align-items:center;justify-content:center;gap:10px;margin:6px auto 0}
-.levelbar span{font-weight:600;font-size:17px;min-width:7.5em;text-align:center}
-main{flex:1;display:flex;flex-direction:column;justify-content:center;padding:10px max(3vw,10px);max-width:760px;width:100%;margin:0 auto}
-.shelf{display:flex;justify-content:center;align-items:flex-end;gap:clamp(5px,1.8vw,14px);padding:0 10px;margin-top:34px;
-  border-bottom:14px solid var(--wood);border-radius:0 0 4px 4px;box-shadow:0 10px 0 -4px rgba(0,0,0,.18);position:relative}
-.shelf::after{content:"";position:absolute;left:0;right:0;bottom:-14px;height:4px;background:var(--woodlight)}
-.jar{all:unset;cursor:pointer;position:relative;display:flex;flex-direction:column;align-items:center;
-  width:clamp(36px,calc((100vw - 60px) / var(--per,7) - 8px),58px);padding-top:16px;transition:transform .3s cubic-bezier(.4,.1,.3,1);-webkit-tap-highlight-color:transparent}
-.jar:focus-visible .glass{outline:3px solid var(--red);outline-offset:3px}
-.glass{width:100%;height:calc(var(--cap,4) * (var(--lh) + 2px) + 12px);--lh:clamp(19px,calc(30vh / var(--cap,4) / 1.25 - 8px),32px);
-  background:var(--glass);border:3px solid var(--rim);border-top-width:2px;border-radius:9px 9px 16px 16px;
-  display:flex;flex-direction:column-reverse;gap:2px;padding:4px 3px;overflow:hidden;position:relative;
-  box-shadow:inset 6px 0 0 rgba(255,255,255,.25),0 4px 0 rgba(0,0,0,.10)}
-.layer{height:var(--lh);flex:none;border-radius:6px;background-color:var(--c);
-  box-shadow:inset 0 -3px 0 rgba(0,0,0,.14),inset 0 2px 0 rgba(255,255,255,.22)}
-.jar.sel{transform:translateY(-18px)}
-.jar.sel .glass{box-shadow:inset 6px 0 0 rgba(255,255,255,.25),0 14px 14px rgba(0,0,0,.22)}
-.lid{position:absolute;top:4px;width:112%;height:14px;border-radius:5px;opacity:0;transform:translateY(-14px);
-  background:repeating-linear-gradient(90deg,var(--red) 0 6px,#ec8a93 6px 12px);transition:.35s cubic-bezier(.3,1.6,.5,1)}
-.jar.done .lid{opacity:1;transform:none}
-.tag{position:absolute;bottom:18%;background:#fffaf0;color:#3b2216;font-size:11px;font-weight:600;padding:1px 5px;border-radius:4px;
-  box-shadow:0 1px 2px rgba(0,0,0,.25);transform:rotate(-4deg);white-space:nowrap;max-width:110%;overflow:hidden;text-overflow:ellipsis}
-.jar.pop .glass{animation:pop .3s ease}
-.jar.flying{z-index:4;transition:transform .3s cubic-bezier(.4,.1,.3,1)}
-.layer{transition:height .32s cubic-bezier(.3,1.4,.6,1)}
-.stream{position:fixed;width:8px;height:0;border-radius:4px;z-index:3;pointer-events:none;transition:height .2s ease-out}
-.jar.shake{animation:shake .32s ease}
-@keyframes pop{50%{transform:scale(1.06)}}
-@keyframes shake{25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
-.controls{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin:34px 0 8px}
-.btn{font:inherit;font-weight:600;font-size:16px;min-height:44px;padding:8px 18px;border-radius:14px;border:0;cursor:pointer;
-  background:var(--card);color:var(--ink);box-shadow:0 3px 0 rgba(0,0,0,.16)}
-.btn:active{transform:translateY(2px);box-shadow:0 1px 0 rgba(0,0,0,.16)}
-.btn:disabled{opacity:.4;cursor:default}
-.btn.red{background:var(--red);color:#fff}
-.btn.round{width:44px;padding:0;font-size:20px}
-.btn:focus-visible{outline:3px solid var(--red);outline-offset:2px}
-.legend{display:flex;flex-wrap:wrap;justify-content:center;gap:6px 14px;font-size:14px;color:var(--soft);margin:6px 0 0}
-.legend i{display:inline-block;width:14px;height:14px;border-radius:4px;vertical-align:-2px;margin-right:5px;background-color:var(--c)}
-footer{text-align:center;font-size:13px;color:var(--soft);padding:10px 14px 16px}
-.overlay{position:fixed;inset:0;background:rgba(40,20,10,.45);display:none;align-items:center;justify-content:center;padding:20px;z-index:5}
-.overlay.on{display:flex}
-.dialog{background:var(--card);border-radius:22px;padding:26px 22px 20px;max-width:340px;width:100%;text-align:center;box-shadow:0 18px 40px rgba(0,0,0,.3);animation:rise .35s cubic-bezier(.3,1.5,.5,1)}
-.dialog h2{margin:0 0 4px;font-size:28px;line-height:1.1}
-.big{font-size:38px;letter-spacing:4px;color:#e0a100;margin:6px 0}
-.big .off{color:light-dark(#e6d7bf,#4c4060)}
-.tip{background:light-dark(#fbefd6,#3a3150);border-radius:12px;padding:10px 12px;font-size:15px;margin:14px 0 18px;text-align:left}
-.tip b{display:block;font-size:13px;color:var(--soft);font-weight:600}
-@keyframes rise{from{transform:translateY(30px) scale(.95);opacity:0}}
-</style>
+<link rel="stylesheet" href="css/style.css?v=4">
 </head>
 <body>
 <header>
   <div>
     <h1>Adventsbackstube</h1>
-    <div class="sub">Gewürzregal – sortiere jede Zutat in ihr eigenes Glas</div>
+    <div class="sub" id="sub"></div>
   </div>
   <div class="hud">
     <button class="btn round snd" id="snd" aria-label="Ton ausschalten"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z" fill="currentColor"/><path class="w" d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path class="x" d="M16 9l6 6M22 9l-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
     <div class="stars" id="stars" aria-label="Gesammelte Sterne">★ 0</div>
   </div>
 </header>
-<div class="levelbar">
-  <button class="btn round" id="prev" aria-label="Vorheriges Level">‹</button>
-  <span id="lvl">Level 1</span>
-  <button class="btn round" id="next" aria-label="Nächstes Level">›</button>
-</div>
-<main>
-  <div id="shelves" aria-live="polite"></div>
-  <div class="controls">
-    <button class="btn" id="undo">↶ Rückgängig</button>
-    <button class="btn" id="restart">Neu starten</button>
+
+<section id="hub" class="hub" aria-label="Stationen"></section>
+
+<section id="game" hidden>
+  <div class="levelbar">
+    <button class="btn back" id="back" aria-label="Zur Backstube">‹ Backstube</button>
+    <button class="btn round" id="prev" aria-label="Vorheriges Level">‹</button>
+    <span id="lvl">Level 1</span>
+    <button class="btn round" id="next" aria-label="Nächstes Level">›</button>
   </div>
-  <div class="legend" id="legend"></div>
-</main>
-<footer>Prototyp v3 · Mechanik 1 von 3 · <span id="moves">0 Züge</span></footer>
+  <main>
+    <div id="stage" class="stage"></div>
+    <div class="controls" id="controls"></div>
+    <div class="legend" id="legend"></div>
+  </main>
+</section>
+
+<footer>Prototyp <span id="ver"></span> · <span id="status"></span></footer>
 
 <div class="overlay" id="win" role="dialog" aria-modal="true" aria-labelledby="winTitle">
   <div class="dialog">
-    <h2 id="winTitle">Regal sortiert!</h2>
+    <h2 id="winTitle">Geschafft!</h2>
     <div class="big" id="winStars"></div>
     <div id="winText"></div>
     <div class="song" id="song"></div>
     <div class="tip"><b>Backstuben-Tipp</b><span id="tip"></span></div>
-    <button class="btn red" id="go">Nächstes Glas-Regal</button>
+    <div class="dlg-btns">
+      <button class="btn" id="toHub">Backstube</button>
+      <button class="btn red" id="go">Nächstes Level</button>
+    </div>
   </div>
 </div>
 
-<script>
-{
-let CAP = 4;
-const dots = (c, s = 10) => `radial-gradient(circle at 30% 40%, ${c} 1.4px, transparent 2px) 0 0/${s}px ${s}px`;
-const ING = [
-  {name:'Kakao',     c:'#5a3420', bg:dots('rgba(255,255,255,.18)', 9)},
-  {name:'Kirschen',  c:'#c62f3d', bg:'radial-gradient(circle at 70% 30%, rgba(255,255,255,.35) 2px, transparent 3px) 0 0/16px 14px'},
-  {name:'Honig',     c:'#e8a317', bg:'linear-gradient(100deg, transparent 40%, rgba(255,255,255,.35) 46%, transparent 54%)'},
-  {name:'Mandeln',   c:'#d8b48a', bg:'radial-gradient(ellipse 4px 2.5px at 50% 50%, #a9794e 90%, transparent) 0 0/13px 11px'},
-  {name:'Pistazien', c:'#8fb35a', bg:dots('rgba(40,70,20,.35)', 8)},
-  {name:'Zucker',    c:'#fbf7ef', bg:dots('rgba(180,170,150,.6)', 7)},
-  {name:'Zimt',      c:'#a8582b', bg:'repeating-linear-gradient(135deg, rgba(0,0,0,.12) 0 3px, transparent 3px 8px)'},
-  {name:'Mohn',      c:'#3d4a6b', bg:dots('rgba(255,255,255,.28)', 6)},
-  {name:'Orangeat',  c:'#ef7d22', bg:'repeating-linear-gradient(90deg, rgba(255,255,255,.2) 0 4px, transparent 4px 10px)'},
-  {name:'Rosinen',   c:'#6a2b52', bg:'radial-gradient(ellipse 3.5px 2.5px at 50% 50%, rgba(0,0,0,.35) 90%, transparent) 0 0/11px 9px'},
-  {name:'Marzipan',  c:'#f2b8b0', bg:'repeating-linear-gradient(0deg, rgba(255,255,255,.3) 0 2px, transparent 2px 7px)'},
-  {name:'Lavendel',  c:'#8e78c4', bg:'repeating-linear-gradient(45deg, rgba(255,255,255,.22) 0 2px, transparent 2px 6px)'},
-];
-const TIPS = [
-  'Butter für Mürbeteig kalt verarbeiten – dann wird er schön mürbe.',
-  'Plätzchenteig vor dem Ausstechen mindestens 30 Minuten kühlen.',
-  'Vanillekipferl noch warm in Vanillezucker wälzen, dann haftet er besser.',
-  'Zimtsterne bei niedriger Temperatur backen, damit die Eiweißglasur weiß bleibt.',
-  'Hart gewordene Lebkuchen werden mit einem Apfelstück in der Dose wieder weich.',
-  'Eiweiß wird nur in einer völlig fettfreien Schüssel richtig steif.',
-];
-const TEST = location.hash === '#test';
-
-/* ---- Spielstand ---- */
-const KEY = 'adventsbackstube.v1';
-let save = {level:1, best:{}};
-try { const st = JSON.parse(localStorage.getItem(KEY)); if (st && st.level) save = Object.assign(save, st); } catch (e) {}
-const persist = () => { try { localStorage.setItem(KEY, JSON.stringify(save)); } catch (e) {} };
-const totalStars = () => Object.values(save.best).reduce((a, b) => a + b, 0);
-
-/* ---- Klang: Geräusche synthetisch (Web Audio), keine Dateien ---- */
-const Snd = (() => {
-  let ctx = null, master = null, on = save.sound !== false, playing = [];
-  const ensure = () => {
-    if (!on) return null;
-    try {
-      if (!ctx) { ctx = new (window.AudioContext || window.webkitAudioContext)(); master = ctx.createGain(); master.gain.value = .55; master.connect(ctx.destination); }
-      if (ctx.state === 'suspended') ctx.resume();
-    } catch (e) { return null; }
-    return ctx;
-  };
-  const env = (g, t, a, peak, d) => { g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(peak, t + a); g.gain.exponentialRampToValueAtTime(0.0001, t + a + d); };
-  const hz = n => 440 * Math.pow(2, (n - 69) / 12);
-  // Holzklopfen beim Antippen
-  function tap(pitch = 1) {
-    const c = ensure(); if (!c) return; const t = c.currentTime;
-    const o = c.createOscillator(), g = c.createGain();
-    o.type = 'sine'; o.frequency.setValueAtTime(520 * pitch, t); o.frequency.exponentialRampToValueAtTime(260 * pitch, t + .08);
-    env(g, t, .004, .35, .09); o.connect(g).connect(master); o.start(t); o.stop(t + .12);
-  }
-  // Rieseln: Körnchen-Geräusch, wie Zucker der ins Glas fällt
-  function pour(dur = .45) {
-    const c = ensure(); if (!c) return; const t = c.currentTime;
-    const len = Math.floor(c.sampleRate * dur), buf = c.createBuffer(1, len, c.sampleRate), d = buf.getChannelData(0);
-    for (let i = 0; i < len; i++) d[i] = Math.random() < .035 ? (Math.random() * 2 - 1) * (1 - i / len * .6) : (Math.random() * 2 - 1) * .05;
-    const src = c.createBufferSource(), bp = c.createBiquadFilter(), g = c.createGain();
-    src.buffer = buf; bp.type = 'bandpass'; bp.Q.value = 1.2;
-    bp.frequency.setValueAtTime(2600, t); bp.frequency.linearRampToValueAtTime(1500, t + dur);
-    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(.7, t + .05); g.gain.setValueAtTime(.7, t + dur - .12); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
-    src.connect(bp).connect(g).connect(master); src.start(t);
-  }
-  function nope() {
-    const c = ensure(); if (!c) return; const t = c.currentTime;
-    const o = c.createOscillator(), g = c.createGain(); o.type = 'triangle';
-    o.frequency.setValueAtTime(160, t); o.frequency.exponentialRampToValueAtTime(90, t + .15);
-    env(g, t, .005, .3, .16); o.connect(g).connect(master); o.start(t); o.stop(t + .2);
-  }
-  // Glockenspiel-Ton (für Glas-voll-Melodie)
-  function bell(n, t, len) {
-    const f = hz(n);
-    [[1, .32], [2.76, .08], [5.4, .03]].forEach(([m, v]) => {
-      const o = ctx.createOscillator(), g = ctx.createGain(); o.type = 'sine'; o.frequency.value = f * m;
-      env(g, t, .005, v, Math.max(.5, len * 1.6)); o.connect(g).connect(master); o.start(t); o.stop(t + len * 1.6 + .6); playing.push(o);
-    });
-  }
-  // Posaunenchor-Klang (für die ganze Melodie am Levelende)
-  function brass(n, t, len) {
-    const f = hz(n - 12), o = ctx.createOscillator(), o2 = ctx.createOscillator(), lp = ctx.createBiquadFilter(), g = ctx.createGain();
-    o.type = 'sawtooth'; o2.type = 'sawtooth'; o.frequency.value = f; o2.frequency.value = f * 1.003;
-    lp.type = 'lowpass'; lp.Q.value = 2; lp.frequency.setValueAtTime(f * 1.5, t); lp.frequency.linearRampToValueAtTime(f * 5, t + .08); lp.frequency.linearRampToValueAtTime(f * 3, t + len);
-    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(.16, t + .06); g.gain.setValueAtTime(.16, t + Math.max(.07, len - .08)); g.gain.exponentialRampToValueAtTime(0.0001, t + len + .05);
-    o.connect(lp); o2.connect(lp); lp.connect(g).connect(master); o.start(t); o2.start(t); o.stop(t + len + .1); o2.stop(t + len + .1); playing.push(o, o2);
-  }
-  function phrase(notes, voice = 'bell', tempo = .17) {
-    const c = ensure(); if (!c) return 0; let t = c.currentTime + .05;
-    for (const [n, d] of notes) { if (n) (voice === 'brass' ? brass : bell)(n, t, d * tempo * .92); t += d * tempo; }
-    return t - c.currentTime;
-  }
-  function stop() { playing.forEach(o => { try { o.stop(); } catch (e) {} }); playing = []; }
-  function toggle() { on = !on; save.sound = on; persist(); if (!on) stop(); else tap(); return on; }
-  return {tap, pour, nope, phrase, stop, toggle, get on() { return on; }};
-})();
-
-/* ---- Melodien (gemeinfrei). [MIDI-Note, Dauer in Achteln] ----
-   Jedes volle Glas spielt das nächste Stück – am Ende erklingt alles als Posaunenchor. */
-const MELODIES = [
-  {name:'Stille Nacht, heilige Nacht', notes:[
-    [67,3],[69,1],[67,2],[64,6],[67,3],[69,1],[67,2],[64,6],[74,4],[74,2],[71,6],[72,4],[72,2],[67,6],
-    [69,4],[69,2],[72,3],[71,1],[69,2],[67,3],[69,1],[67,2],[64,6],[69,4],[69,2],[72,3],[71,1],[69,2],[67,3],[69,1],[67,2],[64,6],
-    [74,4],[74,2],[77,3],[74,1],[71,2],[72,6],[76,6],[72,3],[67,1],[64,2],[67,3],[65,1],[62,2],[60,12]]},
-];
-const melodyFor = L => MELODIES[(L - 1) % MELODIES.length];
-function chunks(notes, n) { // in n etwa gleich lange Stücke teilen, Schnitt bevorzugt nach langen Tönen
-  const L = notes.length, cuts = [0];
-  for (let k = 1; k < n; k++) {
-    const ideal = Math.round(k * L / n); let best = ideal;
-    for (let d = 0; d <= 2; d++) { if (notes[ideal - 1 + d] && notes[ideal - 1 + d][1] >= 6) { best = ideal + d; break; } if (notes[ideal - 1 - d] && notes[ideal - 1 - d][1] >= 6) { best = ideal - d; break; } }
-    cuts.push(Math.min(L - (n - k), Math.max(cuts[k - 1] + 1, best)));
-  }
-  cuts.push(L);
-  return cuts.slice(0, -1).map((c, i) => notes.slice(c, cuts[i + 1]));
-}
-
-/* ---- Regeln ---- */
-const top = j => j[j.length - 1];
-const full = j => j.length === CAP && j.every(x => x === j[0]);
-const solved = s => s.every(j => !j.length || full(j));
-const canPour = (s, a, b) => a !== b && s[a].length > 0 && s[b].length < CAP && (!s[b].length || top(s[b]) === top(s[a]));
-function pourCount(s, a, b) { const A = s[a], t = top(A); let n = 0; while (n < A.length && A[A.length - 1 - n] === t) n++; return Math.min(n, CAP - s[b].length); }
-function pour(s, a, b) { const n = pourCount(s, a, b); for (let i = 0; i < n; i++) s[b].push(s[a].pop()); return n; }
-
-/* ---- Schwierigkeit ----
-   Zutaten: L1 = 6 (8 Gläser) … ab L25 = 12 (14 Gläser).
-   Ab L12 jedes dritte Level hohe Gläser mit 5 Schichten. */
-function levelCfg(L) {
-  const steps = [[1,6],[3,7],[6,8],[9,9],[13,10],[18,11],[25,12]];
-  let colors = 6; for (const [from, c] of steps) if (L >= from) colors = c;
-  const cap = L >= 12 && L % 3 === 0 ? 5 : 4;
-  return {colors, cap};
-}
-
-/* ---- Level-Generator mit Lösbarkeitsprüfung ---- */
-function rng(seed) { return () => { seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
-function shuffle(a, r) { for (let i = a.length - 1; i > 0; i--) { const k = Math.floor(r() * (i + 1)); [a[i], a[k]] = [a[k], a[i]]; } return a; }
-function solvable(start, limit = 120000) {
-  const seen = new Set(); let nodes = 0;
-  const key = s => s.map(j => j.join(',')).sort().join('|');
-  const dfs = s => {
-    if (solved(s)) return true;
-    if (++nodes > limit) return false;
-    const k = key(s); if (seen.has(k)) return false; seen.add(k);
-    for (let a = 0; a < s.length; a++) {
-      const A = s[a]; if (!A.length || full(A)) continue;
-      const uni = A.every(x => x === A[0]);
-      for (let b = 0; b < s.length; b++) {
-        if (!canPour(s, a, b) || (uni && !s[b].length)) continue;
-        const n = s.map(j => j.slice()); pour(n, a, b);
-        if (dfs(n)) return true;
-      }
-    }
-    return false;
-  };
-  return dfs(start.map(j => j.slice()));
-}
-// gleiche Nachbarschichten machen es leichter – stark gemischte Level bevorzugen
-const clumps = s => s.reduce((n, j) => n + j.filter((x, i) => i && x === j[i - 1]).length, 0);
-function generate(L) {
-  const {colors, cap} = levelCfg(L); CAP = cap; let s;
-  for (let t = 0; t < 200; t++) {
-    const r = rng(L * 7919 + t * 104729 + 13);
-    const ids = shuffle([...ING.keys()], r).slice(0, colors);
-    const pieces = shuffle(ids.flatMap(i => Array(cap).fill(i)), r);
-    s = [];
-    for (let i = 0; i < colors; i++) s.push(pieces.slice(i * cap, i * cap + cap));
-    s.push([], []);
-    if (clumps(s) > (t < 120 ? 1 : 3)) continue;
-    if (solvable(s)) return s;
-  }
-  s.push([]); return s; // Notfall: ein Extraglas macht es sicher lösbar
-}
-
-/* ---- Zustand & Darstellung ---- */
-const $ = id => document.getElementById(id);
-let lvl = Math.min((save.cur && save.cur.lvl) || save.level, 999), start, s, sel = null, hist = [], moves = 0, undos = 0, busy = false, doneCount = 0, parts = [];
-
-const countDone = () => s.filter(full).length;
-function load(L, resume = false) {
-  lvl = L; start = generate(L); s = start.map(j => j.slice());
-  sel = null; hist = []; moves = 0; undos = 0; busy = false; doneCount = 0;
-  const c = save.cur;
-  if (resume && c && c.lvl === L && Array.isArray(c.s) && c.s.length === s.length) { // angefangenes Level fortsetzen
-    s = c.s; hist = c.hist || []; moves = c.moves || 0; undos = c.undos || 0; doneCount = c.done || countDone();
-  } else { save.cur = null; persist(); }
-  parts = chunks(melodyFor(L).notes, start.filter(j => j.length).length);
-  render();
-}
-function saveCur() { save.cur = {lvl, s, hist: hist.slice(-40), moves, undos, done: doneCount}; persist(); }
-const layerStyle = x => `background:${ING[x].bg},${ING[x].c}`;
-function jarHTML(i) {
-  const j = s[i], done = full(j);
-  const label = j.length ? j.map(x => ING[x].name).join(', ') : 'leer';
-  return `<button class="jar${sel === i ? ' sel' : ''}${done ? ' done' : ''}" data-i="${i}" aria-label="Glas ${i + 1}: ${label}">
-    <span class="lid"></span>
-    <span class="glass">${j.map(x => `<span class="layer" style="${layerStyle(x)}"></span>`).join('')}</span>
-    ${done ? `<span class="tag">${ING[j[0]].name}</span>` : ''}
-  </button>`;
-}
-function render() {
-  const n = s.length, per = n > 7 ? Math.ceil(n / 2) : n, rows = [];
-  for (let i = 0; i < n; i += per) rows.push([...Array(Math.min(per, n - i)).keys()].map(k => k + i));
-  const sh = $('shelves');
-  sh.style.setProperty('--cap', CAP);
-  sh.style.setProperty('--per', per);
-  sh.innerHTML = rows.map(r => `<div class="shelf">${r.map(jarHTML).join('')}</div>`).join('');
-  $('lvl').textContent = `Level ${lvl}`;
-  $('stars').innerHTML = `<b>★</b> ${totalStars()}`;
-  $('prev').disabled = lvl <= 1;
-  $('next').disabled = !TEST && lvl >= save.level;
-  $('undo').disabled = !hist.length;
-  $('moves').textContent = `${moves} ${moves === 1 ? 'Zug' : 'Züge'}${TEST ? ' · Testmodus' : ''}`;
-  const used = [...new Set(start.flat())].sort((a, b) => a - b);
-  $('legend').innerHTML = used.map(x => `<span><i style="${layerStyle(x)}"></i>${ING[x].name}</span>`).join('');
-}
-const jarEl = i => document.querySelector(`.jar[data-i="${i}"]`);
-function flash(i, cls) { const el = jarEl(i); if (!el) return; el.classList.remove(cls); void el.offsetWidth; el.classList.add(cls); }
-const wait = ms => new Promise(r => setTimeout(r, ms));
-
-/* ---- Umfüll-Animation: Glas fliegt hin, kippt, Zutat fließt ---- */
-async function animatePour(a, b, n, ing) {
-  const src = jarEl(a), dst = jarEl(b);
-  const sg = src.querySelector('.glass'), dg = dst.querySelector('.glass');
-  const sr = sg.getBoundingClientRect(), dr = dg.getBoundingClientRect();
-  const dir = dr.left + dr.width / 2 >= sr.left + sr.width / 2 ? 1 : -1;
-  const ang = 72 * Math.PI / 180, r = sr.height / 2;
-  const tx = dr.left + dr.width / 2, ty = dr.top - 14;
-  const cx = tx - dir * r * Math.sin(ang), cy = ty + r * Math.cos(ang);
-  const dx = cx - (sr.left + sr.width / 2), dy = cy - (sr.top + sr.height / 2);
-  src.classList.add('flying');
-  src.style.transform = `translate(${dx}px, ${dy}px) rotate(${dir * 72}deg)`;
-  await wait(300);
-  // Strahl
-  const lh = sg.querySelector('.layer')?.getBoundingClientRect().height || 30;
-  const stream = document.createElement('div');
-  stream.className = 'stream';
-  stream.style.cssText = `left:${tx - 4}px;top:${ty}px;${layerStyle(ing)}`;
-  document.body.appendChild(stream);
-  const fillTop = dr.bottom - 7 - (s[b].length + n) * (lh + 2);
-  requestAnimationFrame(() => { stream.style.height = Math.max(10, fillTop - ty + lh) + 'px'; });
-  // Quelle leert sich, Ziel füllt sich
-  const srcLayers = [...sg.querySelectorAll('.layer')].slice(-n);
-  srcLayers.forEach(el => { el.style.transition = 'height .42s ease-in, margin .42s'; el.style.height = '0px'; el.style.marginTop = '-2px'; });
-  for (let i = 0; i < n; i++) {
-    const el = document.createElement('span');
-    el.className = 'layer grow'; el.style.cssText = layerStyle(ing) + ';height:0';
-    dg.appendChild(el);
-    setTimeout(() => { el.style.height = ''; }, 60 + i * 110);
-  }
-  await wait(460);
-  stream.style.transition = 'opacity .15s, transform .15s'; stream.style.opacity = '0'; stream.style.transform = 'translateY(30px)';
-  src.style.transform = '';
-  await wait(280);
-  stream.remove(); src.classList.remove('flying');
-}
-
-$('shelves').addEventListener('click', async e => {
-  const b = e.target.closest('.jar'); if (!b || busy) return;
-  const i = +b.dataset.i;
-  if (sel === null) { if (s[i].length) { sel = i; Snd.tap(); render(); } return; }
-  if (sel === i) { sel = null; Snd.tap(.8); render(); return; }
-  if (canPour(s, sel, i)) {
-    const a = sel, ing = top(s[a]), n = pourCount(s, a, i);
-    busy = true;
-    Snd.pour(.42 + n * .04);
-    await animatePour(a, i, n, ing);
-    hist.push(s.map(j => j.slice())); pour(s, a, i); moves++; sel = null; busy = false; render(); flash(i, 'pop');
-    const now = countDone();
-    if (now > doneCount) { Snd.phrase(parts[doneCount] || [], 'bell'); doneCount = now; }
-    saveCur();
-    if (solved(s)) setTimeout(win, 450);
-  } else if (s[i].length) { sel = i; Snd.tap(); render(); }
-  else { Snd.nope(); flash(sel, 'shake'); }
-});
-$('undo').addEventListener('click', () => { if (!hist.length || busy) return; s = hist.pop(); undos++; sel = null; Snd.tap(.7); render(); saveCur(); });
-$('restart').addEventListener('click', () => { if (busy) return; Snd.stop(); load(lvl); });
-$('prev').addEventListener('click', () => !busy && lvl > 1 && load(lvl - 1));
-$('next').addEventListener('click', () => !busy && (TEST || lvl < save.level) && load(lvl + 1));
-
-function win() {
-  const stars = undos === 0 ? 3 : undos <= 3 ? 2 : 1;
-  save.best[lvl] = Math.max(save.best[lvl] || 0, stars);
-  save.level = Math.max(save.level, lvl + 1); save.cur = null; persist();
-  const mel = melodyFor(lvl); Snd.phrase(mel.notes, 'brass', .2);
-  $('winStars').innerHTML = '★'.repeat(stars) + `<span class="off">${'★'.repeat(3 - stars)}</span>`;
-  $('winText').textContent = stars === 3 ? `Perfekt – in ${moves} Zügen ohne Rückgängig.` : `Geschafft in ${moves} Zügen. Ohne Rückgängig gibt’s 3 Sterne.`;
-  $('tip').textContent = TIPS[(lvl - 1) % TIPS.length];
-  $('song').textContent = Snd.on ? `♪ Es erklingt: „${mel.name}“` : '';
-  $('win').classList.add('on'); $('go').focus(); render();
-}
-$('go').addEventListener('click', () => { Snd.stop(); $('win').classList.remove('on'); load(lvl + 1); });
-const setSndBtn = () => { $('snd').setAttribute('aria-pressed', Snd.on); $('snd').classList.toggle('off', !Snd.on); $('snd').setAttribute('aria-label', Snd.on ? 'Ton ausschalten' : 'Ton einschalten'); };
-$('snd').addEventListener('click', () => { Snd.toggle(); setSndBtn(); });
-setSndBtn();
-
-load(lvl, true);
-}
-</script>
+<script src="js/core.js?v=4"></script>
+<script src="js/regal.js?v=4"></script>
+<script src="js/blech.js?v=4"></script>
+<script src="js/buch.js?v=4"></script>
+<script src="js/app.js?v=4"></script>
 </body>
 </html>

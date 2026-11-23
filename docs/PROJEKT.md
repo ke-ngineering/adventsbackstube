@@ -4,7 +4,7 @@
 > Wer (Mensch oder Claude) die Entwicklung fortsetzt, liest zuerst diese Datei.
 > Nach jeder Arbeitssitzung: Status, Entscheidungen und Agenda hier aktualisieren.
 
-Stand: 23.11.2026 (Prototyp v3)
+Stand: 23.11.2026 (Prototyp v4)
 
 ## 1. Vision
 
@@ -39,6 +39,10 @@ mit genug Inhalt für spürbar lange Spielsessions (ca. 20–30 Min neue Tagesin
 | D16 | 23.11. | **Melodie-Gläser**: jedes volle Glas spielt ein Stück eines gemeinfreien Adventslieds (Glockenspiel), Levelende = ganzes Lied als Posaunenchor | Eigene Idee statt Nachbau; Bezug Musik/Chor/Posaunenchor |
 | D17 | 23.11. | **Angefangenes Level** wird gespeichert (`save.cur`) und beim Öffnen fortgesetzt | Wunsch: beim erneuten Öffnen weitermachen |
 | D18 | 23.11. | Dokumentation erweitert: Testprotokoll + Ideen-Backlog | Alles projektrelevante im Repo, chat-unabhängig |
+| D19 | 23.11. | Code in Module aufgeteilt (`js/core.js`, `regal.js`, `blech.js`, `buch.js`, `app.js`, `css/style.css`) | Drei Mechaniken in einer Datei unübersichtlich; Module gemeinsam testbar |
+| D20 | 23.11. | **Backstube** als Startseite mit 3 Stationen; Spiel öffnet beim nächsten Start dort, wo sie aufgehört hat | Navigation zwischen Mechaniken; Grundlage für späteren Adventskalender |
+| D21 | 23.11. | Glasur-Blech mit **Form-abhängigen Mustern** + exaktem Bestwert | Eigene Idee statt reinem Lights-Out |
+| D22 | 23.11. | Rezeptbuch mit **Liedern als Folge**; Melodien-Sammlung erweitert: Morgen kommt der Weihnachtsmann, Jingle Bells, Deck the Halls (alle gemeinfrei) | Musik/Chor-Bezug; Wiedererkennen hilft beim Merken |
 | D12 | 23.11. | Persönliche Inhalte (Name, Nachrichten) **verschlüsselt** im Repo; Schlüssel steht nur im Link-Teil nach `#`, den sie bekommt (wird nie an Server übertragen) | Personalisierung trotz öffentlichem Repo |
 
 ## 3. Spielkonzept
@@ -50,9 +54,13 @@ mit genug Inhalt für spürbar lange Spielsessions (ca. 20–30 Min neue Tagesin
    ab L12 jedes 3. Level hohe Gläser (5 Schichten); Generator bevorzugt stark gemischte Level (kaum gleiche Nachbarschichten).
    Umfüll-Animation: Glas fliegt zum Ziel, kippt, Strahl fließt, Schichten wachsen. Testmodus: URL mit `#test` (alle Level springbar).
    Geplante Wendungen: festgefrorenes Glas (erst nach X Zügen frei), verdeckte Schichten, Zuglimit.
-2. **Glasur-Blech** – Raster aus Plätzchen; Antippen glasiert/entglasiert das Plätzchen und seine 4 Nachbarn.
-   Ziel: alle glasiert. Level werden durch zufällige Klicks auf ein fertiges Blech erzeugt → immer lösbar. ⏳
-3. **Omas Rezeptbuch** – Zutaten leuchten nacheinander auf, dann nachtippen (Simon-Prinzip), Kette wird länger. ⏳
+2. **Glasur-Blech** ✅ v4 – Raster aus Plätzchen; Antippen wechselt Plätzchen + Nachbarn (glasiert ↔ unglasiert). Ziel: alle glasiert.
+   **Eigene Wendung:** Die Form bestimmt das Muster – Taler = Kreuz, Zimtstern = schräg, Spritzgebäck = waagerechte 5er-Reihe
+   (Legende mit Mini-Schema). Level rückwärts erzeugt (immer lösbar); GF(2)-Löser liefert exakten Bestwert (3 Sterne) und Tipps
+   (kosten je 1 Stern). Jeder Tipper spielt die nächste Note eines Lieds. Größe 4×4 → 7×7; Formen ab L4 (Stern), L10 (Spritzgebäck).
+3. **Omas Rezeptbuch** ✅ v4 – Zutaten-Schalen spielen Töne vor, nachtippen; Folge wächst Zeile für Zeile bis zur Ziellänge (6 → 18).
+   **Eigene Wendung:** Ungerade Level = echtes Adventslied (Schalen = Tonleiter, aufsteigend sortiert), gerade Level = zufällige Folge.
+   Fehler wiederholen die Zeile (kein Game Over), kosten aber Sterne. „Nochmal hören“ jederzeit.
 
 ### Advents-Rahmen (geplant)
 - Kalender-Startseite mit 24 Türchen; Türchen öffnet sich ab dem jeweiligen Datum (lokales Datum).
@@ -92,8 +100,9 @@ Ziel: **spielbar ab Di, 1.12.2026**, Link vorher an sie (z. B. am 1. Advent, 29.
 | Termin | Meilenstein | Status |
 |--------|-------------|--------|
 | 23.11. | Konzept, Stil, Repo, Prototyp Gewürzregal (v2: schwerer + Animation; v3: Klang, Melodie-Gläser, Fortsetzen), GitHub Pages live | ✅ |
-| 24.11. | Feedback zum Prototyp; Mechanik 2 Glasur-Blech | ⏳ |
-| 25.11. | Mechanik 3 Rezeptbuch; Kalender-Startseite mit Türchen & Datumssperre | ⏳ |
+| 23.11. | Mechanik 2 Glasur-Blech + Mechanik 3 Rezeptbuch, Backstube-Startseite (v4) | ✅ (vorgezogen) |
+| 24.11. | Feedback v4; Kalender mit 24 Türchen & Datumssperre | ⏳ |
+| 25.11. | Tagesplan, Wendungen, Rezeptseiten | ⏳ |
 | 26.11. | Tagesplan 1–24 (Mechanik, Levelzahl, Wendungen, Goodies); Rezeptseiten | ⏳ |
 | 27.11. | Persönliche Inhalte einbauen; Spielstand-Backup-Code; PWA-Manifest + Icon | ⏳ |
 | 28.11. | Test auf echtem Handy, Feinschliff, Hosting (GitHub Pages) | ⏳ |
@@ -101,16 +110,19 @@ Ziel: **spielbar ab Di, 1.12.2026**, Link vorher an sie (z. B. am 1. Advent, 29.
 | Dez. | Optional: Inhalte nachliefern | – |
 
 ## 6. Technik
-- Eine Seite `index.html` (HTML/CSS/JS, keine Abhängigkeiten außer Google Font Fredoka). Später ggf. Aufteilung in Dateien.
-- Spielstand: `localStorage`-Key `adventsbackstube.v1` → `{level, best:{level:sterne}, sound:bool, cur:{lvl, s, hist, moves, undos, done}}` (`cur` = angefangenes Level). Bleibt im Browser erhalten, solange Browserdaten nicht gelöscht werden / kein privater Modus.
+- `index.html` (Gerüst) + `css/style.css` + `js/core.js` (Spielstand, Zutaten, Klang, Melodien, Hilfen) + je ein Modul pro Mechanik
+  (`regal.js`, `blech.js`, `buch.js`) + `js/app.js` (Backstube, Levelleiste, Gewinn-Dialog). Keine Abhängigkeiten außer Google Font Fredoka.
+- Modul-Schnittstelle: `{id, title, sub, desc, start(level, resume, api), stop()}`; `api` = stage/controls/legend/status/getCur/saveCur/restart/win.
+- Cache: Dateien mit `?v=N` einbinden und `VERSION` in core.js hochzählen.
+- Spielstand: `localStorage`-Key `adventsbackstube.v1` → `{level, best, cur, sound, last, games:{blech:{level,best,cur}, buch:{…}}}`; Gewürzregal nutzt die obersten Felder (abwärtskompatibel), `last` = zuletzt geöffnete Station. Bleibt im Browser erhalten, solange Browserdaten nicht gelöscht werden / kein privater Modus.
 - Klang: Web Audio, alles synthetisch (`Snd`-Modul). Melodien als `[MIDI-Note, Dauer in Achteln]` in `MELODIES`; nur gemeinfreie Lieder (derzeit: Stille Nacht, Gruber 1818).
 - Level-Generator: Seeded RNG (mulberry32), Seed aus Levelnummer → jedes Level ist für sie immer gleich.
   DFS-Solver prüft Lösbarkeit (Knotenlimit 60k), sonst neuer Versuch; Notfall: Extraglas.
 - Hosting-Optionen: GitHub Pages (bevorzugt, Link + „Zum Startbildschirm“) oder claude.ai-Artifact-Link (Vorschau).
-- Tests: `tools/` (folgt) – Generator in Node prüfen, Screenshots mit Playwright (390×800).
+- Tests: `python3 tools/test_generator.py` (alle Generatoren/Löser in Node), `tools/screenshots.py` (Playwright, 390 px).
 
 ## 7. Offene Fragen
-- Prototyp v3 testen (Animation sichtbar? Klang? Fortsetzen?) → danach gemeinsam evaluieren, was das eigentliche Spiel braucht (Schwierigkeitskurve, Wendungen, Animation).
+- Prototyp v4 testen: Glasur-Blech (verständlich? Schwierigkeit?) und Rezeptbuch (Tempo? Lieder erkannt? Melodien korrekt?) → danach gemeinsam evaluieren, was das eigentliche Spiel braucht (Schwierigkeitskurve, Wendungen, Animation).
 - Feedback zum Prototyp (Gefühl, Schwierigkeit, Optik)?
 - Rezeptauswahl bestätigen / eigene Rezepte?
 - Soll der Link schon am 29.11. (1. Advent) kommen, mit einem Vorab-Türchen?
