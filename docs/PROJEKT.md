@@ -32,14 +32,17 @@ mit genug Inhalt für spürbar lange Spielsessions (ca. 20–30 Min neue Tagesin
 | D9 | 23.11. | Projekt lebt in **Git/GitHub**; dieses Dokument ist das Gedächtnis | Entwicklung chat-unabhängig fortsetzbar |
 | D10 | 23.11. | Zutaten als farbige Schichten mit Textur (keine Emojis) | Lesbar, auch bei ähnlichen Farben unterscheidbar |
 | D11 | 23.11. | Repo **öffentlich** (für kostenloses GitHub Pages), aber **strikt anonym**: keine Namen/persönlichen Daten in Code, Doku, Commits; Commit-Autor „Claude <noreply@anthropic.com>“ | Privatsphäre bei öffentlichem Repo |
+| D13 | 23.11. | Gewürzregal deutlich schwerer (6→12 Zutaten, 5er-Gläser) + echte Umfüll-Animation | Feedback: zu wenige Flaschen, zu leicht, zu statisch |
 | D12 | 23.11. | Persönliche Inhalte (Name, Nachrichten) **verschlüsselt** im Repo; Schlüssel steht nur im Link-Teil nach `#`, den sie bekommt (wird nie an Server übertragen) | Personalisierung trotz öffentlichem Repo |
 
 ## 3. Spielkonzept
 
 ### Mechaniken
 1. **Gewürzregal** – Zutaten liegen geschichtet in Gläsern (4 pro Glas). Antippen = Glas wählen, zweites Antippen = umfüllen.
-   Umfüllen nur auf gleiche Zutat oder ins leere Glas. Ziel: jedes Glas sortenrein. ✅ Prototyp fertig.
-   Schwierigkeit: 3 Zutaten + 2 leere Gläser, alle 3 Level +1 Zutat bis 9.
+   Umfüllen nur auf gleiche Zutat oder ins leere Glas. Ziel: jedes Glas sortenrein. ✅ Prototyp v2.
+   Schwierigkeit (v2, nach Feedback „viel zu leicht“): Start mit 6 Zutaten (8 Gläser), steigt bis 12 Zutaten (14 Gläser) ab L25;
+   ab L12 jedes 3. Level hohe Gläser (5 Schichten); Generator bevorzugt stark gemischte Level (kaum gleiche Nachbarschichten).
+   Umfüll-Animation: Glas fliegt zum Ziel, kippt, Strahl fließt, Schichten wachsen. Testmodus: URL mit `#test` (alle Level springbar).
    Geplante Wendungen: festgefrorenes Glas (erst nach X Zügen frei), verdeckte Schichten, Zuglimit.
 2. **Glasur-Blech** – Raster aus Plätzchen; Antippen glasiert/entglasiert das Plätzchen und seine 4 Nachbarn.
    Ziel: alle glasiert. Level werden durch zufällige Klicks auf ein fertiges Blech erzeugt → immer lösbar. ⏳
@@ -82,7 +85,7 @@ Ziel: **spielbar ab Di, 1.12.2026**, Link vorher an sie (z. B. am 1. Advent, 29.
 
 | Termin | Meilenstein | Status |
 |--------|-------------|--------|
-| 23.11. | Konzept, Stil, Repo, Prototyp Gewürzregal | ✅ |
+| 23.11. | Konzept, Stil, Repo, Prototyp Gewürzregal (v2: schwerer + Animation), GitHub Pages live | ✅ |
 | 24.11. | Feedback zum Prototyp; Mechanik 2 Glasur-Blech | ⏳ |
 | 25.11. | Mechanik 3 Rezeptbuch; Kalender-Startseite mit Türchen & Datumssperre | ⏳ |
 | 26.11. | Tagesplan 1–24 (Mechanik, Levelzahl, Wendungen, Goodies); Rezeptseiten | ⏳ |
@@ -100,6 +103,7 @@ Ziel: **spielbar ab Di, 1.12.2026**, Link vorher an sie (z. B. am 1. Advent, 29.
 - Tests: `tools/` (folgt) – Generator in Node prüfen, Screenshots mit Playwright (390×800).
 
 ## 7. Offene Fragen
+- Prototyp v2 weiter testen → danach gemeinsam evaluieren, was das eigentliche Spiel braucht (Schwierigkeitskurve, Wendungen, Animation).
 - Feedback zum Prototyp (Gefühl, Schwierigkeit, Optik)?
 - Rezeptauswahl bestätigen / eigene Rezepte?
 - Soll der Link schon am 29.11. (1. Advent) kommen, mit einem Vorab-Türchen?
