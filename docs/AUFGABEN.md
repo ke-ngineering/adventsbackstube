@@ -56,6 +56,7 @@ Details zum Konzept: `KONZEPT-ADVENT.md`. Entscheidungen: `PROJEKT.md`.
 | M12 | Eigene Fuge über „Es kommt ein Schiff geladen“ (D63) | ✅ v19.2 – bitte anhören |
 | M13 | Folk-Duo statt Jazz, Stopp-Knopf, Süßer die Glocken langsamer (D64) | ✅ v20 |
 | M14 | Leise rieselt der Schnee: welche Melodie? | ❓ Rückfrage |
+| M15 | Gigue über „I Saw Three Ships“ (D65) | ✅ v20.1 – bitte anhören |
 | M7 | Musik-Rückmeldungen Runde 19 umsetzen (Tempi, Jazz-Trio, Sätze, Joy to the World, GKW) | ✅ v19 |
 | M8 | Ton-Fehler nach Fensterwechsel (D59) | ✅ v19 |
 | M6 | Vierstimmiger Satz für Stille Nacht (Finale) | ✅ v19 |
