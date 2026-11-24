@@ -63,9 +63,11 @@ Details zum Konzept: `KONZEPT-ADVENT.md`. Entscheidungen: `PROJEKT.md`.
 | M19 | Carol of the Bells als Glockenfassung im Lied-Tool (D68) | ✅ v23 – bitte anhören; gefällt sie besser, kann sie auch an Türchen 10 |
 | M20 | Branle über „Ding Dong!“ komponieren (D69) | ✅ v24 – bitte anhören |
 | M21 | Weihnachts-Suite: Intrada – Branle gay – Gigue (D69) | ✅ v24 – bitte anhören |
-| M22 | Türchen 24: neues Stück statt „Stille Nacht“ oder zusätzlich? | offen – Auftraggeber entscheidet |
+| M22 | Türchen 24: neues Stück statt „Stille Nacht“ oder zusätzlich? | ✅ entschieden: zusätzlich als Feier, Lied des Tages „O du fröhliche“ (D72) |
 | M23 | Rückmeldung zu D69 umsetzen: Trommel weg, Läufe deutlich, Echo dezenter, Gigue mit wechselnden Instrumenten (D70) | ✅ v25 – bitte anhören |
 | M24 | Musette: Orgel durch Laute und Cello ersetzen (D71) | ✅ v26 – bitte anhören |
+| M25 | Heiligabend: O du fröhliche, Suite als Feier nach dem letzten Rätsel (D72) | ✅ v27 |
+| M26 | Aufnahmen beim Spielstart vorladen (D72) | ✅ v27 |
 | M7 | Musik-Rückmeldungen Runde 19 umsetzen (Tempi, Jazz-Trio, Sätze, Joy to the World, GKW) | ✅ v19 |
 | M8 | Ton-Fehler nach Fensterwechsel (D59) | ✅ v19 |
 | M6 | Vierstimmiger Satz für Stille Nacht (Finale) | ✅ v19 |

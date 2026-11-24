@@ -83,7 +83,7 @@ const ADVENT = [null,
     tasks: [['regal', 1], ['spritz', 1], ['buch', 1]],
     special: {game: 'kette', title: 'Das Festrätsel', spec: {parts: [
       {game: 'streu', spec: {motif: 'tanne_bunt'}}, {game: 'blech', spec: {shape: 'herz', seed: 2402}},
-      {game: 'licht', spec: {motif: 'baum', seed: 2403, farben: true}}, {game: 'buch', spec: {song: 'Stille Nacht, heilige Nacht', len: 14}}]}},
+      {game: 'licht', spec: {motif: 'baum', seed: 2403, farben: true}}, {game: 'buch', spec: {song: 'O du fröhliche', len: 14}}]}},
     cookie: 'wolke', recipe: 'heiligabend', story: 'Die Lichterkette leuchtet, der Baum glänzt, die Plätzchendose ist randvoll. Krümel nimmt die Kochmütze ab und sagt leise: „Danke, dass du mir geholfen hast. Frohe Weihnachten!“ Dann stellt sie ein letztes Stück Kuchen auf den Tisch – für dich.'},
 ];
 
