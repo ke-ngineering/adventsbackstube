@@ -189,3 +189,4 @@ Wunsch zum Gewürzregal: Flüssige Zutaten sollen fließen, andere herunterpurze
 **Zu prüfen:** Kalender-Optik, Tagesmenü-Umfang, Ablauf Türchen → Station → zurück.
 **Zwischenfeedback:** Der Tester hängt zum Testen eine MIDI-Datei von „We Three Kings“ an (Arrangement eines Dritten). Daraus wurde nur die Melodiestimme ausgelesen, um die eigene Notation zu prüfen. Ergebnis: tongleich, Lied gilt jetzt als geprüft. Das Arrangement wurde nicht übernommen.
 Das Rezept zum 24.12. soll gemeinsam überlegt werden.
+Wunsch: We Three Kings vierstimmig. Das MIDI-Arrangement (Mannheim Steamroller, sequenziert von Dritten) ist geschützt, deshalb hat Claude einen eigenen Satz geschrieben (D47).

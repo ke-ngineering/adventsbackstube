@@ -70,6 +70,7 @@ mit genug Inhalt für spürbar lange Spielsessions (ca. 20–30 Min neue Tagesin
 | D44 | 24.11. | Mehrstimmige Sätze aus dem Liederbuch als Bläsersatz am Levelende; zuerst Tochter Zion, die übrigen 4 folgen mit derselben Methode | Wunsch „gerne mehrstimmig“; Posaunenchor-Bezug; Genauigkeit vor Menge |
 | D45 | 24.11. | Midkar.com-MIDIs NICHT verwendet (Download blockiert; Sequenzen/Arrangements ohne Nutzungsrechte, viele moderne geschützte Titel); gemeinfreie Titel daraus als „für später“ notiert | Rechte & Technik |
 | D46 | 24.11. | Adventskalender als Startseite; Tagesmenü aus Stations-Aufgaben; Lied des Tages; Rezept-Tage 3/6/10/13/17/20/24; Backstube bleibt zum freien Spielen | Vorschlag mit Standardwerten umgesetzt (Fragen zu Tagesmenü/Rezepttagen offen, leicht änderbar) |
+| D47 | 24.11. | Fremde Arrangements (z. B. aus MIDI-Dateien) nie übernehmen; für gemeinfreie Melodien ohne freien Satz schreibt Claude **eigene** vierstimmige Sätze | Rechte; Wunsch nach 4-stimmigem We Three Kings |
 | D12 | 23.11. | Persönliche Inhalte (Name, Nachrichten) **verschlüsselt** im Repo; Schlüssel steht nur im Link-Teil nach `#`, den sie bekommt (wird nie an Server übertragen) | Personalisierung trotz öffentlichem Repo |
 
 ## 3. Spielkonzept
@@ -194,7 +195,9 @@ Ziel: **spielbar ab Di, 1.12.2026**, Link vorher an sie (z. B. am 1. Advent, 29.
   Fröhliche Weihnacht überall, Maria durch ein Dornwald ging) können bei Bedarf ergänzt werden.
   **Mehrstimmig (v14, D44):** Lieder mit `voices:[S,A,T,B]` erklingen am Levelende als vierstimmiger Bläsersatz (`Snd.choir`,
   jede Stimme in Originallage, Sopran etwas lauter); auf `#lieder` „▶ 4-stimmig“. Fertig: **Tochter Zion** (Liederbuch S. 43,
-  Form A–B–A, alle Stimmen mit Rasterhilfe abgelesen, Zusammenklänge geprüft; Takt 7: Bass kreuzt kurz den Tenor – so im Satz).
+  Form A–B–A, alle Stimmen mit Rasterhilfe abgelesen, Zusammenklänge geprüft; Takt 7: Bass kreuzt kurz den Tenor – so im Satz),
+  **We Three Kings** (eigener Satz von Claude im Choralstil: e-Moll-Strophe mit Kadenz-Quartsextvorhalt, „O“ über D–D7, Refrain G-Dur;
+  geprüft: gleiche Längen, keine Stimmkreuzung, auf betonten Zeiten nur Dreiklänge und gewollte Septakkorde).
   **Offen (Werkzeuge in `tools/noten/`):** Es ist ein Ros entsprungen (S. 40, Praetorius – anspruchsvoll, Achtel-Durchgänge),
   Herbei o ihr Gläubigen (S. 41), Ich steh an deiner Krippe hier (S. 42), Der Christbaum ist der schönste Baum (S. 37).
 - Level-Generator: Seeded RNG (mulberry32), Seed aus Levelnummer → jedes Level ist für sie immer gleich.
