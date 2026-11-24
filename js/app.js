@@ -103,7 +103,7 @@ function startLevel(resume) {
 function win({stars, text, melody}) {
   const p = prog(cur.id);
   if (!sp) { p.best[curL] = Math.max(p.best[curL] || 0, stars); p.level = Math.max(p.level, curL + 1); p.cur = null; persist(); }
-  Snd.stop(); setTimeout(() => melody.voices ? Snd.choir(melody.voices, .2, melody.style) : Snd.phrase(melody.notes, melody.style || 'brass', .2), 350); // kurz absetzen, damit nichts überlappt
+  Snd.stop(); setTimeout(() => Snd.song(melody), 350); // kurz absetzen, damit nichts überlappt
   $('winTitle').textContent = sp ? 'Tagesrätsel gelöst!' : (cur.winTitle || {regal: 'Regal sortiert!', blech: 'Blech glasiert!', spritz: 'Spritzgebäck gebacken!', buch: 'Rezept gemerkt!'}[cur.id] || 'Geschafft!');
   $('winStars').innerHTML = '★'.repeat(stars) + `<span class="off">${'★'.repeat(3 - stars)}</span>`;
   const calMsg = sp ? Kalender.onSpecialWin(sp, stars) : Kalender.onWin(cur.id);
@@ -168,8 +168,8 @@ if (/tontest/.test(location.hash + location.search)) setTimeout(tonTest, 300);
 // Lieder-Prüfseite: Seite mit #lieder öffnen → jede Melodie anhören und als „stimmt“ / „klingt falsch“ markieren
 function liederCheck() {
   const marks = save.songCheck || (save.songCheck = {});
-  const list = () => MELODIES.map((m, i) => `<div class="song-row"><button class="btn small" data-play="${i}">▶</button>${m.voices ? `<button class="btn small" data-choir="${i}">▶ 4-stimmig</button>` : ''}
-      <span class="song-name">${m.name}<small>${Snd.styleName(m.style)} · ${m.ok === false ? 'aus dem Gedächtnis – bitte prüfen' : 'Noten: ' + (m.src || '')}</small></span>
+  const list = () => MELODIES.map((m, i) => `<div class="song-row"><button class="btn small" data-play="${i}">▶</button><button class="btn small" data-mel="${i}">nur Melodie</button>
+      <span class="song-name">${m.name}<small>${Snd.styleName(m.style)}${m.voices ? ', vierstimmig' + (m.satz ? ' (' + m.satz + ')' : '') : m.chords ? ', mit Akkorden' : ''}${m.tempo ? ', ruhiger' : ''} · ${m.ok === false ? 'aus dem Gedächtnis – bitte prüfen' : 'Noten: ' + (m.src || '')}</small></span>
       <button class="btn small ${marks[m.name] === 'ok' ? 'active' : ''}" data-ok="${i}">stimmt</button>
       <button class="btn small ${marks[m.name] === 'bad' ? 'bad' : ''}" data-bad="${i}">klingt falsch</button></div>`).join('');
   api.help('Lieder-Prüfung', `<p>Tippe auf ▶ und hör dir jede Melodie an. Stimmt sie? Dann „stimmt“, sonst „klingt falsch“ – und sag Claude am besten, an welcher Stelle.</p>
@@ -177,8 +177,8 @@ function liederCheck() {
   const sum = () => { const v = Object.values(marks); $('songSum').textContent = `${v.filter(x => x === 'ok').length} bestätigt, ${v.filter(x => x === 'bad').length} falsch, ${MELODIES.length - v.length} offen.`; };
   $('songList').onclick = e => {
     const b = e.target.closest('button'); if (!b) return;
-    if (b.dataset.play) { Snd.stop(); if (!Snd.on) Snd.toggle(); const m = MELODIES[+b.dataset.play]; Snd.phrase(m.notes, m.style, .2); return; }
-    if (b.dataset.choir) { Snd.stop(); if (!Snd.on) Snd.toggle(); const m = MELODIES[+b.dataset.choir]; Snd.choir(m.voices, .2, m.style); return; }
+    if (b.dataset.play) { Snd.stop(); if (!Snd.on) Snd.toggle(); Snd.song(MELODIES[+b.dataset.play]); return; }
+    if (b.dataset.mel) { Snd.stop(); if (!Snd.on) Snd.toggle(); const m = MELODIES[+b.dataset.mel]; Snd.phrase(m.notes, m.style === 'jazz' ? 'epiano' : m.style, .2 * (m.tempo || 1)); return; }
     const m = MELODIES[+(b.dataset.ok || b.dataset.bad)]; marks[m.name] = b.dataset.ok ? 'ok' : 'bad'; persist();
     $('songList').innerHTML = list(); sum();
   };

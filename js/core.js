@@ -1,6 +1,6 @@
 /* Adventsbackstube – gemeinsame Grundlagen: Spielstand, Zutaten, Klang, Melodien, Hilfsfunktionen.
    Wird von allen Spiel-Modulen (regal.js, blech.js, buch.js) und app.js genutzt. */
-const VERSION = 'v18';
+const VERSION = 'v19';
 const TEST = /(^|[#?&])test/.test(location.hash + location.search);
 const $ = id => document.getElementById(id);
 const wait = ms => new Promise(r => setTimeout(r, ms));
@@ -72,30 +72,42 @@ const totalStars = () => starsOf(save) + Object.values(save.games || {}).reduce(
 
 /* ---- Klang: Geräusche synthetisch (Web Audio), keine Dateien ---- */
 const Snd = (() => {
-  let ctx = null, master = null, on = save.sound !== false, playing = [], stale = false, unlocked = false;
+  let ctx = null, master = null, on = save.sound !== false, playing = [], stale = false, unlocked = false, rebuilt = 0;
+  /* Browser begrenzen die Zahl der Audio-Kontexte (Safari besonders). Darum: einen Kontext behalten und nur fortsetzen.
+     Neu angelegt wird höchstens zweimal pro Seitenaufruf – und nur, wenn er nach einem echten Klick bei sichtbarer Seite hängt (D59). */
   const ensure = () => {
     if (!on) return null;
     try {
       // iPhone/iPad: Ton auch bei Stummschalter abspielen (Safari 16.4+), sonst bleibt Web Audio stumm
       const iOS = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
       try { if (iOS && navigator.audioSession && navigator.audioSession.type !== 'playback') navigator.audioSession.type = 'playback'; } catch (e) {}
-      // Blockierter Ton (z. B. Safari am Mac, wenn der erste Start außerhalb einer „echten“ Nutzeraktion lag): neu anlegen
-      if (ctx && stale) { try { ctx.close(); } catch (e) {} ctx = null; master = null; unlocked = false; stale = false; }
-      if (!ctx) { ctx = new (window.AudioContext || window.webkitAudioContext)(); master = ctx.createGain(); master.gain.value = .7; master.connect(ctx.destination); }
-      if (ctx.state !== 'running') { // WebKit kennt auch 'interrupted'
-        const pr = ctx.resume(); if (pr && pr.catch) pr.catch(() => {});
-        const c0 = ctx; setTimeout(() => { if (ctx === c0 && ctx.state !== 'running') stale = true; }, 400);
+      if (ctx && stale && rebuilt < 2) {
+        let neu = null; try { neu = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {}
+        if (neu) { const alt = ctx; try { alt.close(); } catch (e) {} ctx = neu; master = null; unlocked = false; rebuilt++; }
+        stale = false;
       }
-    } catch (e) { return null; }
+      if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)();
+      if (!master) { master = ctx.createGain(); master.gain.value = .7; master.connect(ctx.destination); }
+      if (ctx.state !== 'running') { const pr = ctx.resume(); if (pr && pr.catch) pr.catch(() => {}); } // WebKit kennt auch 'interrupted'
+    } catch (e) { return ctx; }
     return ctx;
   };
-  // Beim ersten Antippen irgendwo: Ton freischalten (stiller Puffer) – hilft Safari/iOS
+  // Bei jedem Antippen: Ton freischalten (stiller Puffer) – hilft Safari/iOS. Hängt er danach noch, beim nächsten Klick neu anlegen.
   const unlock = () => {
     const c = ensure(); if (!c) return;
-    if (!unlocked || c.state !== 'running') { try { const b = c.createBuffer(1, 1, 22050), s = c.createBufferSource(); s.buffer = b; s.connect(c.destination); s.start(0); unlocked = c.state === 'running'; } catch (e) {} }
+    if (!unlocked || c.state !== 'running') {
+      try { const b = c.createBuffer(1, 1, 22050), s = c.createBufferSource(); s.buffer = b; s.connect(c.destination); s.start(0); unlocked = c.state === 'running'; } catch (e) {}
+      setTimeout(() => { if (ctx === c && c.state !== 'running' && document.visibilityState === 'visible') stale = true; }, 600);
+    }
   };
   ['touchend', 'mousedown', 'click', 'keydown'].forEach(ev => document.addEventListener(ev, unlock, {capture: true, passive: true})); // kein pointerup: zählt in Safari (Maus/Trackpad) nicht als Nutzeraktion
-  document.addEventListener('visibilitychange', () => { if (!document.hidden && ctx && ctx.state !== 'running') ctx.resume().catch?.(() => {}); });
+  // Fenster versteckt: Musik anhalten (sonst stauen sich Töne); wieder sichtbar: fortsetzen
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) { stop(); return; }
+    if (ctx && ctx.state !== 'running') { const pr = ctx.resume(); if (pr && pr.catch) pr.catch(() => {}); }
+  });
+  // laufende Klangquellen merken (für stop) – fertige fallen von selbst heraus
+  const track = o => { playing.push(o); o.onended = () => { const i = playing.indexOf(o); if (i >= 0) playing.splice(i, 1); }; };
   const env = (g, t, a, peak, d) => { g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(peak, t + a); g.gain.exponentialRampToValueAtTime(0.0001, t + a + d); };
   const hz = n => 440 * Math.pow(2, (n - 69) / 12);
   // Holzklopfen beim Antippen
@@ -146,7 +158,7 @@ const Snd = (() => {
     const f = hz(n);
     [[1, .32], [2.76, .08], [5.4, .03]].forEach(([m, v]) => {
       const o = ctx.createOscillator(), g = ctx.createGain(); o.type = 'sine'; o.frequency.value = f * m;
-      env(g, t, .005, v, Math.max(.5, len * 1.6)); o.connect(g).connect(master); o.start(t); o.stop(t + len * 1.6 + .6); playing.push(o);
+      env(g, t, .005, v, Math.max(.5, len * 1.6)); o.connect(g).connect(master); o.start(t); o.stop(t + len * 1.6 + .6); track(o);
     });
   }
   // Posaunenchor-Klang (für die ganze Melodie am Levelende)
@@ -155,11 +167,11 @@ const Snd = (() => {
     o.type = 'sawtooth'; o2.type = 'sawtooth'; o.frequency.value = f; o2.frequency.value = f * 1.003;
     lp.type = 'lowpass'; lp.Q.value = 2; lp.frequency.setValueAtTime(f * 1.5, t); lp.frequency.linearRampToValueAtTime(f * 5, t + .08); lp.frequency.linearRampToValueAtTime(f * 3, t + len);
     g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + .06); g.gain.setValueAtTime(vol, t + Math.max(.07, len - .08)); g.gain.exponentialRampToValueAtTime(0.0001, t + len + .05);
-    o.connect(lp); o2.connect(lp); lp.connect(g).connect(master); o.start(t); o2.start(t); o.stop(t + len + .1); o2.stop(t + len + .1); playing.push(o, o2);
+    o.connect(lp); o2.connect(lp); lp.connect(g).connect(master); o.start(t); o2.start(t); o.stop(t + len + .1); o2.stop(t + len + .1); track(o, o2);
   }
   /* ---- Besetzungen (D55): Jedes Lied hat einen Stil – Instrumente werden im Browser erzeugt ---- */
-  function osc(type, f, t, end, dest, det = 0) { const o = ctx.createOscillator(); o.type = type; o.frequency.value = f; o.detune.value = det; o.connect(dest); o.start(t); o.stop(end); playing.push(o); return o; }
-  function vibAll(os, t, end, depth, rate) { const l = ctx.createOscillator(), g = ctx.createGain(); l.frequency.value = rate; g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(depth, t + .35); l.connect(g); os.forEach(o => g.connect(o.detune)); l.start(t); l.stop(end); playing.push(l); }
+  function osc(type, f, t, end, dest, det = 0) { const o = ctx.createOscillator(); o.type = type; o.frequency.value = f; o.detune.value = det; o.connect(dest); o.start(t); o.stop(end); track(o); return o; }
+  function vibAll(os, t, end, depth, rate) { const l = ctx.createOscillator(), g = ctx.createGain(); l.frequency.value = rate; g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(depth, t + .35); l.connect(g); os.forEach(o => g.connect(o.detune)); l.start(t); l.stop(end); track(l); }
   function adsr(t, len, a, peak, rel = .12) { const g = ctx.createGain(); g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(peak, t + a); g.gain.setValueAtTime(peak, t + Math.max(a, len - .02)); g.gain.exponentialRampToValueAtTime(0.0001, t + len + rel); g.connect(master); return g; }
   const INSTR = {
     bell, brass,
@@ -180,22 +192,22 @@ const Snd = (() => {
     epiano(n, t, len, vol = .16) { // E-Piano (FM) für das Jazz-Trio
       const f = hz(n), g = ctx.createGain(); env(g, t, .004, vol, Math.max(.5, len * 1.4)); g.connect(master);
       const car = osc('sine', f, t, t + len * 1.4 + .6, g), mod = ctx.createOscillator(), mg = ctx.createGain(); mod.frequency.value = f; mg.gain.setValueAtTime(f * 1.8, t); mg.gain.exponentialRampToValueAtTime(f * .15, t + .5);
-      mod.connect(mg).connect(car.frequency); mod.start(t); mod.stop(t + len * 1.4 + .6); playing.push(mod); },
+      mod.connect(mg).connect(car.frequency); mod.start(t); mod.stop(t + len * 1.4 + .6); track(mod); },
     bass(n, t, len, vol = .3) { // gezupfter Kontrabass
       const f = hz(n), g = ctx.createGain(); env(g, t, .006, vol, Math.max(.35, len)); g.connect(master); const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.setValueAtTime(f * 6, t); lp.frequency.exponentialRampToValueAtTime(f * 2, t + .25); lp.connect(g);
       osc('triangle', f, t, t + len + .5, lp); osc('sawtooth', f, t, t + len + .5, lp, 4); },
   };
-  function besen(t) { // Besen auf der Snare: gefiltertes Rauschen
+  function besen(t, vol = .14) { // Besen auf der Snare: gefiltertes Rauschen
     const len = .16, buf = ctx.createBuffer(1, Math.floor(ctx.sampleRate * len), ctx.sampleRate), d = buf.getChannelData(0);
     for (let i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / d.length, 2);
-    const s = ctx.createBufferSource(), bp = ctx.createBiquadFilter(), g = ctx.createGain(); s.buffer = buf; bp.type = 'bandpass'; bp.frequency.value = 3800; bp.Q.value = .6; g.gain.value = .14;
-    s.connect(bp).connect(g).connect(master); s.start(t); playing.push(s);
+    const s = ctx.createBufferSource(), bp = ctx.createBiquadFilter(), g = ctx.createGain(); s.buffer = buf; bp.type = 'bandpass'; bp.frequency.value = 3800; bp.Q.value = .6; g.gain.value = vol;
+    s.connect(bp).connect(g).connect(master); s.start(t); track(s);
   }
   // Stil → Instrument je Stimme (Sopran, Alt, Tenor, Bass) und Lautstärke
   const STYLE = {
     bell: {v: ['bell'], name: 'Glockenspiel'}, blech: {v: ['brass'], name: 'Posaunenchor'}, brass: {v: ['brass'], name: 'Posaunenchor'},
     streicher: {v: ['streicher'], name: 'Streichquartett'}, chor: {v: ['chor'], name: 'Chor'}, holz: {v: ['holz'], name: 'Flöten'},
-    orgel: {v: ['orgel'], name: 'Orgel'}, spieluhr: {v: ['spieluhr'], name: 'Spieluhr'}, jazz: {v: ['epiano', 'epiano', 'epiano', 'bass'], name: 'Jazz-Trio', swing: true},
+    orgel: {v: ['orgel'], name: 'Orgel'}, epiano: {v: ['epiano'], name: 'E-Piano'}, spieluhr: {v: ['spieluhr'], name: 'Spieluhr'}, jazz: {v: ['epiano', 'epiano', 'epiano', 'bass'], name: 'Jazz-Trio', swing: true},
   };
   const styleOf = s => STYLE[s] || STYLE.bell;
   const swingT = (t8, tempo) => { const beat = Math.floor(t8 / 2), off = t8 - beat * 2; return (beat * 2 + (off >= 1 ? 1.34 + (off - 1) * .66 : off * 1.34)) * tempo; };
@@ -226,6 +238,58 @@ const Snd = (() => {
     if (st.swing) { for (let b = 0; b * 2 < p; b++) besen(t0 + b * tempo * 2); bassLine(notes, t0, tempo); }
     return t0 + p * tempo - c.currentTime;
   }
+  /* Jazz-Trio (D60): Melodie auf dem E-Piano, Begleitakkorde (Terz + Septime + None) im Charleston-Rhythmus,
+     Walking Bass auf jeder Viertel (Grundton → Akkordtöne → chromatischer Anlauf zum nächsten Grundton), Besen mit Akzent auf 2 und 4.
+     Braucht m.chords = [[Symbol, Achtel], …] über die ganze Melodie und m.meter (Viertel pro Takt), m.pickup (Achtel Auftakt). */
+  const PC = {C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11};
+  const Q = {'': [0, 4, 7], m: [0, 3, 7], 7: [0, 4, 7, 10], maj7: [0, 4, 7, 11], m7: [0, 3, 7, 10], 6: [0, 4, 7, 9], m6: [0, 3, 7, 9], dim7: [0, 3, 6, 9], m7b5: [0, 3, 6, 10], 9: [0, 4, 7, 10, 14], '7b9': [0, 4, 7, 10, 13]};
+  function chordOf(sym) {
+    const [main, sl] = sym.split('/'); let i = 1; while (i < main.length && '#b'.includes(main[i])) i++;
+    const pc = x => { let p = PC[x[0]]; for (const ch of x.slice(1)) p += ch === '#' ? 1 : ch === 'b' ? -1 : 0; return (p + 12) % 12; };
+    const root = pc(main.slice(0, i)), q = main.slice(i), iv = Q[q] || Q[''];
+    const third = iv[1], sev = iv[3] !== undefined ? iv[3] : q === '' ? 9 : 10;
+    return {root, bass: sl ? pc(sl) : root, tones: iv.map(x => (root + x) % 12), guide: [third, sev, 14].map(x => (root + x) % 12), fifth: (root + 7) % 12};
+  }
+  const near = (pc, around) => { let n = around - ((around - pc) % 12 + 12) % 12; if (around - n > 6) n += 12; return n; };
+  function jazz(m, tempo) {
+    const c = ensure(); if (!c) return 0; const t0 = c.currentTime + .08, meter = m.meter || 4, pk = m.pickup || 0;
+    const T = x => t0 + swingT(x, tempo);
+    // Melodie
+    let p = 0; for (const [n, d] of m.notes) { if (n) INSTR.epiano(n, T(p), (T(p + d) - T(p)) * .9, .17); p += d; }
+    const total = p, segs = []; let q = 0; for (const [sym, d] of m.chords) { segs.push({a: q, b: q + d, c: chordOf(sym)}); q += d; }
+    const segAt = x => segs.find(g => x >= g.a && x < g.b) || segs[segs.length - 1];
+    // Walking Bass (Viertel = 2 Achtel)
+    let last = 43;
+    for (let x = 0; x < total; x += 2) {
+      const g = segAt(x), nx = segAt(x + 2), first = x === g.a || x === 0, beforeNew = x + 2 < total && nx !== g;
+      let n;
+      if (first) n = near(g.c.bass, last);
+      else if (beforeNew) { const target = near(nx.c.bass, last); n = target + (last >= target ? 1 : -1); }
+      else { const opts = [g.c.tones[2], g.c.tones[1], (g.c.root + 9) % 12].map(pc => near(pc, last)); n = opts[(x / 2) % opts.length]; }
+      while (n < 36) n += 12; while (n > 52) n -= 12;
+      if (meter === 3 && !first && ((x - pk) / 2) % 3 === 1) continue; // Walzer: Bass auf 1 und 3
+      INSTR.bass(n, t0 + x * tempo, tempo * (meter === 3 && first ? 3.4 : 1.8), .28); last = n;
+    }
+    // Begleitung: Charleston (1 und 2+) bzw. Walzer (2 und 3)
+    for (let bar = pk ? pk - meter * 2 : 0; bar < total; bar += meter * 2) {
+      const hits = meter === 3 ? [[2, 1.6], [4, 1.6]] : [[0, 2.6], [3, 1.2]];
+      for (const [off, len] of hits) {
+        const x = bar + off; if (x < 0 || x >= total) continue; const g = segAt(x);
+        g.c.guide.forEach(pc => { const n = near(pc, 60); INSTR.epiano(n, T(x), len * tempo, .06); });
+      }
+      // Besen: jede Viertel leise, 2 und 4 betont
+      for (let b = 0; b < meter; b++) { const x = bar + b * 2; if (x < 0 || x >= total) continue; besen(t0 + x * tempo, (meter === 4 ? b % 2 === 1 : b > 0) ? .16 : .07); }
+    }
+    return t0 + total * tempo - c.currentTime + .5;
+  }
+  // Ein Lied in seiner Besetzung abspielen (Grundtempo × eigenes Tempo des Liedes)
+  function song(m, base = .2, kurz = false) {
+    const tempo = base * (m.tempo || 1);
+    if (kurz) return phrase(m.notes.slice(0, 24), m.style === 'jazz' ? 'epiano' : m.style, tempo);
+    if (m.voices) return choir(m.voices, tempo, m.style);
+    if (m.style === 'jazz' && m.chords) return jazz(m, tempo);
+    return phrase(m.notes, m.style, tempo);
+  }
   function bassLine(notes, t0, tempo) { // Jazz: einfacher Bass auf jedem Viertel – Grundton des Taktes aus der Melodie (Tiefster Ton je Halbtakt)
     let p = 0; const seg = {};
     for (const [n, d] of notes) { if (n) { const k = Math.floor(p / 4); seg[k] = Math.min(seg[k] || 999, n); } p += d; }
@@ -235,7 +299,7 @@ const Snd = (() => {
   function note(n, len = .35) { const c = ensure(); if (!c) return; bell(n, c.currentTime + .01, len); }
   function stop() { playing.forEach(o => { try { o.stop(); } catch (e) {} }); playing = []; }
   function toggle() { on = !on; save.sound = on; persist(); if (!on) stop(); else phrase([[72, 1], [76, 1], [79, 2]], 'bell', .14); return on; } // Einschalten spielt einen kleinen Klang zum Testen
-  return {tap, pour, nope, note, phrase, choir, stop, toggle, styleName: s => styleOf(s).name, get state() { return ctx ? ctx.state : 'noch nicht gestartet'; }, ensure, get on() { return on; }};
+  return {tap, pour, nope, note, phrase, choir, song, stop, toggle, styleName: s => styleOf(s).name, get state() { return ctx ? ctx.state : 'noch nicht gestartet'; }, ensure, get on() { return on; }};
 })();
 
 /* ---- Melodien (gemeinfrei). [MIDI-Note, Dauer in Achteln], 60 = c', Note 0 = Pause ----
@@ -243,14 +307,11 @@ const Snd = (() => {
    Noten von Claude aus dem PDF abgelesen. ok:false = aus dem Gedächtnis notiert, auf #lieder prüfen lassen. */
 const SIA = 'Liederbuch „Singen im Advent“';
 const MELODIES = [
-  {name:'Stille Nacht, heilige Nacht', src:SIA, notes:[
-    [67,3],[69,1],[67,2],[64,6],[67,3],[69,1],[67,2],[64,6],[74,4],[74,2],[71,6],[72,4],[72,2],[67,6],
-    [69,4],[69,2],[72,3],[71,1],[69,2],[67,3],[69,1],[67,2],[64,6],[69,4],[69,2],[72,3],[71,1],[69,2],[67,3],[69,1],[67,2],[64,6],
-    [74,4],[74,2],[77,3],[74,1],[71,2],[72,6],[76,6],[72,3],[67,1],[64,2],[67,3],[65,1],[62,2],[60,12]]},
+  {name:'Stille Nacht, heilige Nacht', tempo:1.25, src:SIA, satz:'eigener Satz (D60)', voices:[[[67,3],[69,1],[67,2],[64,6],[67,3],[69,1],[67,2],[64,6],[74,4],[74,2],[71,6],[72,4],[72,2],[67,6],[69,4],[69,2],[72,3],[71,1],[69,2],[67,3],[69,1],[67,2],[64,6],[69,4],[69,2],[72,3],[71,1],[69,2],[67,3],[69,1],[67,2],[64,6],[74,4],[74,2],[77,3],[74,1],[71,2],[72,6],[76,6],[72,3],[67,1],[64,2],[67,3],[65,1],[62,2],[60,12]],   [[64,6],[64,6],[64,6],[60,6],[62,6],[65,6],[64,6],[64,6],[60,6],[60,4],[60,2],[60,6],[60,6],[60,6],[60,4],[60,2],[64,6],[64,6],[67,6],[67,6],[67,6],[67,6],[64,6],[59,6],[55,12]],   [[55,6],[55,6],[55,6],[55,6],[59,6],[55,6],[55,6],[55,6],[53,6],[57,4],[53,2],[52,6],[55,6],[53,6],[57,4],[53,2],[55,6],[55,6],[59,6],[59,6],[55,6],[55,6],[55,6],[53,6],[52,12]],   [[48,6],[48,6],[48,6],[48,6],[43,6],[43,6],[48,6],[48,6],[41,6],[41,4],[45,2],[48,6],[48,6],[41,6],[41,4],[45,2],[48,6],[48,6],[43,6],[43,6],[40,6],[48,6],[48,6],[43,6],[48,12]]]},
   {name:'Alle Jahre wieder', src:SIA, notes:[
     [69,3],[71,1],[69,2],[67,2],[66,4],[64,4],[62,2],[64,1],[66,1],[67,2],[66,2],[64,6],[0,2],
     [66,2],[69,2],[71,2],[69,2],[74,4],[73,2],[71,2],[69,2],[67,1],[66,1],[67,2],[69,2],[66,6],[0,2]]},
-  {name:'O Tannenbaum', src:SIA, notes:[
+  {name:'O Tannenbaum', tempo:1.43, src:SIA, notes:[
     [60,2],[65,1.5],[65,.5],[65,3],[67,1],[69,1.5],[69,.5],[69,3],[69,1],[67,1],[69,1],[70,2],[64,2],[67,2],[65,2],[0,1],[72,1],
     [72,1],[69,1],[74,3],[72,1],[72,1],[70,1],[70,3],[70,1],[70,1],[67,1],[72,3],[70,1],[70,1],[69,1],[69,3],[60,1],
     [65,1.5],[65,.5],[65,3],[67,1],[69,1.5],[69,.5],[69,3],[69,1],[67,1],[69,1],[70,2],[64,2],[67,2],[65,4]]},
@@ -263,29 +324,25 @@ const MELODIES = [
     [69,2],[69,2],[69,1],[71,1],[69,1],[67,1],[66,2],[66,2],[66,2],[0,2],[67,2],[67,2],[67,1],[69,1],[67,1],[66,1],[64,2],[64,2],[64,2],[0,2],
     [62,2],[64,2],[66,2],[67,2],[69,1.5],[71,.5],[69,1],[71,1],[69,4],
     [74,2],[69,2],[69,1],[71,1],[69,1],[67,1],[66,2],[64,2],[69,4],[74,2],[69,2],[69,1],[71,1],[69,1],[67,1],[66,2],[64,2],[62,4]]},
-  {name:'Jingle Bells', src:SIA, notes:[
+  {name:'Jingle Bells', src:SIA, meter:4, pickup:0, chords:[["C6", 8], ["Am7", 8], ["C6", 8], ["C6", 4], ["C7", 4], ["F6", 8], ["C6", 8], ["D7", 8], ["Dm7", 4], ["G7", 4], ["C6", 8], ["A7", 8], ["C6", 8], ["C6", 4], ["C7", 4], ["F6", 8], ["C6", 4], ["A7", 4], ["Dm7", 4], ["G7", 4], ["C6", 8]], notes:[
     [64,2],[64,2],[64,4],[64,2],[64,2],[64,4],[64,2],[67,2],[60,3],[62,1],[64,8],
     [65,2],[65,2],[65,3],[65,1],[65,2],[64,2],[64,2],[64,1],[64,1],[64,2],[62,2],[62,2],[64,2],[62,4],[67,4],
     [64,2],[64,2],[64,4],[64,2],[64,2],[64,4],[64,2],[67,2],[60,3],[62,1],[64,8],
     [65,2],[65,2],[65,3],[65,1],[65,2],[64,2],[64,2],[64,1],[64,1],[67,2],[67,2],[65,2],[62,2],[60,8]]},
-  {name:'Ihr Kinderlein kommet', src:SIA, notes:[
+  {name:'Ihr Kinderlein kommet', tempo:1.3, src:SIA, notes:[
     [69,1],[69,2],[66,1],[69,1],[69,2],[66,1],[69,1],[67,2],[64,1],[67,1],[66,2],[0,1],[69,1],
     [69,2],[66,1],[69,1],[69,2],[66,1],[69,1],[67,2],[64,1],[67,1],[66,2],[0,1],[66,1],
     [64,2],[64,1],[64,1],[67,2],[67,1],[67,1],[66,2],[66,1],[66,1],[71,2],[0,1],[71,1],
     [69,2],[69,1],[69,1],[74,2],[69,1],[66,1],[69,2],[67,1],[64,1],[62,3]]},
-  {name:'Leise rieselt der Schnee', src:SIA, notes:[
+  {name:'Leise rieselt der Schnee', tempo:1.3, src:SIA, notes:[
     [69,2],[69,1],[67,1],[69,1],[67,1],[65,5],[0,1],[65,2],[62,1],[65,1],[64,1],[62,1],[60,5],[0,1],
     [67,1],[66,1],[67,1],[70,1],[69,1],[67,1],[65,5],[0,1],[67,1.5],[62,.5],[62,1],[64,1],[62,1],[64,1],[65,5],[0,1]]},
-  {name:'O du fröhliche', src:SIA, notes:[
-    [69,4],[71,4],[69,3],[67,1],[66,2],[67,2],[69,4],[71,4],[69,3],[67,1],[66,2],[67,2],
-    [69,4],[69,4],[71,4],[73,2],[74,2],[73,4],[71,4],[69,8],
-    [64,3],[66,1],[64,2],[66,2],[67,3],[69,1],[67,4],[66,3],[67,1],[66,2],[67,2],[69,3],[71,1],[69,4],
-    [74,2],[73,2],[71,2],[69,2],[74,2],[71,2],[69,2],[67,2],[66,4],[64,4],[62,8]]},
+  {name:'O du fröhliche', tempo:1.1, src:SIA, satz:'eigener Satz (D60)', voices:[[[69,4],[71,4],[69,3],[67,1],[66,2],[67,2],[69,4],[71,4],[69,3],[67,1],[66,2],[67,2],[69,4],[69,4],[71,4],[73,2],[74,2],[73,4],[71,4],[69,8],[64,3],[66,1],[64,2],[66,2],[67,3],[69,1],[67,4],[66,3],[67,1],[66,2],[67,2],[69,3],[71,1],[69,4],[74,2],[73,2],[71,2],[69,2],[74,2],[71,2],[69,2],[67,2],[66,4],[64,4],[62,8]],   [[62,4],[62,4],[62,4],[62,2],[61,2],[62,4],[62,4],[62,4],[62,2],[64,2],[66,4],[69,4],[67,4],[64,2],[66,2],[64,4],[62,4],[61,8],[61,4],[62,4],[62,4],[61,4],[62,4],[62,2],[61,2],[66,4],[66,4],[66,2],[64,2],[62,2],[62,2],[62,4],[62,2],[61,2],[62,4],[61,4],[57,8]],   [[54,4],[55,4],[54,4],[57,2],[57,2],[54,4],[55,4],[54,4],[57,2],[61,2],[62,4],[61,4],[59,4],[57,2],[57,2],[57,4],[56,4],[52,8],[55,4],[54,4],[59,4],[57,4],[57,4],[57,2],[57,2],[57,4],[57,4],[57,2],[57,2],[54,2],[57,2],[59,4],[54,2],[57,2],[57,4],[55,4],[54,8]],   [[38,4],[43,4],[50,4],[50,2],[45,2],[50,4],[43,4],[50,4],[50,2],[45,2],[50,4],[54,4],[55,4],[57,2],[50,2],[52,4],[52,4],[45,8],[45,4],[50,4],[43,4],[45,4],[50,4],[50,2],[45,2],[50,4],[50,4],[50,2],[45,2],[47,2],[42,2],[43,4],[45,2],[45,2],[50,4],[45,4],[50,8]]]},
   {name:'Morgen kommt der Weihnachtsmann', src:SIA, notes:[
     [60,2],[60,2],[67,2],[67,2],[69,2],[69,2],[67,4],[65,2],[65,2],[64,2],[64,2],[62,2],[62,2],[60,4],
     [67,2],[67,2],[65,2],[65,2],[64,2],[64,2],[62,4],[67,2],[67,2],[65,2],[65,2],[64,2],[64,2],[62,4],
     [60,2],[60,2],[67,2],[67,2],[69,2],[69,2],[67,4],[65,2],[65,2],[64,2],[64,2],[62,2],[62,2],[60,6]]},
-  {name:'We Wish You a Merry Christmas', src:SIA, notes:[
+  {name:'We Wish You a Merry Christmas', src:SIA, meter:3, pickup:2, chords:[["A7", 2], ["D", 6], ["G", 6], ["E7", 6], ["A7", 6], ["F#7", 6], ["Bm", 6], ["Em7", 4], ["A7", 2], ["D", 4], ["A7", 2], ["G", 6], ["A7", 6], ["G", 2], ["A7", 2], ["Bm", 2], ["F#m7", 4], ["A7", 2], ["D", 6], ["Bm7", 6], ["Em7", 4], ["A7", 2], ["D6", 6]], notes:[
     [69,2],[74,2],[74,1],[76,1],[74,1],[73,1],[71,2],[71,2],[71,2],[76,2],[76,1],[78,1],[76,1],[74,1],[73,2],[69,2],[69,2],
     [78,2],[78,1],[79,1],[78,1],[76,1],[74,2],[71,2],[69,1],[69,1],[71,2],[76,2],[73,2],[74,4],[69,2],
     [74,2],[74,2],[74,2],[73,4],[73,2],[74,2],[73,2],[71,2],[69,4],[76,2],
@@ -319,11 +376,8 @@ const MELODIES = [
     [72,2],[72,1],[69,1],[74,1],[70,1],[72,2],[72,1],[69,1],[74,1],[70,1],[72,2],[69,1],[72,1],[67,1],[69,1],[65,6],
     [65,2],[69,1],[65,1],[69,1],[72,1],[65,2],[69,1],[65,1],[67,1],[60,1],[65,2],[69,1],[65,1],[69,1],[72,1],[65,2],[69,1],[65,1],[67,1],[60,1],
     [72,2],[69,1],[72,1],[67,1],[69,1],[65,6]]},
-  {name:'Herbei, o ihr Gläubigen', src:SIA, notes:[
-    [69,2],[69,4],[64,2],[69,2],[71,4],[64,4],[73,2],[71,2],[73,2],[74,2],[73,4],[71,2],[69,2],[69,4],[68,2],[66,2],[68,2],[69,2],[71,2],[73,2],[68,4],[66,3],[64,1],[64,8],
-    [76,4],[74,2],[73,2],[74,4],[73,4],[71,2],[73,2],[69,2],[71,2],[68,3],[66,1],[64,2],[69,2],[69,2],[68,2],[69,2],[71,2],[69,4],[64,2],[73,2],
-    [73,2],[71,2],[73,2],[74,2],[73,4],[71,2],[73,2],[74,2],[73,2],[71,2],[69,2],[68,4],[69,2],[74,2],[73,4],[71,3],[69,1],[69,6]]},
-  {name:'Es ist ein Ros entsprungen', src:SIA, notes:[
+  {name:'Herbei, o ihr Gläubigen', src:SIA, satz:'eigener Satz (D60)', voices:[[[69,2],[69,4],[64,2],[69,2],[71,4],[64,4],[73,2],[71,2],[73,2],[74,2],[73,4],[71,2],[69,2],[69,4],[68,2],[66,2],[68,2],[69,2],[71,2],[73,2],[68,4],[66,3],[64,1],[64,8],[76,4],[74,2],[73,2],[74,4],[73,4],[71,2],[73,2],[69,2],[71,2],[68,3],[66,1],[64,2],[69,2],[69,2],[68,2],[69,2],[71,2],[69,4],[64,2],[73,2],[73,2],[71,2],[73,2],[74,2],[73,4],[71,2],[73,2],[74,2],[73,2],[71,2],[69,2],[68,4],[69,2],[74,2],[73,4],[71,3],[69,1],[69,6]],   [[64,2],[64,4],[64,2],[64,2],[68,4],[64,4],[64,2],[64,2],[64,2],[66,2],[64,4],[64,2],[61,2],[62,4],[59,2],[57,2],[59,2],[61,2],[64,2],[64,2],[64,4],[63,4],[59,8],[69,4],[64,2],[64,2],[66,4],[64,4],[64,2],[64,2],[66,2],[64,2],[63,4],[59,2],[61,2],[61,2],[59,2],[61,2],[64,2],[64,4],[64,2],[64,2],[64,2],[64,2],[64,2],[66,2],[64,4],[64,2],[64,2],[62,2],[64,2],[64,2],[61,2],[64,4],[61,2],[62,2],[64,4],[62,4],[61,6]],   [[61,2],[61,4],[59,2],[61,2],[59,4],[59,4],[57,2],[56,2],[57,2],[57,2],[57,4],[56,2],[54,2],[54,4],[52,2],[49,2],[52,2],[52,2],[52,2],[52,2],[52,4],[57,4],[56,8],[61,4],[59,2],[57,2],[57,4],[57,4],[56,2],[57,2],[61,2],[59,2],[57,4],[56,2],[52,2],[52,2],[52,2],[52,2],[56,2],[61,4],[59,2],[57,2],[57,2],[56,2],[57,2],[57,2],[57,4],[56,2],[57,2],[54,2],[57,2],[56,2],[57,2],[59,4],[54,2],[54,2],[57,4],[56,4],[52,6]],   [[45,2],[45,4],[44,2],[45,2],[40,4],[44,4],[45,2],[40,2],[45,2],[38,2],[40,4],[40,2],[42,2],[38,4],[40,2],[42,2],[40,2],[45,2],[44,2],[45,2],[47,4],[47,4],[52,8],[45,4],[44,2],[45,2],[50,4],[45,4],[40,2],[45,2],[42,2],[44,2],[47,4],[52,2],[49,2],[45,2],[40,2],[45,2],[40,2],[45,4],[44,2],[45,2],[45,2],[40,2],[45,2],[50,2],[45,4],[40,2],[45,2],[47,2],[49,2],[52,2],[54,2],[52,4],[54,2],[47,2],[40,4],[40,4],[45,6]]]},
+  {name:'Es ist ein Ros entsprungen', tempo:1.2, src:SIA, notes:[
     [72,4],[72,2],[72,2],[74,2],[72,2],[72,4],[69,4],[70,4],[69,2],[67,4],[65,4],[64,2],[65,4],[72,4],
     [72,2],[72,2],[74,2],[72,2],[72,4],[69,4],[70,4],[69,2],[67,4],[65,4],[64,2],[65,4],[0,2],[69,2],[67,2],[64,2],[65,2],[62,2],[60,4],[0,2],[72,2],
     [72,2],[72,2],[74,2],[72,2],[72,4],[69,4],[70,4],[69,2],[67,4],[65,4],[64,2],[65,8]]},
@@ -335,7 +389,7 @@ const MELODIES = [
     [62,2],[62,4],[62,2],[64,4],[64,2],[65,2],[67,2],[69,2],[69,4],[69,2],[67,4],[67,2],[62,4],[64,2],
     [65,6],[65,2],[69,2],[72,2],[74,2],[74,2],[72,1],[70,1],[69,1],[67,1],[65,2],[67,2],[69,2],[67,2],[65,2],[64,2],[62,4]]},
   // Melodie gemeinfrei (J. H. Hopkins 1857). Vierstimmiger Satz: eigener Satz (Claude), e-Moll/G-Dur, Choralstil.
-  {name:'We Three Kings', src:'Melodie geprüft mit einer MIDI-Datei (nur Melodiestimme); eigener 4-stimmiger Satz', voices:[
+  {name:'We Three Kings', tempo:1.18, src:'Melodie geprüft mit einer MIDI-Datei (nur Melodiestimme); eigener 4-stimmiger Satz', voices:[
     [
     [71,2],[69,1],[67,2],[64,1],[66,1],[67,1],[66,1],[64,3],[71,2],[69,1],[67,2],[64,1],[66,1],[67,1],[66,1],[64,3],
     [67,2],[67,1],[69,2],[69,1],[71,2],[71,1],[74,1],[72,1],[71,1],[69,1],[71,1],[69,1],[67,2],[66,1],[64,3],
@@ -345,54 +399,40 @@ const MELODIES = [
     [[59,3],[59,3],[57,3],[55,3],[59,3],[60,3],[59,3],[55,3],[59,3],[54,3],[55,3],[59,3],[57,3],[59,3],[55,3],[57,3],[60,3],[59,3],[55,3],[60,3],[59,3],[59,3],[55,3],[60,3],[59,3],[59,3],[62,3],[57,3],[60,3],[59,3],[55,3],[55,3],[59,6]],
     [[52,3],[52,3],[47,3],[52,3],[52,3],[48,3],[47,3],[52,3],[43,3],[50,3],[43,3],[55,3],[48,3],[47,3],[40,3],[50,3],[50,3],[43,3],[47,3],[48,3],[43,3],[55,3],[47,3],[48,3],[43,3],[52,3],[50,3],[48,3],[50,3],[43,3],[47,3],[48,3],[43,6]]]},
   // Melodie gemeinfrei (walisisch); geprüft mit einer MIDI-Datei des Auftraggebers (nur Melodiestimme), hier nach C-Dur gesetzt
-  {name:'Deck the Halls', src:'Melodie geprüft mit MIDI-Datei', notes:[
+  {name:'Deck the Halls', src:'Melodie geprüft mit MIDI-Datei', meter:4, pickup:0, chords:[["Cmaj7", 4], ["Am7", 4], ["Dm7", 4], ["G7", 4], ["Dm7", 4], ["Em7", 4], ["Dm7", 2], ["G7", 2], ["C6", 4], ["Cmaj7", 4], ["Am7", 4], ["Dm7", 4], ["G7", 4], ["Dm7", 4], ["Em7", 4], ["Dm7", 2], ["G7", 2], ["C6", 4], ["Dm7", 4], ["G7", 4], ["Cmaj7", 4], ["Am7", 4], ["Am7", 4], ["D7", 4], ["D7", 4], ["G7", 4], ["Cmaj7", 4], ["Am7", 4], ["Dm7", 4], ["G7", 4], ["F6", 4], ["G7", 4], ["Dm7", 2], ["G7", 2], ["C6", 4]], notes:[
     [67,3],[65,1],[64,2],[62,2],[60,2],[62,2],[64,2],[60,2],[62,1],[64,1],[65,1],[62,1],[64,3],[62,1],[60,2],[59,2],[60,4],
     [67,3],[65,1],[64,2],[62,2],[60,2],[62,2],[64,2],[60,2],[62,1],[64,1],[65,1],[62,1],[64,3],[62,1],[60,2],[59,2],[60,4],
     [62,3],[64,1],[65,2],[62,2],[64,3],[65,1],[67,2],[62,2],[64,1],[66,1],[67,2],[69,1],[71,1],[72,2],[71,2],[69,2],[67,4],
     [67,3],[65,1],[64,2],[62,2],[60,2],[62,2],[64,2],[60,2],[69,1],[69,1],[69,1],[69,1],[67,3],[65,1],[64,2],[62,2],[60,4]]},
-  {name:'Good King Wenceslas', ok:false, notes:[
-    [67,2],[67,2],[67,2],[69,2],[67,2],[67,2],[62,4],[64,2],[62,2],[64,2],[66,2],[67,4],[67,4],
-    [67,2],[67,2],[67,2],[69,2],[67,2],[67,2],[62,4],[64,2],[62,2],[64,2],[66,2],[67,4],[67,4],
-    [74,2],[72,2],[71,2],[69,2],[71,2],[69,2],[67,4],[64,2],[62,2],[64,2],[66,2],[67,4],[67,4]]},
-  {name:'Joy to the World', ok:false, notes:[
-    [72,3],[71,1],[69,2],[67,4],[65,2],[64,2],[62,2],[60,4],[67,1],[69,3],[69,1],[71,3],[71,1],[72,6],
-    [72,1],[72,1],[71,1],[69,1],[67,1],[67,2],[65,1],[64,2],[60,4]]},
+  {name:'Good King Wenceslas', src:'Satz: Thomas Helmore 1853 (gemeinfrei, IMSLP), abgelesen', voices:[[[68,2],[68,2],[68,2],[70,2],[68,2],[68,2],[63,4],[65,2],[63,2],[65,2],[67,2],[68,4],[68,4],[68,2],[68,2],[68,2],[70,2],[68,2],[68,2],[63,4],[65,2],[63,2],[65,2],[67,2],[68,4],[68,4],[75,2],[73,2],[72,2],[70,2],[72,2],[70,2],[68,4],[65,2],[63,2],[65,2],[67,2],[68,4],[68,4],[63,2],[63,2],[65,2],[67,2],[68,2],[68,2],[70,4],[75,2],[73,2],[72,2],[70,2],[68,4],[73,4],[68,8]],[[63,2],[63,2],[65,2],[63,2],[63,2],[63,2],[58,2],[60,2],[61,2],[63,2],[61,2],[61,2],[63,2],[61,2],[60,4],[63,2],[63,2],[65,2],[63,2],[63,2],[63,2],[58,2],[60,2],[61,2],[63,2],[63,2],[61,2],[60,2],[61,2],[63,4],[63,2],[65,2],[67,2],[67,2],[67,2],[64,2],[63,4],[61,2],[63,2],[61,2],[61,2],[60,4],[61,2],[60,2],[58,2],[63,2],[63,2],[61,2],[60,2],[62,2],[63,4],[63,2],[65,2],[63,2],[61,2],[60,4],[65,4],[63,8]],[[60,2],[60,2],[60,2],[58,2],[60,2],[56,2],[55,4],[56,2],[56,2],[56,2],[58,2],[60,2],[58,2],[56,4],[60,2],[60,2],[61,2],[61,2],[60,2],[56,2],[55,4],[56,2],[56,2],[60,2],[58,2],[56,2],[58,2],[60,4],[56,2],[56,2],[63,2],[61,2],[60,2],[55,2],[56,4],[56,2],[56,2],[56,2],[58,2],[56,2],[55,2],[53,4],[55,2],[56,2],[60,2],[58,2],[56,2],[56,2],[55,4],[56,2],[56,2],[55,2],[55,2],[56,4],[56,4],[60,8]],[[56,2],[55,2],[53,2],[55,2],[56,2],[48,2],[51,4],[49,2],[48,2],[49,2],[46,2],[44,4],[44,4],[56,2],[55,2],[53,2],[55,2],[56,2],[48,2],[51,4],[49,2],[48,2],[49,2],[51,2],[44,4],[56,4],[48,2],[49,2],[51,2],[51,2],[52,2],[48,2],[53,2],[51,2],[49,2],[48,2],[46,2],[51,2],[53,2],[51,2],[49,4],[49,2],[48,2],[49,2],[51,2],[53,2],[53,2],[51,4],[48,2],[49,2],[51,2],[51,2],[53,2],[51,2],[49,2],[53,2],[44,8]]]},
+  {name:'Joy to the World', src:'Lowell Mason 1839/1848 „Antioch“ (gemeinfrei)', notes:[
+    [74,2],[73,1.5],[71,.5],[69,3],[67,1],[66,2],[64,2],[62,3],[69,1],[71,3],[71,1],[73,3],[73,1],[74,3],[74,1],
+    [74,1],[73,1],[71,1],[69,1],[69,1.5],[67,.5],[66,1],[66,1],[66,1],[66,1],[66,1],[66,.5],[67,.5],[69,3],[67,.5],[66,.5],
+    [64,1],[64,1],[64,1],[64,.5],[66,.5],[67,3],[66,.5],[64,.5],[62,1],[74,2],[71,1],[69,1.5],[67,.5],[66,1],[67,1],[66,2],[64,2],[62,4]]},
   // Neu aus den MIDI-Dateien des Auftraggebers (D55): nur die gemeinfreien Melodien, je eine Strophe
   {name:'I Saw Three Ships', src:'Melodie aus MIDI-Datei (gemeinfrei, englisch)', notes:[
     [62,1],[67,2],[67,1],[69,2],[71,1],[74,2],[71,1],[69,2],[72,1],[71,2],[67,1],[67,2],[71,1],[69,2],[66,1],[62,2],
     [62,1],[67,2],[67,1],[69,2],[71,1],[74,2],[71,1],[69,2],[72,1],[71,2],[67,1],[67,1],[69,1],[71,1],[69,3],[67,3]]},
-  {name:'Hark! The Herald Angels Sing', src:'Melodie aus MIDI-Datei (gemeinfrei, F. Mendelssohn Bartholdy)', notes:[
-    [60,2],[65,2],[65,3],[64,1],[65,2],[69,2],[69,2],[67,2],[72,2],[72,2],[72,3],[70,1],[69,2],[67,2],[69,4],
-    [60,2],[65,2],[65,3],[64,1],[65,2],[69,2],[69,2],[67,2],[72,2],[67,2],[67,3],[64,1],[64,2],[62,2],[60,4],
-    [72,2],[72,2],[72,2],[65,2],[70,2],[69,2],[69,2],[67,2],[72,2],[72,2],[72,2],[65,2],[70,2],[69,2],[69,2],[67,2],
-    [74,3],[74,1],[74,2],[72,2],[70,2],[69,2],[70,4],[67,2],[69,1],[70,1],[72,3],[65,1],[65,2],[67,2],[69,4],
-    [74,3],[74,1],[74,2],[72,2],[70,2],[69,2],[70,4],[67,2],[69,1],[70,1],[72,3],[77,1],[77,2],[76,2],[77,4]]},
+  {name:'Hark! The Herald Angels Sing', src:'Melodie aus MIDI-Datei (gemeinfrei, F. Mendelssohn Bartholdy)', satz:'eigener Satz (D60)', voices:[[[60,2],[65,2],[65,3],[64,1],[65,2],[69,2],[69,2],[67,2],[72,2],[72,2],[72,3],[70,1],[69,2],[67,2],[69,4],[60,2],[65,2],[65,3],[64,1],[65,2],[69,2],[69,2],[67,2],[72,2],[67,2],[67,3],[64,1],[64,2],[62,2],[60,4],[72,2],[72,2],[72,2],[65,2],[70,2],[69,2],[69,2],[67,2],[72,2],[72,2],[72,2],[65,2],[70,2],[69,2],[69,2],[67,2],[74,3],[74,1],[74,2],[72,2],[70,2],[69,2],[70,4],[67,2],[69,1],[70,1],[72,3],[65,1],[65,2],[67,2],[69,4],[74,3],[74,1],[74,2],[72,2],[70,2],[69,2],[70,4],[67,2],[69,1],[70,1],[72,3],[77,1],[77,2],[76,2],[77,4]],   [[60,2],[60,2],[60,4],[60,2],[60,2],[65,2],[67,2],[65,2],[64,2],[65,3],[64,1],[65,2],[64,2],[60,4],[60,2],[60,2],[60,4],[60,2],[60,2],[65,2],[64,2],[64,2],[60,2],[60,4],[60,2],[59,2],[55,4],[65,2],[65,2],[65,2],[65,2],[62,2],[65,2],[65,2],[64,2],[65,2],[65,2],[65,2],[65,2],[62,2],[65,2],[65,2],[64,2],[62,4],[62,2],[65,2],[62,2],[65,2],[65,4],[64,2],[65,2],[65,4],[62,2],[64,2],[65,4],[65,4],[70,2],[65,2],[62,2],[65,2],[65,4],[64,2],[65,2],[65,4],[65,2],[67,2],[65,4]],   [[57,2],[57,2],[57,4],[57,2],[57,2],[57,2],[60,2],[57,2],[57,2],[57,3],[60,1],[60,2],[60,2],[60,4],[57,2],[57,2],[57,4],[57,2],[57,2],[57,2],[60,2],[57,2],[55,2],[52,4],[55,2],[53,2],[52,4],[57,2],[57,2],[57,2],[57,2],[58,2],[60,2],[60,2],[60,2],[60,2],[57,2],[57,2],[57,2],[58,2],[60,2],[60,2],[60,2],[62,4],[58,2],[57,2],[58,2],[60,2],[62,4],[58,2],[60,2],[57,4],[57,2],[60,2],[60,4],[58,4],[58,2],[57,2],[58,2],[60,2],[62,4],[58,2],[60,2],[57,4],[58,2],[55,2],[57,4]],   [[53,2],[53,2],[57,4],[53,2],[53,2],[50,2],[52,2],[53,2],[57,2],[53,3],[48,1],[53,2],[48,2],[53,4],[53,2],[53,2],[57,4],[53,2],[53,2],[50,2],[52,2],[45,2],[52,2],[48,4],[48,2],[43,2],[48,4],[41,2],[41,2],[41,2],[38,2],[43,2],[41,2],[48,2],[48,2],[45,2],[41,2],[41,2],[38,2],[43,2],[41,2],[48,2],[48,2],[46,4],[43,2],[45,2],[43,2],[41,2],[46,4],[48,2],[53,2],[48,4],[50,2],[48,2],[41,4],[46,4],[43,2],[45,2],[43,2],[41,2],[46,4],[48,2],[53,2],[48,4],[50,2],[48,2],[53,4]]]},
   {name:'Kommt und lasst uns Christum ehren', src:'Melodie aus MIDI-Datei (gemeinfrei, „Quem pastores“)', notes:[
     [65,4],[69,2],[72,4],[69,2],[70,2],[72,2],[74,2],[72,4],[67,2],[69,2],[70,2],[72,2],[70,2],[69,2],[67,2],[65,4],[62,2],[64,4],[60,2],
     [69,4],[70,2],[72,4],[74,2],[72,4],[67,2],[69,4],[65,2],[70,4],[70,2],[69,2],[67,2],[65,2],[65,2],[62,2],[64,2],[65,6]]},
-  {name:'God Rest Ye Merry, Gentlemen', src:'Melodie aus MIDI-Datei (gemeinfrei, englisch)', notes:[
+  {name:'God Rest Ye Merry, Gentlemen', src:'Melodie aus MIDI-Datei (gemeinfrei, englisch)', meter:4, pickup:2, chords:[["Em", 2], ["Em", 4], ["Am7", 4], ["Em", 4], ["D7", 4], ["Cmaj7", 4], ["D7", 4], ["B7", 6], ["Em", 2], ["Em", 4], ["Am7", 4], ["Em", 4], ["D7", 4], ["Cmaj7", 4], ["D7", 4], ["B7", 6], ["Em", 2], ["Am7", 4], ["D7", 4], ["Gmaj7", 4], ["Cmaj7", 4], ["Em7", 4], ["A7", 4], ["Am7", 4], ["D7", 4], ["Gmaj7", 4], ["Cmaj7", 4], ["Am7", 4], ["B7", 4], ["Em", 8], ["Am7", 4], ["D7", 4], ["Gmaj7", 4], ["Cmaj7", 4], ["Am7", 4], ["B7", 4], ["Em", 6]], notes:[
     [64,2],[64,2],[71,2],[71,2],[69,2],[67,2],[66,2],[64,2],[62,2],[64,2],[66,2],[67,2],[69,2],[71,6],
     [64,2],[64,2],[71,2],[71,2],[69,2],[67,2],[66,2],[64,2],[62,2],[64,2],[66,2],[67,2],[69,2],[71,6],
     [71,2],[72,2],[69,2],[71,2],[72,2],[74,2],[76,2],[71,2],[69,2],[67,2],[64,2],[66,2],[67,2],[69,4],[67,2],[69,2],[71,4],[72,2],[71,2],[71,2],[69,2],[67,2],[66,2],[64,4],
     [67,1],[66,1],[64,2],[69,4],[67,2],[69,2],[71,2],[72,2],[74,2],[76,2],[71,2],[69,2],[67,2],[66,2],[64,6]]},
-  {name:'Morning Star', src:'Melodie aus MIDI-Datei (gemeinfrei, J. P. Harding 1892)', notes:[
-    [72,4],[70,2],[68,2],[67,4],[65,2],[63,2],[63,2],[68,2],[67,2],[68,2],[72,4],[70,4],[75,4],[73,2],[72,2],[72,4],[70,2],[68,2],[67,2],[70,2],[68,2],[65,2],[63,8],
-    [72,4],[70,2],[68,2],[67,4],[65,2],[63,2],[63,2],[68,2],[72,2],[75,2],[75,4],[73,4],[72,4],[68,2],[70,2],[72,4],[68,2],[65,2],[63,2],[65,2],[67,2],[70,2],[68,8]]},
-  {name:'Carol of the Bells', ok:false, src:'gemeinfrei (M. Leontowytsch 1914), aus dem Gedächtnis', notes:[
-    [70,2],[69,1],[70,1],[67,2],[70,2],[69,1],[70,1],[67,2],[70,2],[69,1],[70,1],[67,2],[70,2],[69,1],[70,1],[67,2],
-    [74,2],[72,1],[74,1],[70,2],[74,2],[72,1],[74,1],[70,2],[74,2],[72,1],[74,1],[70,2],[74,2],[72,1],[74,1],[70,2],
-    [79,1],[79,1],[79,1],[77,1],[75,1],[74,1],[72,1],[72,1],[72,1],[70,1],[69,1],[67,1],[69,1],[70,1],[72,1],[69,1],[70,2],[67,6],
-    [70,2],[69,1],[70,1],[67,2],[70,2],[69,1],[70,1],[67,2],[67,6]]},
+  // Schtschedryk (Carol of the Bells), Satz M. Leontowytsch (gemeinfrei, IMSLP), abgelesen aus der PDF des Auftraggebers; ein Durchgang: T. 1–32 + 2. Klammer
+  {name:'Carol of the Bells', src:'Satz: M. Leontowytsch „Schtschedryk“ (gemeinfrei, IMSLP), abgelesen', style:'streicher', voices:[[[70,2],[69,1],[70,1],[67,2],[70,2],[69,1],[70,1],[67,2],[70,2],[69,1],[70,1],[67,2],[70,2],[69,1],[70,1],[67,2],[70,2],[69,1],[70,1],[67,2],[70,2],[69,1],[70,1],[67,2],[70,2],[69,1],[70,1],[67,2],[70,2],[69,1],[70,1],[67,2],[70,2],[69,1],[70,1],[67,2],[70,2],[69,1],[70,1],[67,2],[70,2],[69,1],[70,1],[67,2],[70,2],[69,1],[70,1],[67,2],[70,2],[69,1],[70,1],[67,2],[70,2],[69,1],[70,1],[67,2],[70,2],[69,1],[70,1],[67,2],[70,2],[69,1],[70,1],[67,2],[74,2],[72,1],[74,1],[70,2],[74,2],[72,1],[74,1],[70,2],[74,2],[72,1],[74,1],[70,2],[74,2],[72,1],[74,1],[70,2],[79,2],[79,1],[79,1],[77,1],[75,1],[74,2],[74,1],[74,1],[72,1],[70,1],[72,2],[72,1],[72,1],[74,1],[72,1],[67,2],[67,1],[67,1],[67,2],[62,1],[64,1],[66,1],[67,1],[69,1],[70,1],[72,1],[74,1],[72,2],[70,2],[62,1],[64,1],[66,1],[67,1],[69,1],[70,1],[72,1],[74,1],[72,2],[70,2],[70,2],[69,1],[70,1],[67,2],[70,2],[69,1],[70,1],[67,2],[70,2],[69,1],[70,1],[67,2],[70,2],[69,1],[70,1],[67,2],[67,18],[74,2],[72,1],[74,1],[70,1],[0,1]],[[0,6],[0,6],[0,6],[0,6],[67,6],[65,6],[63,6],[62,6],[67,6],[65,6],[63,6],[62,6],[67,2],[67,1],[67,1],[67,2],[67,2],[67,1],[67,1],[67,2],[67,2],[67,1],[67,1],[67,2],[67,2],[67,1],[67,1],[67,2],[70,2],[69,1],[70,1],[67,2],[70,2],[69,1],[70,1],[67,2],[70,2],[69,1],[70,1],[67,2],[70,2],[69,1],[70,1],[67,2],[67,2],[67,1],[67,1],[67,2],[67,2],[67,1],[67,1],[67,2],[67,2],[67,1],[67,1],[67,2],[67,2],[67,1],[67,1],[67,2],[62,6],[64,2],[66,2],[67,2],[62,6],[64,2],[66,2],[67,2],[62,6],[60,6],[65,6],[63,6],[62,18],[70,2],[69,1],[70,1],[67,1],[0,1]],[[0,6],[0,6],[0,6],[0,6],[0,6],[0,6],[0,6],[0,6],[63,6],[62,6],[60,6],[55,6],[60,2],[60,1],[60,1],[60,2],[62,2],[62,1],[62,1],[62,2],[63,2],[63,1],[63,1],[63,2],[62,2],[62,1],[62,1],[62,2],[62,6],[64,6],[65,2],[63,2],[62,2],[67,1],[65,1],[63,2],[62,2],[62,2],[63,1],[63,1],[62,1],[60,1],[62,2],[62,1],[62,1],[62,2],[63,2],[63,1],[63,1],[65,1],[63,1],[62,2],[62,1],[62,1],[62,2],[58,2],[57,1],[58,1],[55,2],[58,2],[57,1],[58,1],[55,2],[58,2],[57,1],[58,1],[55,2],[58,2],[57,1],[58,1],[55,2],[55,24],[58,2],[57,1],[58,1],[55,2],[58,2],[57,1],[58,1],[55,2],[58,2],[57,1],[58,1],[55,2],[0,6]],[[0,6],[0,6],[0,6],[0,6],[0,6],[0,6],[0,6],[0,6],[0,6],[0,6],[0,6],[0,6],[51,2],[51,1],[51,1],[51,2],[55,2],[55,1],[55,1],[55,2],[60,2],[60,1],[60,1],[60,2],[55,2],[55,1],[55,1],[55,2],[55,2],[55,1],[55,1],[55,2],[55,2],[55,1],[55,1],[55,2],[55,2],[55,1],[55,1],[55,2],[55,2],[55,1],[55,1],[55,2],[58,2],[57,1],[58,1],[55,2],[58,2],[57,1],[58,1],[55,2],[58,2],[57,1],[58,1],[55,2],[58,2],[57,1],[58,1],[55,2],[50,6],[50,6],[50,6],[50,4],[51,2],[55,24],[55,18],[0,6]]]},
 ];
 MELODIES.forEach(m => { if (m.voices && !m.notes) m.notes = m.voices[0]; }); // Melodie = Sopran
 // Besetzung je Lied (D55): passend zum Charakter des Stücks
 const BESETZUNG = {'Stille Nacht, heilige Nacht': 'chor', 'Alle Jahre wieder': 'spieluhr', 'O Tannenbaum': 'streicher', 'Kling, Glöckchen, klingelingeling': 'bell',
-  'Lasst uns froh und munter sein': 'holz', 'Jingle Bells': 'jazz', 'Ihr Kinderlein kommet': 'holz', 'Leise rieselt der Schnee': 'spieluhr', 'O du fröhliche': 'orgel',
+  'Lasst uns froh und munter sein': 'holz', 'Jingle Bells': 'jazz', 'Ihr Kinderlein kommet': 'holz', 'Leise rieselt der Schnee': 'holz', 'O du fröhliche': 'orgel',
   'Morgen kommt der Weihnachtsmann': 'spieluhr', 'We Wish You a Merry Christmas': 'jazz', 'Süßer die Glocken nie klingen': 'bell', 'Macht hoch die Tür': 'blech',
-  'Tochter Zion, freue dich': 'blech', 'Kommet, ihr Hirten': 'holz', 'Herbei, o ihr Gläubigen': 'orgel', 'Es ist ein Ros entsprungen': 'chor', 'Zu Bethlehem geboren': 'streicher',
+  'Tochter Zion, freue dich': 'blech', 'Kommet, ihr Hirten': 'holz', 'Herbei, o ihr Gläubigen': 'chor', 'Es ist ein Ros entsprungen': 'chor', 'Zu Bethlehem geboren': 'streicher',
   'Es kommt ein Schiff geladen': 'chor', 'We Three Kings': 'streicher', 'Deck the Halls': 'jazz', 'Good King Wenceslas': 'blech', 'Joy to the World': 'blech',
-  'I Saw Three Ships': 'holz', 'Hark! The Herald Angels Sing': 'chor', 'Kommt und lasst uns Christum ehren': 'streicher', 'God Rest Ye Merry, Gentlemen': 'jazz',
-  'Morning Star': 'orgel', 'Carol of the Bells': 'bell'};
+  'I Saw Three Ships': 'holz', 'Hark! The Herald Angels Sing': 'chor', 'Kommt und lasst uns Christum ehren': 'streicher', 'God Rest Ye Merry, Gentlemen': 'jazz',};
 MELODIES.forEach(m => { m.style = m.style || BESETZUNG[m.name] || 'bell'; });
 const tones = m => m.notes.filter(x => x[0] > 0); // ohne Pausen – für Stationen, die Ton für Ton spielen
 const melodyFor = L => MELODIES[(L - 1) % MELODIES.length];

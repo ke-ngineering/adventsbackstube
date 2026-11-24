@@ -49,8 +49,11 @@ Details zum Konzept: `KONZEPT-ADVENT.md`. Entscheidungen: `PROJEKT.md`.
 | # | Aufgabe | Status |
 |---|---|---|
 | T1 | Auftraggeber testet nach `TESTPLAN.md` | ❓ |
-| M5 | Carol of the Bells prüfen (aus dem Gedächtnis); Away in a Manger, Good King Wenceslas, Joy to the World prüfen | ⏳ |
-| M6 | Vierstimmiger Satz für Stille Nacht (Finale) – eigener Satz oder aus dem Liederbuch | ⏳ |
+| M5 | Carol of the Bells nach Leontowytsch-Partitur (D61) | ✅ v19 |
+| M9 | Away in a Manger (Melodiequelle nötig) | ⏳ für später |
+| M7 | Musik-Rückmeldungen Runde 19 umsetzen (Tempi, Jazz-Trio, Sätze, Joy to the World, GKW) | ✅ v19 |
+| M8 | Ton-Fehler nach Fensterwechsel (D59) | ✅ v19 |
+| M6 | Vierstimmiger Satz für Stille Nacht (Finale) | ✅ v19 |
 | P1 | Leistung auf älteren Handys prüfen (Marktschlitten-Aufbau, lange Lieder) | ⏳ |
 
 ## Erledigt (Auswahl)

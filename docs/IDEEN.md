@@ -67,3 +67,8 @@ Status: ✅ umgesetzt · 🔨 in Arbeit · 💡 Idee · ❌ verworfen
 - **Urheberrechtlich geschützt** (nicht ins öffentliche Repo): White Christmas, Frosty the Snowman, The Little Drummer Boy, Winter Wonderland.
 - **Für später:** Away in a Manger (MIDI zu frei gespielt, Melodie müsste aus einer anderen Quelle kommen), Ebenezer (gemeinfreie Hymne, aber kein Weihnachtslied).
 - Adeste Fideles: die MIDI enthält einen vierstimmigen Satz; übernommen wird bewusst nur die Melodie (Herkunft des Satzes unbekannt).
+
+## Musik – offen (v19)
+- ~~Carol of the Bells~~ – erledigt mit der Leontowytsch-Partitur (D61).
+- **Morning Star**: auf Wunsch entfernt (unbekannt).
+- Weitere vierstimmige Sätze aus dem Liederbuch: Es ist ein Ros (S. 40), Ich steh an deiner Krippe (S. 42), Christbaum (S. 37); Herbei (S. 41) gäbe es auch im Liederbuch – derzeit eigener Satz.

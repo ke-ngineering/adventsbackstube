@@ -118,6 +118,9 @@ for (const m of MELODIES.filter(m => m.voices)) {
   for (let L = 1; L <= 30; L++) { const t = Date.now(), g = Schlitten._test.generate(L); worst = Math.max(worst, Date.now() - t); chk(g, 'L' + L); if (L % 5 === 0) rep.push(`L${L}:${g.min}`); }
   for (let d = 1; d <= 24; d++) { const sp = ADVENT[d].special; (sp.game === 'kette' ? sp.spec.parts : [sp]).filter(q => q.game === 'schlitten').forEach(q => { const t = Date.now(), g = Schlitten._test.generate(0, q.spec); chk(g, 'Türchen ' + d); console.log('OK Marktschlitten-Tagesrätsel Türchen', d, g.min, 'Züge (Ziel', q.spec.min + ')', Date.now() - t, 'ms'); }); }
   console.log('OK Marktschlitten 1-30, kürzeste Wege', rep.join(' '), '· langsamstes Level', worst, 'ms'); }
+for (const m of MELODIES) { const len = m.notes.reduce((a, b) => a + b[1], 0);
+  if (m.chords) { const c = m.chords.reduce((a, b) => a + b[1], 0); if (c !== len) { console.log('Akkorde passen nicht zur Melodie', m.name, c, len); process.exit(1); } }
+  if (m.voices && m.voices.some(v => v.reduce((a, b) => a + b[1], 0) !== len)) { console.log('Stimmen ungleich lang', m.name); process.exit(1); } }
 console.log('OK', MELODIES.length, 'Melodien,', MELODIES.filter(m => m.ok !== false).length, 'geprüft (Liederbuch oder MIDI),', MELODIES.filter(m => m.ok === false).length, 'noch zu prüfen');
 """
 f = tempfile.NamedTemporaryFile('w', suffix='.js', delete=False)
