@@ -12,7 +12,7 @@ const api = {
   getCur: () => { const p = prog(cur.id); return p.cur && p.cur.lvl === curL ? p.cur : null; },
   saveCur: o => { prog(cur.id).cur = o ? Object.assign({lvl: curL}, o) : null; persist(); },
   restart: () => startLevel(false),
-  help: (title, html) => { $('helpOk').hidden = false; $('helpTitle').textContent = title; $('helpBody').innerHTML = html; $('help').classList.add('on'); $('helpOk').focus(); },
+  help: (title, html) => { $('helpOk').hidden = false; $('helpTitle').textContent = title; $('helpBody').innerHTML = html; $('help').classList.add('on'); $('help').querySelector('.dialog').scrollTop = 0; $('helpOk').focus({preventScroll: true}); },
   win,
 };
 
@@ -25,6 +25,7 @@ const calApi = {
   play: id => open(id),
   setTitle: t => { $('sub').textContent = t; },
   toast,
+  help: (t, html) => api.help(t, html),
 };
 function toast(msg) { const t = $('toast'); t.textContent = msg; t.classList.remove('on'); void t.offsetWidth; t.classList.add('on'); }
 function screens(which) { $('calendar').hidden = which !== 'cal'; $('hub').hidden = which !== 'hub'; $('game').hidden = which !== 'game'; }

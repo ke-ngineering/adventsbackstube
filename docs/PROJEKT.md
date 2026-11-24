@@ -4,7 +4,7 @@
 > Wer (Mensch oder Claude) die Entwicklung fortsetzt, liest zuerst diese Datei.
 > Nach jeder Arbeitssitzung: Status, Entscheidungen und Agenda hier aktualisieren.
 
-Stand: 24.11.2026 (Prototyp v15)
+Stand: 24.11.2026 (Prototyp v16)
 
 ## 1. Vision
 
@@ -71,6 +71,7 @@ mit genug Inhalt für spürbar lange Spielsessions (ca. 20–30 Min neue Tagesin
 | D45 | 24.11. | Midkar.com-MIDIs NICHT verwendet (Download blockiert; Sequenzen/Arrangements ohne Nutzungsrechte, viele moderne geschützte Titel); gemeinfreie Titel daraus als „für später“ notiert | Rechte & Technik |
 | D46 | 24.11. | Adventskalender als Startseite; Tagesmenü aus Stations-Aufgaben; Lied des Tages; Rezept-Tage 3/6/10/13/17/20/24; Backstube bleibt zum freien Spielen | Vorschlag mit Standardwerten umgesetzt (Fragen zu Tagesmenü/Rezepttagen offen, leicht änderbar) |
 | D47 | 24.11. | Fremde Arrangements (z. B. aus MIDI-Dateien) nie übernehmen; für gemeinfreie Melodien ohne freien Satz schreibt Claude **eigene** vierstimmige Sätze | Rechte; Wunsch nach 4-stimmigem We Three Kings |
+| D48 | 24.11. | 6 Rezepte geschrieben (eigene Texte, mit Experimentier-Idee und Sicherheitshinweis beim Frittieren); Rezept zum 24.12. bleibt offen | Auftraggeber will über den 24. noch nachdenken |
 | D12 | 23.11. | Persönliche Inhalte (Name, Nachrichten) **verschlüsselt** im Repo; Schlüssel steht nur im Link-Teil nach `#`, den sie bekommt (wird nie an Server übertragen) | Personalisierung trotz öffentlichem Repo |
 
 ## 3. Spielkonzept
@@ -123,7 +124,8 @@ mit genug Inhalt für spürbar lange Spielsessions (ca. 20–30 Min neue Tagesin
 - ✅ **Startseite = Adventskalender** mit 24 Türchen (durcheinander angeordnet), Türchen öffnet ab dem jeweiligen Dezembertag (lokales Datum), Verpasstes nachholbar, im Testmodus alle offen. Im November Hinweis „Noch X Tage“ + Link zur Backstube.
 - ✅ **Tagesmenü** je Tag 2–4 Aufgaben „Station: N Level“ (Plan in `Kalender.PLAN`); Level zählen, wenn die Station aus dem Türchen gestartet wurde; Gewinn-Dialog meldet Fortschritt, Knopf „Zum Türchen N“.
 - ✅ **Lied des Tages** (`SONG_DAYS`, passend zum Datum: 1. Macht hoch die Tür, 6. Lasst uns froh und munter sein, 24. Stille Nacht), erklingt beim ersten Öffnen, „♪ Lied anhören“ (vierstimmig, wenn vorhanden).
-- ✅ **Belohnung** nach geschafftem Türchen: Stern im Kalender; Rezept an Tag 3, 6, 10, 13, 17, 20, 24 (Rezepttexte folgen, `RECIPES`), Willkommen an Tag 1.
+- ✅ **Belohnung** nach geschafftem Türchen: Stern im Kalender; Rezept an Tag 3, 6, 10, 13, 17, 20, 24, Willkommen an Tag 1.
+- ✅ **Rezepte (v16, `js/rezepte.js`):** 3 Vanillekipferl · 6 Hamburger Braune Kuchen · 10 Elisenlebkuchen · 13 Franzbrötchen · 17 Auszogne · 20 Rote Grütze (Winter) · 24 noch offen (gemeinsam festlegen, Platzhalter). Je Rezept: Menge, Zeit, Herkunft, Zutaten, Schritte, Backtipp, **Experimentier-Idee**; „Rezept kopieren“; Sammlung „Meine Rezepte“ im Kalender (nur freigeschaltete).
 - Spielstand: `save.cal = {active, days:{Tag:{opened, done:{station:n}, finished}}}`.
 
 **Ursprüngliche Planung:**
@@ -135,7 +137,7 @@ mit genug Inhalt für spürbar lange Spielsessions (ca. 20–30 Min neue Tagesin
 - Endlos-Modus für alle freigeschalteten Mechaniken.
 - Testmodus (z. B. `#test`) zum Durchklicken aller Tage vor dem 1.12.
 
-### Rezept-Goodies (Entwurf, noch abzustimmen)
+### Rezept-Goodies (v16 umgesetzt, Tag 17 = Auszogne statt Spitzbuben)
 | Tag | Rezept | Bezug |
 |-----|--------|-------|
 | 3 | Vanillekipferl | Klassiker, bayerisch-österreichisch |
@@ -207,7 +209,8 @@ Ziel: **spielbar ab Di, 1.12.2026**, Link vorher an sie (z. B. am 1. Advent, 29.
 
 ## 7. Offene Fragen
 - Kalender: Passt das Tagesmenü (Umfang ~20–40 Min.)? Passen die Rezept-Tage?
-- Nächste Schritte: Rezepttexte (7), persönliche Inhalte (verschlüsselt), PWA-Icon/„Zum Startbildschirm“, Spielstand-Backup-Code
+- Rezept zum 24.12. gemeinsam festlegen (Ideen: eigenes Rezept, „Hamburg trifft München“-Fusion, Experimentier-Karte, Back-Gutschein)
+- Nächste Schritte: persönliche Inhalte (verschlüsselt), PWA-Icon/„Zum Startbildschirm“, Spielstand-Backup-Code
 - Mehrstimmig: Tochter Zion anhören (`#lieder` → „▶ 4-stimmig“) – klingt der Satz richtig?
 - Lieder prüfen (`#lieder`): v. a. die 4 Gedächtnis-Lieder (We Three Kings, Deck the Halls, Good King Wenceslas, Joy to the World)
 - Prototyp v10 testen: Lehrplan Glasur-Blech Level 1–11 durchspielen – lernt man den Rest-Trick? Labor verständlich? Spritzbeutel schwer genug?
