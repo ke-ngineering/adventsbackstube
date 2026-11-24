@@ -1,6 +1,6 @@
 # Konzept 2.0 – „Jedes Türchen packt etwas aus“ (Entwurf, 24.11.)
 
-**Status:** Entwurf, wartet auf Freigabe durch den Auftraggeber (D54).
+**Status:** freigegeben (D54), umgesetzt in v18. Abweichung: Wendung am 20. sind Eisgläser statt „Bestellung“ (D57).
 
 ## Das Problem mit Konzept 1
 Ein Türchen war nur eine Aufgabenliste für Spiele, die man auch frei spielen konnte. Überraschend waren allein Lied und
@@ -74,7 +74,7 @@ Chor, Jazz-Trio, Glocken, Spieluhr).
 | 17 | München-Tag | Wiesn-Blech / Isar-Spritzweg | Auszogne | Auszogne |
 | 18 | Ausstecher: große Platten | Teigplatte „Glocke“ | Heidesand | |
 | 19 | Zuckerstreusel **in Farbe** | Bild: Rentier | Schokocrossie | |
-| 20 | 4. Advent, Regal: **Bestellung** | Bestellung zum 4. Advent | Dominostein | Rote Grütze |
+| 20 | 4. Advent, Regal: **Eisgläser** | Frostige Vorräte | Dominostein | Rote Grütze |
 | 21 | Marktschlitten: große Märkte | Schlitten-Stau | Mohnschnecke | |
 | 22 | **Meisterbleche** | Meisterblech | Nussecke | |
 | 23 | Generalprobe: Kette aus allen Spielen | 4 Mini-Rätsel hintereinander | Stollenkonfekt | |

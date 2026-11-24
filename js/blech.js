@@ -34,21 +34,36 @@ const PLAN = [null,
   {R:5, C:5, kinds:ALL, mode:'jagd', k:8, title:'Neue Form: Spritzgebäck'},
   {R:5, C:5, kinds:ALL, mode:'rest', k:9, title:'Alle Formen'},
 ];
-function levelCfg(L) {
+function rawCfg(L) {
   if (L < PLAN.length) return PLAN[L];
   const n = L < 22 ? 6 : 7; // danach: freie Bleche zum Genießen
   return {R:n, C:n, kinds:ALL, mode: L % 4 === 0 ? 'jagd' : 'rest', k: Math.min(Math.floor(n * n * .5), 6 + Math.floor(L * .45)), title:'Meisterblech'};
 }
+/* Kalender 2.0: Stern-Pinsel ab Türchen 8, Stangen-Pinsel ab 15, Meisterbleche ab 22 – vorher Ersatzbleche ohne diese Formen */
+function levelCfg(L) {
+  let c = rawCfg(L);
+  if (L > 16 && !Feat.has('blech.meister')) c = Object.assign({}, rawCfg(13 + L % 4), {title: 'Übungsblech'});
+  const kinds = c.kinds.filter(k => k === 'taler' || (k === 'stern' && Feat.has('blech.stern')) || (k === 'stange' && Feat.has('blech.stange')));
+  if (kinds.length < c.kinds.length) c = Object.assign({}, c, {kinds, title: c.title.startsWith('Neue Form') ? 'Jagd üben' : c.title.replace(/Zimtsterne|Sternenblech|Alle Formen/, 'Rest-Trick üben')});
+  return c;
+}
+/* Tagesrätsel: Bleche mit Motiv. X = Plätzchen, . = Lücke. */
+const MOTIFS = {
+  herz: ['.XX.XX.', 'XXXXXXX', 'XXXXXXX', '.XXXXX.', '..XXX..', '...X...'],
+  stiefel: ['XXX...', 'XXX...', 'XXX...', 'XXXXXX', 'XXXXXX'],
+  sternform: ['...X...', '..XXX..', 'XXXXXXX', '.XXXXX.', '.XX.XX.'],
+};
 const LETTERS = 'ABCDEFG';
 
-let api, lvl, cfg, R, C, shape, aff, fps, g, taps, hints, par, best, noteI, mel, hist, coachOn = false, coachUsed = false, restPlan = [], secondPass = false;
+let api, lvl, cfg, R, C, shape, aff, fps, g, taps, hints, par, best, noteI, mel, hist, coachOn = false, coachUsed = false, restPlan = [], secondPass = false, mask = null;
+const inM = i => !mask || mask[i];
 
 /* ---- Regeln & Werkzeuge ---- */
 const rowOf = i => Math.floor(i / C), colOf = i => i % C;
 function affected(i) {
   const r = rowOf(i), c = colOf(i);
   return SHAPES[shape[i]].off.map(([dr, dc]) => [r + dr, c + dc])
-    .filter(([a, b]) => a >= 0 && b >= 0 && a < R && b < C).map(([a, b]) => a * C + b);
+    .filter(([a, b]) => a >= 0 && b >= 0 && a < R && b < C && inM(a * C + b)).map(([a, b]) => a * C + b);
 }
 const apply = (st, i) => { for (const j of aff[i]) st[j] ^= 1; };
 function chase(state) { // Reihe für Reihe direkt darunter tippen
@@ -89,7 +104,7 @@ function solve(state) { // mathematisches Minimum (Gauß über GF(2)) – für �
     piv.push(c); r++;
   }
   for (let k = r; k < M; k++) if (rows[k].b) return null;
-  const isPiv = new Set(piv), free = [...Array(M).keys()].filter(c => !isPiv.has(c));
+  const isPiv = new Set(piv), free = [...Array(M).keys()].filter(c => !isPiv.has(c) && inM(c));
   const lim = Math.min(free.length, 12); let bestX = null;
   for (let a = 0; a < (1 << lim); a++) {
     let x = 0n;
@@ -100,7 +115,28 @@ function solve(state) { // mathematisches Minimum (Gauß über GF(2)) – für �
   return [...Array(M).keys()].filter(i => (bestX.x >> BigInt(i)) & 1n);
 }
 
-function generate(L) {
+// Tagesrätsel: spec {shape: Motiv | 'rechteck', w, h, stamp, seed} – Lösung per Gauß, Ziel = kürzeste Lösung
+function generateSpecial(spec) {
+  const rows = spec.shape === 'rechteck' ? Array(spec.h).fill('X'.repeat(spec.w)) : MOTIFS[spec.shape];
+  R = rows.length; C = rows[0].length; mask = rows.join('').split('').map(ch => ch === 'X');
+  const kinds = spec.stamp ? [spec.stamp] : spec.shape === 'rechteck' ? ALL : ['taler'];
+  cfg = {R, C, kinds, mode: 'motiv', title: 'Tagesrätsel'};
+  const cells = [...Array(R * C).keys()].filter(i => mask[i]);
+  for (let t = 0; t < 400; t++) {
+    const r = rng(spec.seed * 977 + t * 7717 + 5);
+    shape = Array.from({length: R * C}, () => kinds[Math.floor(r() * kinds.length)]);
+    aff = shape.map((_, i) => inM(i) ? affected(i) : []);
+    const k = Math.round(cells.length * .32), pick = shuffle(cells.slice(), r).slice(0, k);
+    const state = Array(R * C).fill(1); pick.forEach(i => apply(state, i));
+    if (state.filter(v => !v).length < cells.length * .3) continue;
+    const sol = solve(state); if (!sol || sol.length < Math.min(6, k)) continue;
+    return {state, par: sol.length, best: sol.length};
+  }
+  throw new Error('Kein Motiv-Blech gefunden');
+}
+function generate(L, spec) {
+  if (spec) return generateSpecial(spec);
+  mask = null;
   cfg = levelCfg(L); R = cfg.R; C = cfg.C;
   const M = R * C, k = Math.min(cfg.k, M - (cfg.mode === 'jagd' ? C : 0));
   for (let t = 0; t < 400; t++) {
@@ -133,7 +169,8 @@ const bits = (arr, cls = '') => `<span class="fp ${cls}">${arr.map(v => `<i clas
 /* ---- Spielaufbau ---- */
 function begin(L, resume, a) {
   api = a; lvl = L; mel = melodyFor(L + 1);
-  const gen = generate(L); g = gen.state; par = gen.par; best = gen.best;
+  const gen = generate(L, api.special); g = gen.state; par = gen.par; best = gen.best;
+  const motiv = !!mask;
   taps = 0; hints = 0; noteI = 0; hist = []; coachOn = !!cfg.tutorial; coachUsed = false; restPlan = []; secondPass = false;
   const c = resume ? api.getCur() : null;
   if (c && c.v === 8 && Array.isArray(c.g) && c.g.length === g.length) {
@@ -141,8 +178,8 @@ function begin(L, resume, a) {
   } else api.saveCur(null);
   const maxW = Math.min(460, C * 92 + 40);
   api.stage.innerHTML = `
-    <div class="blech" id="blech" style="--n:${C};aspect-ratio:${C}/${R};width:min(100%,${maxW}px)">${g.map((v, i) =>
-      `<button class="cell" data-i="${i}" aria-label="${SHAPES[shape[i]].name}${i < C ? ' ' + LETTERS[i] : ''}">${i < C && L >= 6 ? `<span class="colname">${LETTERS[i]}</span>` : ''}<span class="cookie s-${shape[i]}${v ? ' on' : ''}"></span></button>`).join('')}</div>
+    <div class="blech${motiv ? ' motiv' : ''}" id="blech" style="--n:${C};aspect-ratio:${C}/${R};width:min(100%,${maxW}px)">${g.map((v, i) => !inM(i) ? '<span class="cell gap"></span>' :
+      `<button class="cell" data-i="${i}" aria-label="${SHAPES[shape[i]].name}${i < C && !motiv ? ' ' + LETTERS[i] : ''}">${i < C && L >= 6 && !motiv ? `<span class="colname">${LETTERS[i]}</span>` : ''}<span class="cookie s-${shape[i]}${v ? ' on' : ''}"></span></button>`).join('')}</div>
     <div class="coach" id="coach" aria-live="polite" hidden></div>
     <div class="rcard" id="rcard" hidden></div>`;
   const bl = $('blech'), clearPv = () => bl.querySelectorAll('.pv').forEach(x => x.classList.remove('pv'));
@@ -153,12 +190,12 @@ function begin(L, resume, a) {
   api.legend.innerHTML = `<span class="lesson">${cfg.title}</span>` +
     kinds.map(k => `<span class="pat">${mini(k)}<span><b>${SHAPES[k].name}</b> wechselt ${SHAPES[k].how}</span></span>`).join('');
   api.controls.innerHTML = `<button class="btn" id="bUndo">↶ Zurück</button><button class="btn" id="hint">Tipp</button><button class="btn" id="restart">Neu</button>` +
-    `<button class="btn" id="bHelp">Regeln</button><button class="btn" id="bCourse">Lösungsweg</button>` +
-    (L >= 6 ? `<button class="btn" id="bLab">Abdruck-Labor</button>` : '') + `<button class="btn" id="bCoach" aria-pressed="false">Lernhilfe</button>`;
+    `<button class="btn" id="bHelp">Regeln</button>` + (motiv ? '' : `<button class="btn" id="bCourse">Lösungsweg</button>` +
+    (L >= 6 ? `<button class="btn" id="bLab">Abdruck-Labor</button>` : '') + `<button class="btn" id="bCoach" aria-pressed="false">Lernhilfe</button>`);
   $('bHelp').onclick = () => explain(kinds);
-  $('bCourse').onclick = () => course(0);
+  $('bCourse') && ($('bCourse').onclick = () => course(0));
   $('bLab') && ($('bLab').onclick = lab);
-  $('bCoach').onclick = () => setCoach(!coachOn);
+  $('bCoach') && ($('bCoach').onclick = () => setCoach(!coachOn));
   $('bUndo').onclick = () => { if (!hist.length) return; const i = hist.pop(); apply(g, i); taps--; restPlan = []; secondPass = false; Snd.tap(.7); paint(aff[i]); saveCur(); refresh(); };
   $('hint').onclick = showHint;
   $('restart').onclick = () => api.restart();
@@ -166,11 +203,12 @@ function begin(L, resume, a) {
   // Lektionen und neue Formen beim ersten Mal
   const p = prog('blech'); p.seen = p.seen || []; p.lessons = p.lessons || [];
   const fresh = kinds.filter(k => !p.seen.includes(k));
+  if (motiv) { if (fresh.length) { p.seen.push(...fresh); persist(); explain(kinds, p.seen.length !== fresh.length); } else api.toast && api.toast('Ein Blech mit Motiv: Hier hilft die Jagd nicht immer – probier dich heran!'); return; }
   if (L >= 10 && !p.lessons.includes('warum') && !fresh.length) { p.lessons.push('warum'); persist(); offerWhy(); }
   else if (cfg.lesson && !p.lessons.includes(cfg.lesson)) { p.lessons.push(cfg.lesson); p.seen.push(...fresh); persist(); course(cfg.lesson === 'jagd' ? 1 : 2, true); }
   else if (fresh.length) { p.seen.push(...fresh); persist(); explain(p.seen.length === fresh.length ? kinds : fresh, p.seen.length !== fresh.length); }
 }
-function refresh() { status(); coach(); showCard(); }
+function refresh() { status(); if (!mask) { coach(); showCard(); } }
 function status() {
   api.status(`${taps} ${taps === 1 ? 'Zug' : 'Züge'} · Ziel: ${par}` + (coachOn ? (cfg.tutorial ? ' · Übungslevel: Lernhilfe kostenlos' : ' · Lernhilfe an (max. 2 Sterne)') : ''));
   $('bUndo').disabled = !hist.length;
@@ -198,7 +236,7 @@ function onTap(e) {
     api.win({stars, melody: mel,
       text: taps <= best ? `Meisterhaft – ${taps} Züge, kürzer geht es gar nicht!`
         : taps <= par ? `Sauber gelöst in ${taps} Zügen – genau nach Lösungsweg.`
-        : `Glasiert in ${taps} Zügen. Mit Jagd und Rest-Trick geht es in ${par}.`});
+        : mask ? `Glasiert in ${taps} Zügen. Die kürzeste Lösung braucht ${best}.` : `Glasiert in ${taps} Zügen. Mit Jagd und Rest-Trick geht es in ${par}.`});
   }, 500);
 }
 
@@ -243,6 +281,7 @@ function coach() {
 }
 function setCoach(on) { coachOn = on; if (on && !cfg.tutorial) coachUsed = true; saveCur(); refresh(); }
 function showHint() {
+  if (mask) { const sol = solve(g); if (!sol || !sol.length) return; hints++; saveCur(); document.querySelector(`#blech .cell[data-i="${sol[0]}"]`)?.classList.add('hint'); api.status('Tipp: das leuchtende Plätzchen gehört zur kürzesten Lösung (kostet einen Stern)'); return; }
   const a = advise(); if (!a || !a.picks.length) return;
   hints++; saveCur();
   document.querySelector(`#blech .cell[data-i="${a.picks[0]}"]`)?.classList.add('hint');
@@ -439,8 +478,8 @@ function offerWhy() {
 
 return {id:'blech', title:'Glasur-Blech', sub:'Glasiere alle Plätzchen – mit Jagd und Rest-Trick',
   desc:'Knobeln mit Lehrplan: vom 2×2 bis zum Meisterblech',
-  start: begin, stop() {},
-  _test: {generate, solve, levelCfg, method, apply: (st, i) => apply(st, i),
+  start: begin, stop() {}, winTitle: 'Blech glasiert!',
+  _test: {generate, solve, levelCfg, method, MOTIFS, apply: (st, i) => apply(st, i),
     coachSolve(L) { const gen = generate(L); g = gen.state.slice(); restPlan = []; let n = 0;
       for (;;) { const a = advise(); if (!a) return n === gen.par ? n : -2; const i = a.picks[0]; apply(g, i);
         if (restPlan.includes(i)) restPlan = restPlan.filter(x => x !== i); else restPlan = []; if (++n > 600) return -1; } }}};

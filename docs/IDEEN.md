@@ -62,3 +62,8 @@ Status: ✅ umgesetzt · 🔨 in Arbeit · 💡 Idee · ❌ verworfen
 | 💡 | Vierstimmig nachziehen: Es ist ein Ros entsprungen, Herbei o ihr Gläubigen, Ich steh an deiner Krippe hier, Der Christbaum ist der schönste Baum (Liederbuch S. 37–42, Werkzeuge in `tools/noten/`) |
 | 💡 | **Internationale gemeinfreie Lieder** (Anregung: Liste auf midkar.com – deren MIDI-Dateien aber nicht verwenden, keine Nutzungsrechte): God Rest Ye Merry Gentlemen, Greensleeves / What Child Is This, Hark the Herald Angels Sing, I Saw Three Ships, It Came Upon a Midnight Clear, Jolly Old Saint Nicholas. Melodie nach bestem Wissen notieren, als „bitte prüfen“ markieren – oder exakt aus einer vom Tester angehängten MIDI-Datei (nur Melodiestimme) übernehmen. |
 | 💡 | Weitere Lieder aus dem Liederbuch: Vom Himmel hoch, In dulci jubilo, Fröhliche Weihnacht überall, Maria durch ein Dornwald ging, Still still still, Was soll das bedeuten |
+
+## Lieder aus den MIDI-Dateien – nicht übernommen (24.11., D55)
+- **Urheberrechtlich geschützt** (nicht ins öffentliche Repo): White Christmas, Frosty the Snowman, The Little Drummer Boy, Winter Wonderland.
+- **Für später:** Away in a Manger (MIDI zu frei gespielt, Melodie müsste aus einer anderen Quelle kommen), Ebenezer (gemeinfreie Hymne, aber kein Weihnachtslied).
+- Adeste Fideles: die MIDI enthält einen vierstimmigen Satz; übernommen wird bewusst nur die Melodie (Herkunft des Satzes unbekannt).

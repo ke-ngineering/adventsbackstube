@@ -1,21 +1,34 @@
-/* App-Rahmen: Backstube (Startseite), Spielwechsel, Levelleiste, Gewinn-Dialog, Ton-Schalter.
-   Jedes Spiel-Modul liefert {id, title, sub, desc, start(level, resume, api), stop()}. */
+/* App-Rahmen: Kalender (Startseite), Übungsküche, Spielwechsel, Levelleiste, Gewinn-Dialog, Ton-Schalter.
+   Jedes Spiel-Modul liefert {id, title, sub, desc, winTitle, start(level, resume, api), stop()}.
+   Tagesrätsel: api.special enthält den Bauplan (spec) – das Spiel baut daraus ein einmaliges Level. */
 {
-const GAMES = [Regal, Blech, Spritz, Buch];
-let cur = null, curL = 1;
+const GAMES = [Regal, Blech, Spritz,
+  typeof Licht !== 'undefined' && Licht, Buch, typeof Aus !== 'undefined' && Aus,
+  typeof Streu !== 'undefined' && Streu, typeof Schlitten !== 'undefined' && Schlitten].filter(Boolean);
+GAMES.forEach(g => { Spiele[g.id] = g; });
+let cur = null, curL = 1, sp = null; // sp = laufendes Tagesrätsel {day, part, game, spec, title}
 
 const api = {
   get stage() { return $('stage'); },
   get controls() { return $('controls'); },
   get legend() { return $('legend'); },
   status: t => { $('status').textContent = t + (TEST ? ' · Testmodus' : ''); },
-  getCur: () => { const p = prog(cur.id); return p.cur && p.cur.lvl === curL ? p.cur : null; },
-  saveCur: o => { prog(cur.id).cur = o ? Object.assign({lvl: curL}, o) : null; persist(); },
+  getCur: () => { if (sp) return Kalender.specialCur(sp); const p = prog(cur.id); return p.cur && p.cur.lvl === curL ? p.cur : null; },
+  saveCur: o => { if (sp) return Kalender.specialCur(sp, o || null); prog(cur.id).cur = o ? Object.assign({lvl: curL}, o) : null; persist(); },
+  get special() { return sp ? sp.spec : null; },
   restart: () => startLevel(false),
   help: (title, html) => { $('helpOk').hidden = false; $('helpTitle').textContent = title; $('helpBody').innerHTML = html; $('help').classList.add('on'); $('help').querySelector('.dialog').scrollTop = 0; $('helpOk').focus({preventScroll: true}); },
   win,
+  toast: m => toast(m),
 };
 
+// Bildchen für die neuen Stationen (SVG)
+const ICONS = {
+  licht: '<svg viewBox="0 0 64 64" width="64" height="64"><path d="M6,14 Q20,30 32,16 T58,16" stroke="#3b5d2a" stroke-width="3" fill="none"/><circle cx="14" cy="24" r="6" fill="#ffd45a"/><circle cx="32" cy="18" r="6" fill="#ff6b6b"/><circle cx="50" cy="22" r="6" fill="#ffd45a"/><path d="M10,44 h16 v12 h-16z M32,40 v16 M32,48 h22" stroke="#5d6a52" stroke-width="5" fill="none" stroke-linecap="round"/></svg>',
+  aus: '<svg viewBox="0 0 64 64" width="64" height="64"><rect x="6" y="10" width="52" height="44" rx="8" fill="#ecc98a"/><path d="M12,16 h16 v8 h8 v16 h-24z" fill="#c98a4a" stroke="#8f5a28" stroke-width="2"/><path d="M40,16 h12 v24 h-8 v-8 h-4z" fill="#f2b8b0" stroke="#b97a56" stroke-width="2"/><path d="M12,44 h28 v6 h-28z" fill="none" stroke="#9aa0a8" stroke-width="2" stroke-dasharray="3 3"/></svg>',
+  streu: '<svg viewBox="0 0 64 64" width="64" height="64"><rect x="10" y="10" width="44" height="44" rx="4" fill="#fff8ea" stroke="#8a5533" stroke-width="2"/><g fill="#3f8a4a"><rect x="29" y="13" width="7" height="7"/><rect x="22" y="20" width="21" height="7"/><rect x="15" y="27" width="35" height="7"/><rect x="22" y="34" width="21" height="7"/></g><rect x="29" y="41" width="7" height="8" fill="#8a5533"/><circle cx="26" cy="31" r="2.5" fill="#c8283a"/><circle cx="40" cy="24" r="2.5" fill="#e0a82e"/></svg>',
+  schlitten: '<svg viewBox="0 0 64 64" width="64" height="64"><rect x="6" y="6" width="52" height="52" rx="8" fill="#eef3f8" stroke="#8a5533" stroke-width="3"/><rect x="10" y="26" width="26" height="12" rx="4" fill="#c8283a"/><circle cx="17" cy="32" r="3" fill="#e7b56e"/><circle cx="26" cy="32" r="3" fill="#fff8ea"/><rect x="40" y="10" width="12" height="40" rx="4" fill="#8fb3c9"/><rect x="10" y="44" width="26" height="10" rx="4" fill="#d6913f"/><path d="M58,32 h4" stroke="#c8283a" stroke-width="4"/></svg>',
+};
 function updateStars() { $('stars').innerHTML = `<b>★</b> ${totalStars()}`; }
 
 // ---- Adventskalender ----
@@ -23,6 +36,7 @@ const calApi = {
   get screen() { return $('calendar'); },
   hub: () => showHub(),
   play: id => open(id),
+  special: x => openSpecial(x),
   setTitle: t => { $('sub').textContent = t; },
   toast,
   help: (t, html) => api.help(t, html),
@@ -31,21 +45,22 @@ function toast(msg) { const t = $('toast'); t.textContent = msg; t.classList.rem
 function screens(which) { $('calendar').hidden = which !== 'cal'; $('hub').hidden = which !== 'hub'; $('game').hidden = which !== 'game'; }
 function showCal(d) {
   $('help').classList.remove('on'); $('win').classList.remove('on');
-  if (cur) cur.stop(); cur = null;
+  if (cur) cur.stop(); cur = null; sp = null;
   screens('cal'); save.last = null; persist(); updateStars();
   d ? Kalender.openDay(d) : Kalender.showGrid(calApi);
   $('status').textContent = TEST ? 'Testmodus' : '';
 }
 function showHub() {
   $('help').classList.remove('on');
-  if (cur) cur.stop(); cur = null; Snd.stop();
+  if (cur) cur.stop(); cur = null; sp = null; Snd.stop();
   screens('hub');
   if (save.cal) { save.cal.active = null; }
-  $('sub').textContent = 'Wähle eine Station in deiner Backstube';
-  $('hub').innerHTML = `<button class="btn cal-back" id="toCal">‹ Adventskalender</button>` + GAMES.map(g => {
+  $('sub').textContent = 'Übungsküche: alles Ausgepackte frei spielen';
+  const da = GAMES.filter(g => Feat.has('game:' + g.id));
+  $('hub').innerHTML = `<button class="btn cal-back" id="toCal">‹ Adventskalender</button>` + (da.length ? '' : '<p class="cal-note hub-empty">Die Übungsküche ist noch leer. Ab dem 1. Dezember packt jedes Türchen etwas aus – dann kannst du hier frei weiterspielen.</p>') + da.map(g => {
     const p = prog(g.id);
     return `<button class="station" data-g="${g.id}">
-      <span class="pic pic-${g.id}" aria-hidden="true"><i></i><i></i><i></i></span>
+      <span class="pic pic-${g.id}" aria-hidden="true">${ICONS[g.id] || '<i></i><i></i><i></i>'}</span>
       <span class="st-t">${g.title}</span>
       <span class="st-d">${g.desc}</span>
       <span class="st-l">Level ${p.level} · ★ ${starsOf(p)}</span>
@@ -56,19 +71,29 @@ function showHub() {
   $('status').textContent = TEST ? 'Testmodus' : '';
 }
 function open(id) {
+  sp = null;
   cur = GAMES.find(g => g.id === id); if (!cur) return showHub();
   const p = prog(id);
   curL = (p.cur && p.cur.lvl) || p.level;
   screens('game');
   $('sub').textContent = cur.sub;
-  const d = Kalender.active; $('back').textContent = d ? `‹ Türchen ${d}` : '‹ Backstube';
+  const d = Kalender.active; $('back').textContent = d ? `‹ Türchen ${d}` : '‹ Übungsküche';
   save.last = id; persist();
+  startLevel(true);
+}
+function openSpecial(x) {
+  cur = Spiele[x.game]; if (!cur) return;
+  sp = x; curL = 1000 + x.day * 10 + (x.part || 0); // eigene Nummer, damit Zufallsfolgen der Übungsküche unberührt bleiben
+  screens('game'); $('sub').textContent = cur.sub;
+  $('back').textContent = `‹ Türchen ${x.day}`;
+  save.last = null; persist();
   startLevel(true);
 }
 function startLevel(resume) {
   Snd.stop(); cur.stop();
   const p = prog(cur.id);
-  $('lvl').textContent = `Level ${curL}`;
+  $('lvl').textContent = sp ? `★ ${sp.title}` : `Level ${curL}`;
+  $('prev').hidden = $('next').hidden = !!sp;
   $('prev').disabled = curL <= 1;
   $('next').disabled = !TEST && curL >= p.level;
   $('stage').className = 'stage stage-' + cur.id;
@@ -77,27 +102,27 @@ function startLevel(resume) {
 }
 function win({stars, text, melody}) {
   const p = prog(cur.id);
-  p.best[curL] = Math.max(p.best[curL] || 0, stars);
-  p.level = Math.max(p.level, curL + 1); p.cur = null; persist();
-  Snd.stop(); setTimeout(() => melody.voices ? Snd.choir(melody.voices, .2) : Snd.phrase(melody.notes, 'brass', .2), 350); // kurz absetzen, damit nichts überlappt
-  $('winTitle').textContent = {regal: 'Regal sortiert!', blech: 'Blech glasiert!', spritz: 'Spritzgebäck gebacken!', buch: 'Rezept gemerkt!'}[cur.id];
+  if (!sp) { p.best[curL] = Math.max(p.best[curL] || 0, stars); p.level = Math.max(p.level, curL + 1); p.cur = null; persist(); }
+  Snd.stop(); setTimeout(() => melody.voices ? Snd.choir(melody.voices, .2, melody.style) : Snd.phrase(melody.notes, melody.style || 'brass', .2), 350); // kurz absetzen, damit nichts überlappt
+  $('winTitle').textContent = sp ? 'Tagesrätsel gelöst!' : (cur.winTitle || {regal: 'Regal sortiert!', blech: 'Blech glasiert!', spritz: 'Spritzgebäck gebacken!', buch: 'Rezept gemerkt!'}[cur.id] || 'Geschafft!');
   $('winStars').innerHTML = '★'.repeat(stars) + `<span class="off">${'★'.repeat(3 - stars)}</span>`;
-  const calMsg = Kalender.onWin(cur.id);
+  const calMsg = sp ? Kalender.onSpecialWin(sp, stars) : Kalender.onWin(cur.id);
   $('winText').textContent = text + (calMsg ? ' ' + calMsg : '');
-  $('toHub').textContent = Kalender.active ? `Zum Türchen ${Kalender.active}` : 'Backstube';
+  $('toHub').textContent = Kalender.active ? `Zum Türchen ${Kalender.active}` : 'Übungsküche';
+  $('go').hidden = !!sp;
   $('tip').textContent = TIPS[(curL - 1) % TIPS.length];
-  $('song').textContent = Snd.on ? `♪ Es erklingt: „${melody.name}“${melody.voices ? ' – vierstimmig' : ''}` : '';
+  $('song').textContent = Snd.on ? `♪ Es erklingt: „${melody.name}“ · ${Snd.styleName(melody.style)}${melody.voices ? ', vierstimmig' : ''}` : '';
   $('win').classList.add('on'); $('go').focus(); updateStars();
   $('next').disabled = false;
 }
 
 $('hub').onclick = e => { const b = e.target.closest('.station'); if (b) { Snd.tap(); open(b.dataset.g); } };
-$('back').onclick = () => { Snd.tap(.8); const d = Kalender.active; d ? showCal(d) : showHub(); };
+$('back').onclick = () => { Snd.tap(.8); const d = Kalender.active || (sp && sp.day); d ? showCal(d) : showHub(); };
 $('prev').onclick = () => { if (curL > 1) { curL--; startLevel(true); } };
 $('next').onclick = () => { if (TEST || curL < prog(cur.id).level) { curL++; startLevel(true); } };
-$('go').onclick = () => { $('win').classList.remove('on'); curL++; startLevel(false); };
+$('go').onclick = () => { $('win').classList.remove('on'); if (sp) return; curL++; startLevel(false); };
 $('helpOk').onclick = () => $('help').classList.remove('on');
-$('toHub').onclick = () => { $('win').classList.remove('on'); const d = Kalender.active; d ? showCal(d) : showHub(); };
+$('toHub').onclick = () => { $('win').classList.remove('on'); const d = Kalender.active || (sp && sp.day); d ? showCal(d) : showHub(); };
 
 const setSndBtn = () => { const b = $('snd'); b.setAttribute('aria-pressed', Snd.on); b.classList.toggle('off', !Snd.on); b.setAttribute('aria-label', Snd.on ? 'Ton ausschalten' : 'Ton einschalten'); };
 $('snd').onclick = () => { Snd.toggle(); setSndBtn(); };
@@ -144,7 +169,7 @@ if (/tontest/.test(location.hash + location.search)) setTimeout(tonTest, 300);
 function liederCheck() {
   const marks = save.songCheck || (save.songCheck = {});
   const list = () => MELODIES.map((m, i) => `<div class="song-row"><button class="btn small" data-play="${i}">▶</button>${m.voices ? `<button class="btn small" data-choir="${i}">▶ 4-stimmig</button>` : ''}
-      <span class="song-name">${m.name}<small>${m.ok === false ? 'aus dem Gedächtnis – bitte prüfen' : 'Noten: ' + (m.src || '')}</small></span>
+      <span class="song-name">${m.name}<small>${Snd.styleName(m.style)} · ${m.ok === false ? 'aus dem Gedächtnis – bitte prüfen' : 'Noten: ' + (m.src || '')}</small></span>
       <button class="btn small ${marks[m.name] === 'ok' ? 'active' : ''}" data-ok="${i}">stimmt</button>
       <button class="btn small ${marks[m.name] === 'bad' ? 'bad' : ''}" data-bad="${i}">klingt falsch</button></div>`).join('');
   api.help('Lieder-Prüfung', `<p>Tippe auf ▶ und hör dir jede Melodie an. Stimmt sie? Dann „stimmt“, sonst „klingt falsch“ – und sag Claude am besten, an welcher Stelle.</p>
@@ -152,8 +177,8 @@ function liederCheck() {
   const sum = () => { const v = Object.values(marks); $('songSum').textContent = `${v.filter(x => x === 'ok').length} bestätigt, ${v.filter(x => x === 'bad').length} falsch, ${MELODIES.length - v.length} offen.`; };
   $('songList').onclick = e => {
     const b = e.target.closest('button'); if (!b) return;
-    if (b.dataset.play) { Snd.stop(); if (!Snd.on) Snd.toggle(); Snd.phrase(MELODIES[+b.dataset.play].notes, 'bell', .2); return; }
-    if (b.dataset.choir) { Snd.stop(); if (!Snd.on) Snd.toggle(); Snd.choir(MELODIES[+b.dataset.choir].voices, .2); return; }
+    if (b.dataset.play) { Snd.stop(); if (!Snd.on) Snd.toggle(); const m = MELODIES[+b.dataset.play]; Snd.phrase(m.notes, m.style, .2); return; }
+    if (b.dataset.choir) { Snd.stop(); if (!Snd.on) Snd.toggle(); const m = MELODIES[+b.dataset.choir]; Snd.choir(m.voices, .2, m.style); return; }
     const m = MELODIES[+(b.dataset.ok || b.dataset.bad)]; marks[m.name] = b.dataset.ok ? 'ok' : 'bad'; persist();
     $('songList').innerHTML = list(); sum();
   };
@@ -162,5 +187,5 @@ function liederCheck() {
 if (/lieder/.test(location.hash + location.search)) setTimeout(liederCheck, 300);
 
 // Beim Öffnen dort weitermachen, wo sie aufgehört hat
-if (save.last && GAMES.some(g => g.id === save.last)) open(save.last); else showCal();
+if (save.last && GAMES.some(g => g.id === save.last) && Feat.has('game:' + save.last)) open(save.last); else showCal();
 }
