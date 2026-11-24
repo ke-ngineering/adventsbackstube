@@ -4,7 +4,7 @@
 > Wer (Mensch oder Claude) die Entwicklung fortsetzt, liest zuerst diese Datei.
 > Nach jeder Arbeitssitzung: Status, Entscheidungen und Agenda hier aktualisieren.
 
-Stand: 24.11.2026 (Prototyp v12)
+Stand: 24.11.2026 (Prototyp v13)
 
 ## 1. Vision
 
@@ -65,6 +65,8 @@ mit genug Inhalt für spürbar lange Spielsessions (ca. 20–30 Min neue Tagesin
 | D39 | 24.11. | Keine überlappenden Melodien: letztes volles Glas spielt kein Teilstück, Gewinn-Melodie startet nach kurzer Pause und stoppt laufende Klänge | Tester: Teilstück + ganze Melodie überlagern sich |
 | D40 | 24.11. | iPhone-Ton-Einstellung (audioSession) nur noch auf iPhone/iPad setzen, nicht auf dem Mac | Ton auf iOS jetzt ok, auf Mac-Safari weiterhin still – Ausschluss einer möglichen Ursache |
 | D41 | 24.11. | Liedersammlung auf 10 gemeinfreie Lieder erweitert + Lieder-Prüfseite `#lieder` | Tester: „ruhig eine große Auswahl“, z. B. We Three Kings; Spielerin singt im Chor → Noten müssen stimmen |
+| D42 | 24.11. | Ausnahme von der Ein-Repo-Regel: `musikpirat/singen-im-advent.github.io` **nur lesend** als Notenquelle | Vom Auftraggeber ausdrücklich erlaubt; gemeinfreies Liederbuch, frei verbreitbar |
+| D43 | 24.11. | 23 Lieder, 19 notengetreu aus dem Liederbuch; Liederkiste.com NICHT als Quelle (Noten nur für private Zwecke, keine Veröffentlichung) | Genauigkeit für eine Chorsängerin; Lizenz sauber |
 | D12 | 23.11. | Persönliche Inhalte (Name, Nachrichten) **verschlüsselt** im Repo; Schlüssel steht nur im Link-Teil nach `#`, den sie bekommt (wird nie an Server übertragen) | Personalisierung trotz öffentlichem Repo |
 
 ## 3. Spielkonzept
@@ -168,18 +170,24 @@ Ziel: **spielbar ab Di, 1.12.2026**, Link vorher an sie (z. B. am 1. Advent, 29.
 - Modul-Schnittstelle: `{id, title, sub, desc, start(level, resume, api), stop()}`; `api` = stage/controls/legend/status/getCur/saveCur/restart/win.
 - Cache: Dateien mit `?v=N` einbinden und `VERSION` in core.js hochzählen.
 - Spielstand: `localStorage`-Key `adventsbackstube.v1` → `{level, best, cur, sound, last, games:{blech:{level,best,cur}, buch:{…}}}`; Vorratsregal (`regal`) nutzt die obersten Felder (abwärtskompatibel), `last` = zuletzt geöffnete Station. Bleibt im Browser erhalten, solange Browserdaten nicht gelöscht werden / kein privater Modus.
-- Klang: Web Audio, alles synthetisch (`Snd`-Modul). iPhone: `navigator.audioSession.type = 'playback'`, damit der Stummschalter Web Audio nicht stummschaltet (Safari 16.4+). Einschalten des Tons spielt einen Testklang. WebKit-Fix: Ton wird bei jedem Zustand ≠ `running` (auch `interrupted`) fortgesetzt, Freischalten mit stillem Puffer beim ersten Antippen, Fortsetzen nach Tab-Wechsel. **Ton-Test:** Seite mit `#tontest` öffnen → Diagnose + 3 Testtöne (Spiel-Klang, einfacher Ton, Audio-Datei). Melodien als `[MIDI-Note, Dauer in Achteln]` in `MELODIES`; nur gemeinfreie Lieder. **Liedersammlung (v12, 10 Lieder):** Stille Nacht, Morgen kommt der Weihnachtsmann, Jingle Bells,
-  Deck the Halls, We Three Kings, We Wish You a Merry Christmas, O Tannenbaum (1. Satz), Good King Wenceslas, Joy to the World
-  (Anfang), Herbei o ihr Gläubigen (Anfang). Notiert aus dem Gedächtnis – exakte Notenquellen waren aus der Arbeitsumgebung nicht
-  verlässlich abrufbar. **Lieder-Prüfseite `#lieder`:** jede Melodie anhören, als „stimmt“/„klingt falsch“ markieren (lokal gespeichert,
-  `save.songCheck`). Falsche Melodien korrigieren oder entfernen, bevor sie live gehen.
+- Klang: Web Audio, alles synthetisch (`Snd`-Modul). iPhone: `navigator.audioSession.type = 'playback'`, damit der Stummschalter Web Audio nicht stummschaltet (Safari 16.4+). Einschalten des Tons spielt einen Testklang. WebKit-Fix: Ton wird bei jedem Zustand ≠ `running` (auch `interrupted`) fortgesetzt, Freischalten mit stillem Puffer beim ersten Antippen, Fortsetzen nach Tab-Wechsel. **Ton-Test:** Seite mit `#tontest` öffnen → Diagnose + 3 Testtöne (Spiel-Klang, einfacher Ton, Audio-Datei). Melodien als `[MIDI-Note, Dauer in Achteln]` in `MELODIES`; nur gemeinfreie Lieder. **Liedersammlung (v13, 23 Lieder):** 19 davon notengetreu aus dem gemeinfreien Liederbuch
+  „Singen im Advent“ (PDF aus `musikpirat/singen-im-advent.github.io`, Noten von Claude aus den Notenbildern abgelesen, `src`):
+  Stille Nacht, Alle Jahre wieder, O Tannenbaum, Kling Glöckchen, Lasst uns froh und munter sein, Jingle Bells, Ihr Kinderlein kommet,
+  Leise rieselt der Schnee, O du fröhliche, Morgen kommt der Weihnachtsmann, We Wish You a Merry Christmas (mit Refrain),
+  Süßer die Glocken nie klingen, Macht hoch die Tür, Tochter Zion (mit D.C.), Kommet ihr Hirten, Herbei o ihr Gläubigen (mit Refrain),
+  Es ist ein Ros entsprungen, Zu Bethlehem geboren, Es kommt ein Schiff geladen. 4 aus dem Gedächtnis (`ok:false`, im Buch nicht
+  enthalten): We Three Kings, Deck the Halls, Good King Wenceslas, Joy to the World. Pausen = Note 0; `tones(m)` liefert Töne ohne
+  Pausen (für Blech, Spritzbeutel, Rezeptbuch). **Lieder-Prüfseite `#lieder`** zeigt Quelle bzw. „bitte prüfen“.
+  Abgleich: Meine Gedächtnis-Versionen von Stille Nacht, Herbei, We Wish und Morgen kommt waren tongenau; O Tannenbaum (Rhythmus 2. Hälfte)
+  und Jingle Bells (eine punktierte Note) wurden korrigiert. Weitere Lieder im Buch (z. B. Vom Himmel hoch, In dulci jubilo,
+  Fröhliche Weihnacht überall, Maria durch ein Dornwald ging) können bei Bedarf ergänzt werden.
 - Level-Generator: Seeded RNG (mulberry32), Seed aus Levelnummer → jedes Level ist für sie immer gleich.
   DFS-Solver prüft Lösbarkeit (Knotenlimit 60k), sonst neuer Versuch; Notfall: Extraglas.
 - Hosting-Optionen: GitHub Pages (bevorzugt, Link + „Zum Startbildschirm“) oder claude.ai-Artifact-Link (Vorschau).
 - Tests: `python3 tools/test_generator.py` (alle Generatoren/Löser in Node), `tools/screenshots.py` (Playwright, 390 px).
 
 ## 7. Offene Fragen
-- Lieder prüfen (`#lieder`): Welche Melodien klingen falsch? Weitere Wunschlieder (Notennamen vom Tester willkommen)
+- Lieder prüfen (`#lieder`): v. a. die 4 Gedächtnis-Lieder (We Three Kings, Deck the Halls, Good King Wenceslas, Joy to the World)
 - Prototyp v10 testen: Lehrplan Glasur-Blech Level 1–11 durchspielen – lernt man den Rest-Trick? Labor verständlich? Spritzbeutel schwer genug?
 - Weiterhin offen: Rezeptbuch (Tempo, Lieder erkannt, Melodien korrekt?)
 - Wie verteilen sich die 4 Stationen auf die 24 Adventstage? → danach gemeinsam evaluieren, was das eigentliche Spiel braucht (Schwierigkeitskurve, Wendungen, Animation).

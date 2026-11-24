@@ -259,3 +259,4 @@ footer{text-align:center;font-size:13px;color:var(--soft);padding:10px 14px 16px
 .song-name{flex:1;min-width:140px;font-weight:600;font-size:15px}
 .btn.small.bad{background:var(--red);color:#fff}
 .dialog{max-height:92dvh;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.song-name small{display:block;font-weight:400;font-size:12px;color:var(--soft)}

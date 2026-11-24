@@ -189,7 +189,7 @@ function onTap(e) {
   document.querySelectorAll('#blech .cell.hint').forEach(x => x.classList.remove('hint'));
   apply(g, i); taps++; hist.push(i);
   if (restPlan.includes(i)) restPlan = restPlan.filter(x => x !== i); else restPlan = [];
-  const n = mel.notes; Snd.note(n[noteI % n.length][0], .4); noteI++;
+  const n = tones(mel); Snd.note(n[noteI % n.length][0], .4); noteI++;
   paint(aff[i]); saveCur(); refresh();
   if (g.every(v => v)) secondPass = false;
   if (g.every(v => v)) setTimeout(() => {

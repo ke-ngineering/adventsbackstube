@@ -121,7 +121,7 @@ if (/tontest/.test(location.hash + location.search)) setTimeout(tonTest, 300);
 function liederCheck() {
   const marks = save.songCheck || (save.songCheck = {});
   const list = () => MELODIES.map((m, i) => `<div class="song-row"><button class="btn small" data-play="${i}">▶</button>
-      <span class="song-name">${m.name}</span>
+      <span class="song-name">${m.name}<small>${m.ok === false ? 'aus dem Gedächtnis – bitte prüfen' : 'Noten: ' + (m.src || '')}</small></span>
       <button class="btn small ${marks[m.name] === 'ok' ? 'active' : ''}" data-ok="${i}">stimmt</button>
       <button class="btn small ${marks[m.name] === 'bad' ? 'bad' : ''}" data-bad="${i}">klingt falsch</button></div>`).join('');
   api.help('Lieder-Prüfung', `<p>Tippe auf ▶ und hör dir jede Melodie an. Stimmt sie? Dann „stimmt“, sonst „klingt falsch“ – und sag Claude am besten, an welcher Stelle.</p>

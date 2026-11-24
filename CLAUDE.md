@@ -4,6 +4,7 @@
 > Der Auftraggeber hat weitere Projekte auf GitHub. Diese niemals lesen, klonen, ändern, durchsuchen oder
 > Commits/Issues/Pull Requests darin anlegen – auch nicht „nur kurz zum Nachschauen“. Wird für eine Aufgabe ein
 > anderes Repository nötig, zuerst ausdrücklich beim Auftraggeber nachfragen.
+> **Genehmigte Ausnahme (nur lesen):** `musikpirat/singen-im-advent.github.io` – gemeinfreies Liederbuch „Singen im Advent“ (PDF) als Notenquelle (D42).
 
 1. **Zuerst `docs/PROJEKT.md` lesen** – dort stehen Vision, Entscheidungen, Agenda, Status und offene Fragen.
 2. Mit dem Auftraggeber auf **Deutsch** kommunizieren; er ist kein Spieleentwickler – Entscheidungen gemeinsam treffen, Optionen kurz erklären.
