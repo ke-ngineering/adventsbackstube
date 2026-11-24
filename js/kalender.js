@@ -8,12 +8,12 @@ const PLAN = ADVENT;
 // Türchen-Anordnung wie ein echter Kalender (durcheinander)
 const ORDER = [13, 6, 21, 2, 17, 9, 24, 11, 4, 19, 1, 15, 8, 22, 5, 12, 18, 3, 23, 10, 16, 7, 20, 14];
 // Lied des Tages – passend zum Datum (Nikolaus, Heiligabend …)
-// Vierstimmige Sätze an den besonderen Tagen (D60): 1. Türchen, Adventssonntage 13/20, 18, 9, 23 und Heiligabend
+// Vierstimmige Sätze an den besonderen Tagen (D60): 1. Türchen, Adventssonntage 13/20, 18, 9, 23 und Heiligabend; Fuge zu den Meisterblechen (22, D63)
 const SONG_DAYS = [null, 'Tochter Zion, freue dich', 'Macht hoch die Tür', 'Kling, Glöckchen, klingelingeling', 'Es kommt ein Schiff geladen',
   'Leise rieselt der Schnee', 'Lasst uns froh und munter sein', 'O Tannenbaum', 'Jingle Bells', 'Good King Wenceslas', 'Carol of the Bells',
   'We Wish You a Merry Christmas', 'Süßer die Glocken nie klingen', 'Hark! The Herald Angels Sing', 'Deck the Halls', 'Ihr Kinderlein kommet',
   'God Rest Ye Merry, Gentlemen', 'Es ist ein Ros entsprungen', 'We Three Kings', 'Morgen kommt der Weihnachtsmann', 'O du fröhliche',
-  'Joy to the World', 'I Saw Three Ships', 'Herbei, o ihr Gläubigen', 'Stille Nacht, heilige Nacht'];
+  'Joy to the World', 'Fuge über „Es kommt ein Schiff geladen“', 'Herbei, o ihr Gläubigen', 'Stille Nacht, heilige Nacht'];
 const songOfDay = d => MELODIES.find(m => m.name === SONG_DAYS[d]) || MELODIES[d % MELODIES.length];
 
 let api;

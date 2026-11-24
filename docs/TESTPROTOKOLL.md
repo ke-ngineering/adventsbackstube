@@ -229,3 +229,8 @@ Wunsch: We Three Kings vierstimmig. Das MIDI-Arrangement (Mannheim Steamroller, 
 | Morning Star | weglassen | entfernt |
 | Ton | nach 2–3 Fensterwechseln kein Ton mehr | D59; im Test 6 Wechsel simuliert, Ton läuft weiter |
 
+## Runde 19.1 – Rückmeldung zu v19 (24.11.)
+- Carol of the Bells nach Partitur: „Prima!“
+- Joy to the World „klingt noch etwas komisch und abgebrochen“ → Ursache vermutlich: Bläser-Klang machte Sechzehntel zu kurzen Stößen und spielte die einstimmige Melodie eine Oktave tief. v19.1: vierstimmiger Posaunenchor-Satz, Tempo −15 %, weichere kurze Bläsertöne. Bitte erneut anhören.
+- Musikdaten liegen jetzt als MIDI/ABC/JSON in `musik/`.
+
