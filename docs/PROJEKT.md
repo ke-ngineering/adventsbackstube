@@ -72,6 +72,7 @@ mit genug Inhalt für spürbar lange Spielsessions (ca. 20–30 Min neue Tagesin
 | D46 | 24.11. | Adventskalender als Startseite; Tagesmenü aus Stations-Aufgaben; Lied des Tages; Rezept-Tage 3/6/10/13/17/20/24; Backstube bleibt zum freien Spielen | Vorschlag mit Standardwerten umgesetzt (Fragen zu Tagesmenü/Rezepttagen offen, leicht änderbar) |
 | D47 | 24.11. | Fremde Arrangements (z. B. aus MIDI-Dateien) nie übernehmen; für gemeinfreie Melodien ohne freien Satz schreibt Claude **eigene** vierstimmige Sätze | Rechte; Wunsch nach 4-stimmigem We Three Kings |
 | D48 | 24.11. | 6 Rezepte geschrieben (eigene Texte, mit Experimentier-Idee und Sicherheitshinweis beim Frittieren); Rezept zum 24.12. bleibt offen | Auftraggeber will über den 24. noch nachdenken |
+| D49 | 24.11. | Ton-Freischaltung nur bei mousedown/click/touchend/keydown (nicht pointerup); blockierter AudioContext wird beim nächsten Antippen neu angelegt | Kein Ton in Safari (Mac) mit v15/16: pointerup zählt dort bei Maus/Trackpad nicht als Nutzeraktion |
 | D12 | 23.11. | Persönliche Inhalte (Name, Nachrichten) **verschlüsselt** im Repo; Schlüssel steht nur im Link-Teil nach `#`, den sie bekommt (wird nie an Server übertragen) | Personalisierung trotz öffentlichem Repo |
 
 ## 3. Spielkonzept

@@ -1,6 +1,6 @@
 /* Adventsbackstube – gemeinsame Grundlagen: Spielstand, Zutaten, Klang, Melodien, Hilfsfunktionen.
    Wird von allen Spiel-Modulen (regal.js, blech.js, buch.js) und app.js genutzt. */
-const VERSION = 'v16';
+const VERSION = 'v16.1';
 const TEST = /(^|[#?&])test/.test(location.hash + location.search);
 const $ = id => document.getElementById(id);
 const wait = ms => new Promise(r => setTimeout(r, ms));
@@ -49,25 +49,29 @@ const totalStars = () => starsOf(save) + Object.values(save.games || {}).reduce(
 
 /* ---- Klang: Geräusche synthetisch (Web Audio), keine Dateien ---- */
 const Snd = (() => {
-  let ctx = null, master = null, on = save.sound !== false, playing = [];
+  let ctx = null, master = null, on = save.sound !== false, playing = [], stale = false, unlocked = false;
   const ensure = () => {
     if (!on) return null;
     try {
       // iPhone/iPad: Ton auch bei Stummschalter abspielen (Safari 16.4+), sonst bleibt Web Audio stumm
       const iOS = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
       try { if (iOS && navigator.audioSession && navigator.audioSession.type !== 'playback') navigator.audioSession.type = 'playback'; } catch (e) {}
+      // Blockierter Ton (z. B. Safari am Mac, wenn der erste Start außerhalb einer „echten“ Nutzeraktion lag): neu anlegen
+      if (ctx && stale) { try { ctx.close(); } catch (e) {} ctx = null; master = null; unlocked = false; stale = false; }
       if (!ctx) { ctx = new (window.AudioContext || window.webkitAudioContext)(); master = ctx.createGain(); master.gain.value = .7; master.connect(ctx.destination); }
-      if (ctx.state !== 'running') { const pr = ctx.resume(); if (pr && pr.catch) pr.catch(() => {}); } // WebKit kennt auch 'interrupted'
+      if (ctx.state !== 'running') { // WebKit kennt auch 'interrupted'
+        const pr = ctx.resume(); if (pr && pr.catch) pr.catch(() => {});
+        const c0 = ctx; setTimeout(() => { if (ctx === c0 && ctx.state !== 'running') stale = true; }, 400);
+      }
     } catch (e) { return null; }
     return ctx;
   };
   // Beim ersten Antippen irgendwo: Ton freischalten (stiller Puffer) – hilft Safari/iOS
-  let unlocked = false;
   const unlock = () => {
     const c = ensure(); if (!c) return;
-    if (!unlocked) { try { const b = c.createBuffer(1, 1, 22050), s = c.createBufferSource(); s.buffer = b; s.connect(c.destination); s.start(0); unlocked = true; } catch (e) {} }
+    if (!unlocked || c.state !== 'running') { try { const b = c.createBuffer(1, 1, 22050), s = c.createBufferSource(); s.buffer = b; s.connect(c.destination); s.start(0); unlocked = c.state === 'running'; } catch (e) {} }
   };
-  ['touchend', 'pointerup', 'click', 'keydown'].forEach(ev => document.addEventListener(ev, unlock, {capture: true, passive: true}));
+  ['touchend', 'mousedown', 'click', 'keydown'].forEach(ev => document.addEventListener(ev, unlock, {capture: true, passive: true})); // kein pointerup: zählt in Safari (Maus/Trackpad) nicht als Nutzeraktion
   document.addEventListener('visibilitychange', () => { if (!document.hidden && ctx && ctx.state !== 'running') ctx.resume().catch?.(() => {}); });
   const env = (g, t, a, peak, d) => { g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(peak, t + a); g.gain.exponentialRampToValueAtTime(0.0001, t + a + d); };
   const hz = n => 440 * Math.pow(2, (n - 69) / 12);

@@ -190,3 +190,11 @@ Wunsch zum Gewürzregal: Flüssige Zutaten sollen fließen, andere herunterpurze
 **Zwischenfeedback:** Der Tester hängt zum Testen eine MIDI-Datei von „We Three Kings“ an (Arrangement eines Dritten). Daraus wurde nur die Melodiestimme ausgelesen, um die eigene Notation zu prüfen. Ergebnis: tongleich, Lied gilt jetzt als geprüft. Das Arrangement wurde nicht übernommen.
 Das Rezept zum 24.12. soll gemeinsam überlegt werden.
 Wunsch: We Three Kings vierstimmig. Das MIDI-Arrangement (Mannheim Steamroller, sequenziert von Dritten) ist geschützt, deshalb hat Claude einen eigenen Satz geschrieben (D47).
+
+## Runde 16 – v16 in Safari (Mac)
+**Feedback:** wieder kein Ton in Safari auf dem Mac.
+**Analyse:** Das Freischalt-Ereignis `pointerup` zählt in Safari bei Maus oder Trackpad nicht als Nutzeraktion. Wird der AudioContext dort angelegt, kann er blockiert bleiben. Mit dem Kalender als Startseite hat sich die Reihenfolge der ersten Klicks geändert.
+**Folge:** v16.1 (D49). Freischalten nur noch bei mousedown, click, touchend und keydown. Ein blockierter AudioContext wird beim nächsten Antippen neu angelegt.
+**Zu prüfen:** Ton in Safari (Mac) nach v16.1. Falls es weiter still bleibt: `#tontest` (Zustand, welche Knöpfe hörbar), Lautsprecher-Symbol im Spiel, Safari-Tab nicht stummgeschaltet.
+
+**Nachtrag Runde 16:** In v15 ging der Ton auf dem Mac, sobald einmal auf der Lieder-Testseite ein Lied abgespielt wurde – danach auch in den Spielen. Das bestätigt die Diagnose: Der Ton war nicht kaputt, sondern nur nicht freigeschaltet (der Knopf auf der Testseite spielt direkt im Klick, die Spiele teils verzögert). v16.1 schaltet jetzt bei jedem Klick frei, bis Safari den Ton wirklich laufen lässt.
