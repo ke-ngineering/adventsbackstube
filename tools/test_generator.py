@@ -61,6 +61,12 @@ for (const m of MELODIES.filter(m => m.voices)) {
   for (let d = 1; d <= 24; d++) { const s = Kalender._test.songOfDay(d), want = Kalender._test.SONG_DAYS[d]; if (!s || s.name !== want) { console.log('Lied des Tages nicht gefunden', d, want); process.exit(1); } }
   for (const p of P.slice(1)) if (p.reward && p.reward.type === 'recipe' && !RECIPES[p.reward.id]) { console.log('Rezept fehlt', p.reward.id); process.exit(1); }
   console.log('OK Kalender: 24 Türchen, Lied des Tages überall gefunden, Rezepte vorhanden'); }
+{ const st = {level: 7, best: {1: 3}, sound: false, games: {blech: {level: 4, best: {}, cards: {a: 1}}}, cal: {active: null, days: {1: {opened: true, done: {regal: 2}, finished: true}}}, notiz: 'Grüße – äöü ß ★'};
+  const c = Backup.code(st), r = Backup.read(' ' + c.slice(0, 20) + '\n' + c.slice(20) + ' ');
+  if (!r.ok || JSON.stringify(r.save) !== JSON.stringify(st)) { console.log('Sicherungscode FEHLER', r); process.exit(1); }
+  const bad = c.slice(0, 10) + (c[10] === 'A' ? 'B' : 'A') + c.slice(11);
+  if (Backup.read(bad).ok || Backup.read('hallo').ok || Backup.read('').ok) { console.log('Sicherungscode erkennt Fehler nicht'); process.exit(1); }
+  console.log('OK Sicherungscode: hin und zurück, Umlaute, Tippfehler erkannt,', c.length, 'Zeichen'); }
 console.log('OK', MELODIES.length, 'Melodien,', MELODIES.filter(m => m.ok !== false).length, 'aus dem Liederbuch');
 """
 f = tempfile.NamedTemporaryFile('w', suffix='.js', delete=False)
