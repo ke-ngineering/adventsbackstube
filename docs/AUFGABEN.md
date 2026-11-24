@@ -57,6 +57,8 @@ Details zum Konzept: `KONZEPT-ADVENT.md`. Entscheidungen: `PROJEKT.md`.
 | M13 | Folk-Duo statt Jazz, Stopp-Knopf, Süßer die Glocken langsamer (D64) | ✅ v20 |
 | M14 | Leise rieselt der Schnee: welche Melodie? | ❓ Rückfrage |
 | M15 | Gigue über „I Saw Three Ships“ (D65) | ✅ v20.1 – bitte anhören |
+| M16 | Raumhall + lebendiges Spiel (D66) | ✅ v21 |
+| M17 | Hörvergleich Orgel: Synthese vs. Aufnahme (O du fröhliche, Fuge) → entscheiden, ob weitere Instrumente als Aufnahme | ❓ Auftraggeber hört |
 | M7 | Musik-Rückmeldungen Runde 19 umsetzen (Tempi, Jazz-Trio, Sätze, Joy to the World, GKW) | ✅ v19 |
 | M8 | Ton-Fehler nach Fensterwechsel (D59) | ✅ v19 |
 | M6 | Vierstimmiger Satz für Stille Nacht (Finale) | ✅ v19 |

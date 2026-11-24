@@ -1,6 +1,6 @@
 /* Adventsbackstube – gemeinsame Grundlagen: Spielstand, Zutaten, Klang, Melodien, Hilfsfunktionen.
    Wird von allen Spiel-Modulen (regal.js, blech.js, buch.js) und app.js genutzt. */
-const VERSION = 'v20.1';
+const VERSION = 'v21';
 const TEST = /(^|[#?&])test/.test(location.hash + location.search);
 const $ = id => document.getElementById(id);
 const wait = ms => new Promise(r => setTimeout(r, ms));
@@ -101,7 +101,7 @@ const Snd = (() => {
         stale = false;
       }
       if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)();
-      if (!master) { master = ctx.createGain(); master.gain.value = .7; master.connect(ctx.destination); }
+      if (!master) { master = ctx.createGain(); master.gain.value = .7; hallBus(); }
       if (ctx.state !== 'running') { const pr = ctx.resume(); if (pr && pr.catch) pr.catch(() => {}); } // WebKit kennt auch 'interrupted'
     } catch (e) { return ctx; }
     return ctx;
@@ -120,6 +120,30 @@ const Snd = (() => {
     if (document.hidden) { stop(); return; }
     if (ctx && ctx.state !== 'running') { const pr = ctx.resume(); if (pr && pr.catch) pr.catch(() => {}); }
   });
+  /* Raumhall (D66): Faltungshall mit berechneter Impulsantwort (abklingendes, nach hinten dunkler werdendes Rauschen, Stereo).
+     master → trocken → Ausgang, master → Hall → Ausgang. Wie viel Hall, bestimmt die Besetzung des Liedes (room()). */
+  let dry = null, send = null;
+  function hallBus() {
+    dry = ctx.createGain(); dry.gain.value = 1; master.connect(dry).connect(ctx.destination);
+    send = ctx.createGain(); send.gain.value = .15;
+    try {
+      const sr = ctx.sampleRate, len = Math.floor(sr * 3.2), ir = ctx.createBuffer(2, len, sr), r = rng(4711);
+      for (let ch = 0; ch < 2; ch++) { const d = ir.getChannelData(ch); let lp = 0;
+        for (let i = 0; i < len; i++) { const x = i / sr, k = Math.min(.92, .25 + x * .35); lp = lp * k + (r() * 2 - 1) * (1 - k); d[i] = x < .018 ? 0 : lp * Math.exp(-x * 2.3) * 1.6; } }
+      const conv = ctx.createConvolver(); conv.buffer = ir; master.connect(send).connect(conv).connect(ctx.destination);
+    } catch (e) {}
+  }
+  const ROOM = {orgelA: .5, orgel: .55, chor: .45, blech: .38, brass: .38, streicher: .35, holz: .3, tanz: .26, spieluhr: .22, bell: .25, folk: .16, epiano: .15};
+  function room(style) { if (!send) return; const v = ROOM[style] ?? .2, t = ctx.currentTime; send.gain.setTargetAtTime(v, t, .05); dry.gain.setTargetAtTime(1 - v * .35, t, .05); }
+  // Lebendiges Spiel (D66): Betonung nach Taktschwerpunkten, kleine Schwankungen in Lautstärke und Einsatz – wie bei echten Musikern
+  const VOL = {orgelA: .32, bell: 1, brass: .16, streicher: .11, chor: .12, holz: .14, orgel: .07, spieluhr: .2, epiano: .16, bass: .3, mandoline: .2, gitarre: .16, zupf: .22};
+  let human = rng(1);
+  function feel(p, meter, pickup) { // Faktor für die Lautstärke an Position p (in Achteln)
+    const bar = (meter || 4) * 2, x = ((p - (pickup || 0)) % bar + bar) % bar;
+    const acc = x === 0 ? 1.12 : x % 2 === 0 ? (meter === 4 && x === 4 ? 1.05 : 1) : .9;
+    return acc * (.94 + human() * .12);
+  }
+  const jitter = () => (human() - .5) * .014; // ±7 ms
   // laufende Klangquellen merken (für stop) – fertige fallen von selbst heraus
   const track = o => { playing.push(o); o.onended = () => { const i = playing.indexOf(o); if (i >= 0) playing.splice(i, 1); }; };
   const env = (g, t, a, peak, d) => { g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(peak, t + a); g.gain.exponentialRampToValueAtTime(0.0001, t + a + d); };
@@ -168,9 +192,9 @@ const Snd = (() => {
     env(g, t, .005, .3, .16); o.connect(g).connect(master); o.start(t); o.stop(t + .2);
   }
   // Glockenspiel-Ton (für Glas-voll-Melodie)
-  function bell(n, t, len) {
+  function bell(n, t, len, vol = 1) {
     const f = hz(n);
-    [[1, .32], [2.76, .08], [5.4, .03]].forEach(([m, v]) => {
+    [[1, .32 * vol], [2.76, .08 * vol], [5.4, .03 * vol]].forEach(([m, v]) => {
       const o = ctx.createOscillator(), g = ctx.createGain(); o.type = 'sine'; o.frequency.value = f * m;
       env(g, t, .005, v, Math.max(.5, len * 1.6)); o.connect(g).connect(master); o.start(t); o.stop(t + len * 1.6 + .6); track(o);
     });
@@ -221,37 +245,43 @@ const Snd = (() => {
   const STYLE = {
     bell: {v: ['bell'], name: 'Glockenspiel'}, blech: {v: ['brass'], name: 'Posaunenchor'}, brass: {v: ['brass'], name: 'Posaunenchor'},
     streicher: {v: ['streicher'], name: 'Streichquartett'}, chor: {v: ['chor'], name: 'Chor'}, holz: {v: ['holz'], name: 'Flöten'},
-    orgel: {v: ['orgel'], name: 'Orgel'}, epiano: {v: ['epiano'], name: 'E-Piano'}, spieluhr: {v: ['spieluhr'], name: 'Spieluhr'}, folk: {v: ['mandoline'], name: 'Mandoline & Gitarre'}, tanz: {v: ['holz', 'holz', 'gitarre', 'gitarre'], name: 'Flöten & Laute'}, mandoline: {v: ['mandoline'], name: 'Mandoline'},
+    orgel: {v: ['orgel'], name: 'Orgel'}, epiano: {v: ['epiano'], name: 'E-Piano'}, spieluhr: {v: ['spieluhr'], name: 'Spieluhr'}, folk: {v: ['mandoline'], name: 'Mandoline & Gitarre'}, tanz: {v: ['holz', 'holz', 'gitarre', 'gitarre'], name: 'Flöten & Laute'}, orgelA: {v: ['orgelA'], name: 'Orgel (Aufnahme)'}, mandoline: {v: ['mandoline'], name: 'Mandoline'},
   };
   const styleOf = s => STYLE[s] || STYLE.bell;
   const swingT = (t8, tempo) => { const beat = Math.floor(t8 / 2), off = t8 - beat * 2; return (beat * 2 + (off >= 1 ? 1.34 + (off - 1) * .66 : off * 1.34)) * tempo; };
   // Mehrstimmig: jede Stimme in Originallage, Sopran etwas lauter
-  function choir(voices, tempo = .2, style = 'blech') {
-    const c = ensure(); if (!c) return 0; const t0 = c.currentTime + .05, st = styleOf(style); let end = 0;
+  function choir(voices, tempo = .2, style = 'blech', meter = 4, pickup = 0) {
+    const c = ensure(); if (!c) return 0; const t0 = c.currentTime + .06, st = styleOf(style); let end = 0;
+    room(style); human = rng(voices[0].length * 7 + 3);
     voices.forEach((v, k) => {
-      const ins = INSTR[st.v[Math.min(k, st.v.length - 1)]], lead = k === 0;
+      const name = st.v[Math.min(k, st.v.length - 1)], ins = INSTR[name], lead = k === 0;
       let p = 0;
       for (const [n, d] of v) {
-        const ta = t0 + (st.swing ? swingT(p, tempo) : p * tempo), tb = t0 + (st.swing ? swingT(p + d, tempo) : (p + d) * tempo);
-        if (n) { const nn = style === 'blech' || style === 'brass' ? n + 12 : n; ins === INSTR.brass ? ins(nn, ta, (tb - ta) * .94, lead ? .14 : .09) : ins(nn, ta, (tb - ta) * .94, ins === INSTR.bass ? .3 : ins === INSTR.gitarre ? .17 : lead ? undefined : (st.v[0] === 'orgel' ? .045 : st.v[0] === 'holz' ? .11 : .07)); }
+        const ta = t0 + p * tempo, tb = t0 + (p + d) * tempo;
+        if (n) {
+          const nn = style === 'blech' || style === 'brass' ? n + 12 : n;
+          const base = ins === INSTR.brass ? (lead ? .14 : .09) : ins === INSTR.bass ? .3 : ins === INSTR.gitarre ? .17 : lead ? VOL[name] : st.v[0] === 'orgelA' ? .2 : (st.v[0] === 'orgel' ? .045 : st.v[0] === 'holz' ? .11 : .07);
+          ins(nn, Math.max(t0, ta + jitter()), (tb - ta) * .94, base * feel(p, meter, pickup));
+        }
         p += d;
       }
       end = Math.max(end, t0 + p * tempo);
     });
-    if (st.swing) for (let b = 0; t0 + b * tempo * 2 < end; b++) besen(t0 + b * tempo * 2 + (b % 2 ? .0 : .01));
-    return end - c.currentTime;
+    return end - c.currentTime + .8;
   }
-  function phrase(notes, voice = 'bell', tempo = .17) {
-    const c = ensure(); if (!c) return 0; const t0 = c.currentTime + .05, st = styleOf(voice), ins = INSTR[st.v[0]];
+
+  function phrase(notes, voice = 'bell', tempo = .17, meter = 4, pickup = 0) {
+    const c = ensure(); if (!c) return 0; const t0 = c.currentTime + .06, st = styleOf(voice), name = st.v[0], ins = INSTR[name];
+    room(voice); human = rng(notes.length * 13 + 5);
     let p = 0;
     for (const [n, d] of notes) {
-      const ta = t0 + (st.swing ? swingT(p, tempo) : p * tempo), tb = t0 + (st.swing ? swingT(p + d, tempo) : (p + d) * tempo);
-      if (n) ins(n, ta, (tb - ta) * .92);
+      const ta = t0 + p * tempo, tb = t0 + (p + d) * tempo;
+      if (n) ins(n, Math.max(t0, ta + jitter()), (tb - ta) * .92, (VOL[name] || .15) * feel(p, meter, pickup));
       p += d;
     }
-    if (st.swing) { for (let b = 0; b * 2 < p; b++) besen(t0 + b * tempo * 2); bassLine(notes, t0, tempo); }
-    return t0 + p * tempo - c.currentTime;
+    return t0 + p * tempo - c.currentTime + .6;
   }
+
   /* Akkord-Hilfen (D60, für Folk-Duo D64). Ursprünglich Jazz-Trio: Melodie auf dem E-Piano, Begleitakkorde (Terz + Septime + None) im Charleston-Rhythmus,
      Walking Bass auf jeder Viertel (Grundton → Akkordtöne → chromatischer Anlauf zum nächsten Grundton), Besen mit Akzent auf 2 und 4.
      Braucht m.chords = [[Symbol, Achtel], …] über die ganze Melodie und m.meter (Viertel pro Takt), m.pickup (Achtel Auftakt). */
@@ -290,6 +320,25 @@ const Snd = (() => {
     g.gain.setValueAtTime(vol, t); g.gain.setValueAtTime(vol, Math.min(end, t + dur - .1)); g.gain.exponentialRampToValueAtTime(0.0001, Math.min(t + dur, end + .12));
     s.connect(lp).connect(g).connect(master); s.start(t); s.stop(Math.min(t + dur, end + .15)); track(s);
   };
+  /* Aufnahmen (D66, Test): echte Instrumententöne (MuseScore General, MIT) – je 3 Halbtöne ein Ton, dazwischen umgestimmt */
+  const SETS = {orgelA: {pfad: 'klang/orgel/o', toene: [36, 39, 42, 45, 48, 51, 54, 57, 60, 63, 66, 69, 72, 75, 78, 81]}}, bufs = {};
+  async function laden(set) {
+    const c = ensure(); if (!c) return false; const S = SETS[set]; bufs[set] = bufs[set] || {};
+    await Promise.all(S.toene.filter(n => !bufs[set][n]).map(async n => {
+      const r = await fetch(`${S.pfad}${n}.mp3?v=${VERSION}`), a = await r.arrayBuffer();
+      bufs[set][n] = await new Promise((ok, err) => { const p = c.decodeAudioData(a, ok, err); if (p && p.then) p.then(ok, err); });
+    }));
+    return true;
+  }
+  const geladen = set => !!bufs[set] && SETS[set].toene.every(n => bufs[set][n]);
+  function aufnahme(set, n, t, len, vol) {
+    const S = SETS[set], s0 = S.toene.reduce((a, b) => Math.abs(b - n) < Math.abs(a - n) ? b : a), b = bufs[set] && bufs[set][s0]; if (!b) return;
+    const src = ctx.createBufferSource(), g = ctx.createGain(); src.buffer = b; src.playbackRate.value = Math.pow(2, (n - s0) / 12);
+    const end = t + Math.min(len, b.duration / src.playbackRate.value - .2);
+    g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(vol, t + .015); g.gain.setValueAtTime(vol, end); g.gain.exponentialRampToValueAtTime(0.0001, end + .12);
+    src.connect(g).connect(master); src.start(t); src.stop(end + .15); track(src);
+  }
+  INSTR.orgelA = (n, t, len, vol = .32) => aufnahme('orgelA', n, t, len, vol);
   INSTR.mandoline = (n, t, len, vol = .2) => INSTR.zupf(n, t, len, vol, true);
   INSTR.gitarre = (n, t, len, vol = .16) => INSTR.zupf(n, t, len, vol, false);
   /* Folk-Duo: Melodie auf der Mandoline (lange Töne als Tremolo), Begleitung als Fingerpicking auf der Gitarre:
@@ -321,17 +370,17 @@ const Snd = (() => {
     return {ev, total};
   }
   function folk(m, tempo) {
-    const c = ensure(); if (!c) return 0; const t0 = c.currentTime + .1, {ev, total} = folkEvents(m);
-    for (const e of ev) INSTR[e.i](e.n, t0 + e.t * tempo, e.len * tempo, e.vol);
+    const c = ensure(); if (!c) return 0; const t0 = c.currentTime + .1, {ev, total} = folkEvents(m); room('folk'); human = rng(5);
+    for (const e of ev) INSTR[e.i](e.n, Math.max(t0, t0 + e.t * tempo + jitter()), e.len * tempo, e.vol * (.92 + human() * .16));
     return t0 + total * tempo - c.currentTime + .6;
   }
   // Ein Lied in seiner Besetzung abspielen (Grundtempo × eigenes Tempo des Liedes)
   function song(m, base = .2, kurz = false) {
     const tempo = base * (m.tempo || 1);
     if (kurz) return phrase(m.notes.slice(0, 24), m.style, tempo);
-    if (m.voices) return choir(m.voices, tempo, m.style);
+    if (m.voices) return choir(m.voices, tempo, m.style, m.meter, m.pickup);
     if (m.style === 'folk' && m.chords) return folk(m, tempo);
-    return phrase(m.notes, m.style, tempo);
+    return phrase(m.notes, m.style, tempo, m.meter, m.pickup);
   }
   function bassLine(notes, t0, tempo) { // Jazz: einfacher Bass auf jedem Viertel – Grundton des Taktes aus der Melodie (Tiefster Ton je Halbtakt)
     let p = 0; const seg = {};
@@ -342,7 +391,7 @@ const Snd = (() => {
   function note(n, len = .35) { const c = ensure(); if (!c) return; bell(n, c.currentTime + .01, len); }
   function stop() { playing.forEach(o => { try { o.stop(); } catch (e) {} }); playing = []; }
   function toggle() { on = !on; save.sound = on; persist(); if (!on) stop(); else phrase([[72, 1], [76, 1], [79, 2]], 'bell', .14); return on; } // Einschalten spielt einen kleinen Klang zum Testen
-  return {tap, pour, nope, note, phrase, choir, song, folkEvents, stop, toggle, styleName: s => styleOf(s).name, get state() { return ctx ? ctx.state : 'noch nicht gestartet'; }, ensure, get on() { return on; }};
+  return {tap, pour, nope, note, phrase, choir, song, folkEvents, laden, geladen, stop, toggle, styleName: s => styleOf(s).name, get state() { return ctx ? ctx.state : 'noch nicht gestartet'; }, ensure, get on() { return on; }};
 })();
 
 /* ---- Melodien (gemeinfrei). [MIDI-Note, Dauer in Achteln], 60 = c', Note 0 = Pause ----
