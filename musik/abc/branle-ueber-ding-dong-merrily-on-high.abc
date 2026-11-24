@@ -1,0 +1,66 @@
+X:32
+T:Branle über „Ding Dong! Merrily on High“
+N:eigene Komposition (D69) über Arbeaus „Branle de l'Official“ (Orchésographie 1589, gemeinfrei)
+N:Satz: Branle mit Glockenkaskade, Diminutionen, Echo und Tenorlied
+N:Besetzung im Spiel: Streichquartett
+M:2/2
+L:1/8
+Q:1/4=158
+%%score (S A) (T B)
+V:S name="Sopran" clef=treble
+V:A name="Alt" clef=treble
+V:T name="Tenor" clef=treble-8
+V:B name="Bass" clef=bass
+K:C
+[V:S]
+z8 | z8 | G2 G2 A G ^F E | D6 D2 | 
+E2 G2 G2 ^F2 | G4 G4 | G A B G A G ^F E | D2 E ^F G F E D | 
+E ^F G E G F G F | G2 B A G4 | d3 c B c d B | c3 B A B c A | 
+B3 A G A B G | A3 G ^F G A F | G3 ^F E F G E | ^F3 E D2 D2 | 
+E2 G2 G2 ^F2 | G4 G4 | ^f2 d2 B2 G2 | E2 G2 A2 c2 | 
+d2 g2 e2 B2 | A2 E2 ^F2 A2 | B2 e2 g2 e2 | d2 A2 ^F2 B2 | 
+c2 e2 g2 d2 | d2 B2 G2 B2 | E2 G2 G2 ^F2 | G4 G4 | 
+d B G B c e ^f d | B d ^f d B G B d | c c B G c e ^f d | B G B d g d B G | 
+d B G B c e ^f d | B d ^f d B G B d | c c B G c e ^f d | B G B d g d B G | 
+d3 c B c d B | c3 B A B c A | B3 A G A B G | A3 G ^F G A F | 
+G3 ^F E F G E | ^F3 E D2 D2 | E2 G2 G2 ^F2 | G4 G4 | 
+e4 d4 | d8 |]
+[V:A]
+z8 | z8 | D2 D2 C2 ^F2 | D2 D2 D2 D2 | 
+C D E2 E2 D2 | D8 | E2 E2 E2 D2 | D2 D2 D2 D2 | 
+C D E2 E2 ^F E | D8 | z8 | A3 G ^F G A F | 
+G3 ^F E F G E | ^F3 E D E F D | E3 D C D E C | A,2 A,2 B,2 B,2 | 
+C D E2 E2 D2 | D7 E | ^F2 F2 G3 F | E2 E2 E3 ^F | 
+G3 ^F E2 E2 | E2 E2 D2 D2 | G4 G2 G2 | ^F2 F2 F2 F2 | 
+G2 G A B2 A2 | G7 ^F | E2 E2 E2 D2 | D8 | 
+G3 ^F E2 A2 | B3 B B2 B2 | E2 E2 E2 D E | D8 | 
+G3 ^F E2 A2 | B3 B B2 B2 | E2 E2 E2 D E | D8 | 
+z8 | A3 G ^F G A F | G3 ^F E F G E | ^F3 E D E F D | 
+E3 D C D E C | A,2 A,2 B,2 B,2 | C D E2 E2 D2 | D8 | 
+E4 G4 | G8 |]
+[V:T]
+G,2 D,2 G,2 D,2 | G,2 D,2 G,2 D,2 | D,2 D,2 A,2 A,2 | B,2 B,2 B,2 B,2 | 
+C2 B,2 C B, A,2 | B,8 | B,2 B,2 C B, A,2 | B,2 B,2 B,2 B,2 | 
+C2 B,2 G, B, A,2 | B,8 | z8 | z8 | 
+D3 C B, C D B, | C3 B, A, B, C A, | B,3 A, G, A, B, G, | ^F,2 F,2 G,2 G,2 | 
+C2 B,2 C B, A,2 | B,8 | B,3 C D2 D2 | C2 C2 C2 C2 | 
+B,2 B,2 B,2 B,2 | C3 B, A,2 A,2 | G,2 B,2 C3 B, | A,2 A,2 B,3 A, | 
+G, A, B, C D2 D C | B,8 | C2 B,2 C B, A,2 | B,7 A, | 
+G,2 G,2 A, G, ^F, E, | D,6 D,2 | E,2 G,2 G,2 ^F,2 | G,4 G,4 | 
+G,2 G,2 A, G, ^F, E, | D,6 D,2 | E,2 G,2 G,2 ^F,2 | G,4 G,4 | 
+B,8 | E2 E2 C2 C2 | D3 C B,2 B,2 | A,2 A,2 A,2 A,2 | 
+G,2 G,2 G,2 G,2 | ^F,2 F,2 G,2 G,2 | C2 B,2 C B, A,2 | B,7 A, | 
+G,4 B,4 | B,8 |]
+[V:B]
+G,,8- | G,,8 | G,,4 C,2 D, C, | B,,3 A,, G,,4 | 
+C,2 E, D, C,2 D,2 | G,7 ^F, | E,4 A,,2 D, C, | B,,3 A,, G,,4 | 
+C,2 E, D, C,2 D,2 | G,,8 | G,,8 | A,,4 D,4 | 
+G,4 E,4 | D,4 D,4 | G,4 C,4 | D,4 G,4 | 
+E,2 E, D, C,2 D,2 | G,8 | D,3 C, B,, C, D, B,, | C,3 B,, A,, B,, C, A,, | 
+B,,3 A,, G,, A,, B,, G,, | A,,3 G,, ^F,, G,, A,, F,, | G,,3 ^F,, E,, F,, G,, E,, | ^F,,3 E,, D,,2 D,,2 | 
+E,,2 G,,2 G,,2 ^F,,2 | G,,4 G,,4 | A,,2 E, D, C,2 D,2 | G,,8 | 
+G,,4 C,2 D, C, | B,,3 A,, G,,4 | C,2 E, D, C,2 D,2 | G,,8 | 
+G,,4 C,2 D, C, | B,,3 A,, G,,4 | C,2 E, D, C,2 D,2 | G,8 | 
+G,,3 A,, B,, A,, G,, B,, | A,,3 B,, C, B,, A,, C, | G,,4 G,,4 | D,4 D,4 | 
+G,4 C,4 | D,4 G,4 | E,2 E, D, C,2 D,2 | G,,8 | 
+C,4 G,,4 | G,,8 |]

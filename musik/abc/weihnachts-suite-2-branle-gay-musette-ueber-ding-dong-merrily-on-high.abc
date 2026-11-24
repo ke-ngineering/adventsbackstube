@@ -1,0 +1,58 @@
+X:34
+T:Weihnachts-Suite 2. Branle gay (Musette) über „Ding Dong! Merrily on High“
+N:eigene Komposition (D69) über „Macht hoch die Tür“, „Ding Dong! Merrily on High“ und „In dulci jubilo“ (gemeinfrei)
+N:Satz: 2. Satz – Branle gay (Musette) über „Ding Dong! Merrily on High“
+N:Besetzung im Spiel: Flöten & Bordun
+M:3/4
+L:1/8
+Q:1/4=200
+%%score (S A) (T B)
+V:S name="Sopran" clef=treble
+V:A name="Alt" clef=treble
+V:T name="Tenor" clef=treble-8
+V:B name="Bass" clef=bass
+K:C
+[V:S]
+z6 | z6 | G4 G2 | A G ^F2 E2 | 
+D4 D2 | E4 G2- | G2 ^F4 | G6 | 
+G2 A B G2 | A G ^F E F E | D2 ^F E D2 | E2 G E G2 | 
+B G ^F2 E F | G6 | d2 c B c d | c2 B A B c | 
+B2 A G A B | A2 G ^F G A | G2 ^F E F G | ^F2 E2 D2 | 
+E4 G2- | G2 ^F4 | G6 | d2 c B c d | 
+c2 B A B c | B2 A G A B | A2 G ^F G A | G2 ^F E F G | 
+^F2 E2 D2 | E4 G2- | G2 ^F4 | G6 | 
+G4 G2 | A G ^F2 E2 | D4 D2 | E4 G2- | 
+G2 ^F4 | G6 | G6 |]
+[V:A]
+z6 | z6 | E4 E2 | E E D2 C2 | 
+B,4 B,2 | C4 E2- | E2 D4 | E6 | 
+E4 E2 | E E D2 C2 | B,4 B,2 | C4 E2- | 
+E2 D4 | E6 | B2 A G A B | A2 G ^F G A | 
+G2 ^F E F G | ^F2 E D E F | E2 D C D E | D2 C2 B,2 | 
+C4 E2- | E2 D4 | E6 | z6 | 
+A2 G ^F G A | G2 ^F E F G | ^F2 E D E F | E2 D C D E | 
+D2 C2 B,2 | C4 E2- | E2 D4 | E6 | 
+E4 E2 | E E D2 C2 | B,4 B,2 | C4 E2- | 
+E2 D4 | E6 | D6 |]
+[V:T]
+G,6 | G,6 | B,6 | C2 A,4 | 
+^F,4 G,2 | G,4 B,2 | B,2 A,4 | B,6 | 
+B,6 | C2 A,4 | ^F,4 G,2 | G,4 B,2 | 
+G,2 A,4 | B,6 | G,6 | E,6 | 
+E,6 | ^F,6 | C6 | A,6 | 
+G,4 B,2 | B,2 A,4 | B,6 | B,6 | 
+C6 | E,6 | ^F,6 | C6 | 
+A,6 | G,4 B,2 | B,2 A,4 | B,6 | 
+B,6 | C2 A,4 | ^F,4 G,2 | G,4 B,2 | 
+B,2 A,4 | B,6 | B,6 |]
+[V:B]
+G,,6 | G,,6 | G,,6 | G,,6 | 
+G,,6 | C,4 B,,2 | B,,2 D,4 | G,,6 | 
+G,,6 | G,,6 | G,,6 | C,4 B,,2 | 
+B,,2 D,4 | G,,6 | G,,6 | G,,6 | 
+G,,6 | G,,6 | G,,6 | G,,6 | 
+C,4 B,,2 | B,,2 D,4 | G,,6 | G,,6 | 
+G,,6 | G,,6 | G,,6 | G,,6 | 
+G,,6 | C,4 B,,2 | B,,2 D,4 | G,,6 | 
+G,,6 | G,,6 | G,,6 | C,4 B,,2 | 
+B,,2 D,4 | G,,6 | G,,6 |]

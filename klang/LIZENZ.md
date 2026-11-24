@@ -13,6 +13,8 @@ Klangsammlung **MuseScore General** (Debian-Paket `musescore-general-soundfont`)
 | `glocken` | Glockenspiel (9) | Glockenspiel-Lieder |
 | `spieluhr` | Spieluhr (10) | Spieluhr-Lieder, Mittelstimmen der Glockenfassung |
 | `roehrenglocken` | Röhrenglocken (14) | tiefe Stimme der Glockenfassung von Carol of the Bells |
+| `pauke` | Pauken (47), Töne D und G | Intrada der Weihnachts-Suite |
+| `trommel` | Schlagzeug-Kanal: Snare (38) und tiefe Tom (45) | Trommel (Tabor) in Branle und Musette |
 
 Fehlt eine Aufnahme oder scheitert das Laden, spielt das Spiel automatisch den nachgebauten Klang (D67).
 

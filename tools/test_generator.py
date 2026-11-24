@@ -64,6 +64,12 @@ for (const m of MELODIES.filter(m => m.voices)) {
   if (cross.size) console.log('  Hinweis Stimmkreuzung (im Notenbild prüfen):', m.name, [...cross].join(', '));
   console.log('OK vierstimmig:', m.name, len[0] / 8, 'Takte');
 }
+for (const m of STUECKE) for (const s of m.teile || [m]) { // eigene Kompositionen (D69): Stimmen und Schlagwerk gleich lang, Tonumfang
+  const len = s.voices.map(v => v.reduce((a, n) => a + n[1], 0)), pl = s.perc ? s.perc.reduce((a, n) => a + n[1], 0) : len[0];
+  if (len.some(l => l !== len[0]) || Math.abs(pl - len[0]) > 1e-9) { console.log('Stück ungleich lang', m.name, s.titel || '', len, pl); process.exit(1); }
+  if (s.voices.flat().some(([n, d]) => !(d > 0) || (n && (n < 36 || n > 84)))) { console.log('Stück Tonumfang/Dauer', m.name, s.titel || ''); process.exit(1); }
+  console.log('OK eigenes Stück:', s.titel || m.name, len[0] / ((s.meter || 4) * 2), 'Takte');
+}
 { const P = Kalender._test.PLAN, O = Kalender._test.ORDER;
   if (P.length !== 25 || new Set(O).size !== 24 || O.some(d => d < 1 || d > 24)) { console.log('Kalender FEHLER'); process.exit(1); }
   for (let d = 1; d <= 24; d++) { const s = Kalender._test.songOfDay(d), want = Kalender._test.SONG_DAYS[d]; if (!s || s.name !== want) { console.log('Lied des Tages nicht gefunden', d, want); process.exit(1); } }
