@@ -97,7 +97,7 @@ ALLE_LIEDER.forEach(m => { if (m.teile) m.teile.forEach((t, i) => EINZELN.push({
 EINZELN.forEach((m, k) => {
   const id = slug(m.name), usq = Math.round(BASE * (m.tempo || 1) * 2 * 1e6);
   let tracks;
-  const prog = i => m.style === 'tanz' ? (i < 2 ? 74 : 24) : m.style === 'musette' ? (i < 2 ? 73 : 19) : m.style === 'glocken' ? [9, 10, 10, 14][i] : m.style === 'streicher' ? [40, 40, 41, 42][i] : m.style === 'blech' ? [56, 56, 57, 57][i] : GM[m.style] ?? 0;
+  const prog = i => m.style === 'tanz' ? (i < 2 ? 74 : 24) : m.style === 'musette' ? [73, 73, 24, 42][i] : m.style === 'glocken' ? [9, 10, 10, 14][i] : m.style === 'streicher' ? [40, 40, 41, 42][i] : m.style === 'blech' ? [56, 56, 57, 57][i] : GM[m.style] ?? 0;
   if (m.voices) tracks = m.voices.map((v, i) => track(notesToEv(v, i ? 80 : 96, m.dyn), VOICE[i], i, prog(i))).concat(percTrack(m));
   else if (m.style === 'folk' && m.chords) {
     const {ev} = Snd.folkEvents(m), parts = {};
