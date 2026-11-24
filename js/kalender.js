@@ -59,13 +59,20 @@ function showGrid(a) {
     return `<button class="door${st.opened ? ' opened' : ''}${st.finished ? ' finished' : ''}${open ? '' : ' locked'}" data-d="${d}" aria-label="Türchen ${d}${open ? '' : ' (noch zu)'}">
       <span class="num">${d}</span>${st.finished ? '<span class="tick">★</span>' : ''}</button>`;
   }).join('')}</div>
-  <div class="cal-foot"><button class="btn" id="toBackstube">Zur Backstube (frei spielen)</button></div>`;
+  <div class="cal-foot"><button class="btn" id="toBackstube">Zur Backstube (frei spielen)</button><button class="btn" id="myRecipes">Meine Rezepte (${unlockedRecipes().length})</button></div>`;
   api.screen.querySelector('.doors').onclick = e => {
     const b = e.target.closest('.door'); if (!b) return; const d = +b.dataset.d;
     if (!unlocked(d)) { Snd.nope(); b.classList.remove('shake'); void b.offsetWidth; b.classList.add('shake'); api.toast(`Türchen ${d} öffnet sich am ${d}. Dezember.`); return; }
     Snd.tap(); openDay(d);
   };
   $('toBackstube').onclick = () => api.hub();
+  $('myRecipes').onclick = () => {
+    const list = unlockedRecipes();
+    api.help('Meine Rezepte', list.length
+      ? `<p>Diese Rezepte hast du im Adventskalender freigeschaltet:</p><div class="rz-index">${list.map(id => `<button class="btn" data-recipe="${id}">${RECIPES[id].title}</button>`).join('')}</div>`
+      : '<p>Noch keine Rezepte – das erste wartet hinter Türchen 3.</p>');
+    $('helpBody').onclick = e => { const b = e.target.closest('[data-recipe]'); if (b) showRecipe(b.dataset.recipe); };
+  };
   api.setTitle('Dein Adventskalender');
 }
 function openDay(d) {
@@ -85,6 +92,7 @@ function openDay(d) {
     </div>`;
   api.screen.querySelector('.tasks').onclick = e => { const b = e.target.closest('[data-go]'); if (b) { Snd.tap(); api.play(b.dataset.go); } };
   $('toGrid').onclick = () => showGrid(api);
+  $('reward').onclick = e => { const b = e.target.closest('[data-recipe]'); if (b) showRecipe(b.dataset.recipe); };
   $('playSong').onclick = () => { Snd.stop(); if (!Snd.on) Snd.toggle(); song.voices ? Snd.choir(song.voices, .2) : Snd.phrase(song.notes, 'brass', .2); };
   api.setTitle(`Türchen ${d}`);
 }
@@ -96,9 +104,18 @@ function rewardHTML(d) {
   const r = PLAN[d].reward;
   if (!r) return '<b>★ Türchen geschafft!</b> Dein Stern leuchtet im Kalender.';
   if (r.type === 'welcome') return '<b>★ Willkommen in deiner Adventsbackstube!</b> Ab jetzt öffnet sich jeden Tag ein neues Türchen.';
-  if (r.type === 'recipe') return `<b>★ Rezept freigeschaltet!</b><br>${(typeof RECIPES !== 'undefined' && RECIPES[r.id]) ? RECIPES[r.id].title : 'Das Rezept folgt in Kürze.'}` +
-    `${(typeof RECIPES !== 'undefined' && RECIPES[r.id]) ? ` <button class="btn small" data-recipe="${r.id}">Ansehen</button>` : ''}`;
+  if (r.type === 'recipe') { const rz = RECIPES[r.id];
+    return rz && !rz.platzhalter ? `<b>★ Rezept freigeschaltet: ${rz.title}</b><br><button class="btn small red" data-recipe="${r.id}">Rezept ansehen</button>` : '<b>★ Geschafft!</b> Das Rezept für heute folgt in Kürze.'; }
   return '<b>★ Geschafft!</b>';
+}
+const unlockedRecipes = () => PLAN.map((p, d) => p && p.reward && p.reward.type === 'recipe' && day(d).finished ? p.reward.id : null).filter(id => id && RECIPES[id] && !RECIPES[id].platzhalter);
+function showRecipe(id) {
+  api.help(RECIPES[id].title, recipeHTML(id) + '<p><button class="btn small" id="rzCopy">Rezept kopieren</button> <span class="soft" id="rzMsg"></span></p>');
+  $('helpBody').onclick = null;
+  $('rzCopy').onclick = () => {
+    const r = RECIPES[id], txt = `${r.title} (${r.menge})\n\nZutaten:\n${r.zutaten.map(z => '- ' + z).join('\n')}\n\nZubereitung:\n${r.schritte.map((s, i) => (i + 1) + '. ' + s).join('\n')}\n\nTipp: ${r.tipp}\nExperiment: ${r.experiment}`;
+    navigator.clipboard?.writeText(txt).then(() => { $('rzMsg').textContent = 'Kopiert!'; }, () => { $('rzMsg').textContent = 'Kopieren hat nicht geklappt.'; });
+  };
 }
 // von app.js nach jedem gewonnenen Level aufgerufen
 function onWin(station) {

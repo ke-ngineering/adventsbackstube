@@ -1,0 +1,100 @@
+/* Rezepte als Belohnung im Adventskalender (Tage 3, 6, 10, 13, 17, 20, 24).
+   Eigene Texte; klassische Rezepte mit München-/Hamburg-Bezug. Jedes mit Herkunft, Zutaten, Schritten, Tipp und
+   „Experimentier-Idee“ (die Spielerin probiert gern Varianten aus). Der 24. wird gemeinsam mit dem Auftraggeber festgelegt. */
+const RECIPES = {
+  'vanillekipferl': {
+    title: 'Vanillekipferl', menge: 'ca. 50 Stück', zeit: '30 Min. + 1 Std. Kühlen, 10–12 Min. Backen',
+    herkunft: 'Der Klassiker aus Bayern und Österreich – zart, mürbe und so vanillig, dass die ganze Küche duftet.',
+    zutaten: ['250 g Weizenmehl (Type 405)', '200 g kalte Butter', '80 g Zucker', '100 g gemahlene Mandeln (blanchiert)', '2 Eigelb',
+      'Mark von 1 Vanilleschote', '1 Prise Salz', 'Zum Wälzen: 60 g Puderzucker und 2 Päckchen Vanillezucker'],
+    schritte: ['Mehl, Zucker, Mandeln, Salz und Vanillemark mischen. Kalte Butter in Stückchen und die Eigelbe dazugeben und rasch zu einem glatten Teig verkneten.',
+      'Teig in Folie wickeln und mindestens 1 Stunde kühl stellen.',
+      'Ofen auf 175 °C Ober-/Unterhitze vorheizen. Aus dem Teig fingerdicke Rollen formen, in ca. 5 cm lange Stücke schneiden, die Enden etwas dünner rollen und zu Hörnchen biegen.',
+      'Auf Backpapier 10–12 Minuten backen – sie sollen hell bleiben, nur die Spitzen dürfen leicht goldig werden.',
+      'Puderzucker und Vanillezucker mischen. Die Kipferl kurz abkühlen lassen (sonst brechen sie) und noch warm darin wälzen.'],
+    tipp: 'Teig und Hände kühl halten – warme Butter macht den Teig brüchig. Zwischendurch den Teig wieder in den Kühlschrank legen.',
+    experiment: 'Statt Mandeln Haselnüsse oder Pistazien nehmen – oder dem Wälzzucker eine Prise Tonkabohne oder Kardamom beigeben.',
+  },
+  'braune-kuchen': {
+    title: 'Hamburger Braune Kuchen', menge: 'ca. 80 dünne Plätzchen', zeit: '30 Min. + Ruhezeit über Nacht, 8–10 Min. Backen',
+    herkunft: 'Hauchdünne, knusprige Gewürzplätzchen aus Hamburg – mit Zuckerrübensirup, Mandeln und Orangeat. Der Teig darf ruhig ein paar Tage reifen.',
+    zutaten: ['250 g Zuckerrübensirup', '100 g Butter', '100 g brauner Zucker', '500 g Weizenmehl', '1 gestr. TL Pottasche (in 1 EL Wasser aufgelöst)',
+      '2 TL Lebkuchengewürz (oder Zimt, Nelke, Kardamom, Piment gemischt)', '50 g gehackte Mandeln', '50 g Orangeat, sehr fein gehackt', 'Mandelhälften zum Belegen'],
+    schritte: ['Sirup, Butter und Zucker in einem Topf erwärmen, bis alles geschmolzen ist (nicht kochen). Etwas abkühlen lassen.',
+      'Gewürze, Mandeln und Orangeat einrühren, dann Mehl und die aufgelöste Pottasche dazugeben und zu einem festen Teig verkneten.',
+      'Teig in Folie gewickelt über Nacht (gern auch 2–3 Tage) kühl ruhen lassen – dann wird er aromatischer.',
+      'Ofen auf 180 °C Ober-/Unterhitze vorheizen. Teig portionsweise auf bemehlter Fläche sehr dünn (ca. 2 mm) ausrollen, Plätzchen ausstechen, je eine Mandelhälfte daraufdrücken.',
+      '8–10 Minuten backen, bis sie leicht dunkler werden. Auf dem Blech kurz abkühlen lassen – sie werden beim Erkalten knusprig.'],
+    tipp: 'In einer gut schließenden Blechdose bleiben sie wochenlang knusprig – nicht mit weichen Plätzchen zusammen lagern.',
+    experiment: 'Einen Teil des Mehls durch Roggenmehl ersetzen oder etwas frisch geriebene Orangenschale und gemahlenen Ingwer dazugeben.',
+  },
+  'elisenlebkuchen': {
+    title: 'Elisenlebkuchen', menge: 'ca. 20 Stück (Oblaten 7 cm)', zeit: '30 Min., 20–25 Min. Backen',
+    herkunft: 'Die feinsten Lebkuchen aus Nürnberg: viele Nüsse, kaum Mehl, saftig auf Oblaten gebacken.',
+    zutaten: ['3 Eier', '200 g brauner Zucker', '1 Päckchen Vanillezucker', '200 g gemahlene Mandeln', '200 g gemahlene Haselnüsse',
+      '100 g Orangeat und 50 g Zitronat, sehr fein gehackt', '1 Päckchen Lebkuchengewürz (ca. 15 g)', 'abgeriebene Schale von 1 Bio-Zitrone', '1 Prise Salz',
+      '20 Backoblaten (7 cm)', 'Zum Überziehen: 150 g Zartbitterkuvertüre oder Zuckerguss (150 g Puderzucker + 2–3 EL Zitronensaft)'],
+    schritte: ['Eier, Zucker und Vanillezucker mit dem Mixer 5 Minuten hell und schaumig schlagen.',
+      'Nüsse, Orangeat, Zitronat, Gewürz, Zitronenschale und Salz unterheben.',
+      'Die Masse mit einem nassen Esslöffel ca. 1 cm hoch und leicht gewölbt auf die Oblaten streichen. Wer Zeit hat, lässt sie über Nacht antrocknen.',
+      'Bei 160 °C Ober-/Unterhitze 20–25 Minuten backen – sie sollen innen noch weich sein.',
+      'Abkühlen lassen und mit geschmolzener Kuvertüre oder Zuckerguss überziehen, nach Belieben mit Mandeln verzieren.'],
+    tipp: 'In einer Dose mit einem Apfelschnitz bleiben sie schön saftig (Apfel alle paar Tage wechseln).',
+    experiment: 'Einen Teil der Haselnüsse durch Walnüsse ersetzen oder einen Hauch Chili ins Gewürz – passt erstaunlich gut zur Schokolade.',
+  },
+  'franzbroetchen': {
+    title: 'Franzbrötchen', menge: '12 Stück', zeit: '40 Min. + 1½ Std. Gehzeit, 15–18 Min. Backen',
+    herkunft: 'Hamburgs Lieblingsgebäck: zimtig, buttrig, karamellig – erkennbar an der flachgedrückten Mitte.',
+    zutaten: ['500 g Weizenmehl (Type 550)', '250 ml lauwarme Milch', '20 g frische Hefe (oder 1 Päckchen Trockenhefe)', '60 g Zucker', '75 g weiche Butter', '1 Prise Salz',
+      'Füllung: 150 g weiche Butter, 150 g brauner Zucker, 3 TL Zimt'],
+    schritte: ['Hefe in der lauwarmen Milch mit 1 TL Zucker auflösen. Mit Mehl, restlichem Zucker, Butter und Salz 5–8 Minuten zu einem glatten Teig kneten.',
+      'Zugedeckt an einem warmen Ort ca. 1 Stunde gehen lassen, bis er sich verdoppelt hat.',
+      'Teig zu einem Rechteck (ca. 40 × 50 cm) ausrollen, mit der weichen Butter bestreichen, Zucker und Zimt gemischt daraufstreuen.',
+      'Von der langen Seite her aufrollen und in 12 Stücke schneiden – abwechselnd schräg, sodass Trapeze entstehen.',
+      'Jedes Stück mit der schmalen Seite nach oben aufs Blech setzen und mit einem Kochlöffelstiel in der Mitte kräftig flachdrücken, sodass die Seiten aufklappen. 20 Minuten gehen lassen.',
+      'Bei 200 °C Ober-/Unterhitze 15–18 Minuten goldbraun backen.'],
+    tipp: 'Das ist die einfache Hefeteig-Variante. Ganz echt wird der Teig wie Croissant-Teig mehrfach mit Butter „touriert“ – ein schönes Projekt für einen langen Backtag.',
+    experiment: 'Ein Teil des Zimts durch Kardamom ersetzen (wie in Skandinavien) – oder Marzipan-Raspel und gehackte Mandeln in die Füllung.',
+  },
+  'auszogne': {
+    title: 'Auszogne', menge: '12 Stück', zeit: '40 Min. + 1½ Std. Gehzeit, Ausbacken',
+    herkunft: 'Bayerisches Schmalzgebäck – Münchner nennen sie auch Kniekiacherl: in der Mitte hauchdünn, am Rand ein dicker, flaumiger Wulst.',
+    zutaten: ['500 g Weizenmehl (Type 405)', '200 ml lauwarme Milch', '20 g frische Hefe', '50 g Zucker', '60 g weiche Butter', '2 Eier', '1 Prise Salz',
+      'abgeriebene Schale von ½ Bio-Zitrone', 'ca. 1 kg Butterschmalz zum Ausbacken', 'Puderzucker zum Bestäuben'],
+    schritte: ['Hefe in der Milch mit etwas Zucker auflösen. Mit allen übrigen Teigzutaten zu einem weichen, glatten Teig kneten (er soll sich vom Schüsselrand lösen).',
+      'Zugedeckt ca. 1 Stunde an einem warmen Ort gehen lassen.',
+      'Teig in 12 Stücke teilen, zu Kugeln formen und auf einem bemehlten Tuch zugedeckt nochmals 20–30 Minuten gehen lassen.',
+      'Butterschmalz in einem weiten Topf auf 170 °C erhitzen (Thermometer verwenden).',
+      'Jede Kugel mit eingefetteten Fingern von innen nach außen ziehen: die Mitte so dünn, dass man fast durchschauen kann, der Rand bleibt dick.',
+      'Mit der Unterseite nach unten ins Fett gleiten lassen, mit einem Löffel heißes Fett über die Mitte schöpfen, bis sie sich hebt. Wenden, insgesamt 2–3 Minuten goldbraun backen.',
+      'Auf Küchenpapier abtropfen lassen und mit Puderzucker bestäuben.'],
+    tipp: 'Vorsicht mit dem heißen Fett: nie unbeaufsichtigt lassen und brennendes Fett niemals mit Wasser löschen (Deckel drauflegen). Am besten frisch und noch lauwarm essen.',
+    experiment: 'Mit Vanillezucker statt Puderzucker bestäuben – oder ein Klecks Preiselbeeren oder Aprikosenmarmelade in die dünne Mitte.',
+  },
+  'rote-gruetze': {
+    title: 'Rote Grütze (Winterversion)', menge: '4–6 Portionen', zeit: '20 Min. + Abkühlen',
+    herkunft: 'Ein Klassiker aus dem Norden – im Winter mit tiefgekühlten Beeren und einem Hauch Weihnachtsgewürz.',
+    zutaten: ['500 g gemischte Beeren (TK, z. B. Kirschen, Himbeeren, Johannisbeeren)', '300 ml Kirsch- oder Johannisbeersaft', '60 g Zucker',
+      '1 Zimtstange', '1 Sternanis', '1 Streifen Bio-Orangenschale', '30 g Speisestärke', 'Dazu: Vanillesoße, flüssige Sahne oder Vanilleeis'],
+    schritte: ['Die Stärke mit 4 EL vom Saft glattrühren.',
+      'Restlichen Saft mit Zucker, Zimt, Sternanis und Orangenschale aufkochen.',
+      'Angerührte Stärke einrühren und unter Rühren 1 Minute kochen lassen, bis die Flüssigkeit klar und sämig ist. Gewürze herausnehmen.',
+      'Die Beeren unterheben, kurz erhitzen und vom Herd nehmen.',
+      'In Schälchen füllen, abkühlen lassen und kalt mit Vanillesoße servieren.'],
+    tipp: 'Die Beeren nur kurz mitkochen, dann bleiben sie ganz. Wer es weniger süß mag, nimmt etwas mehr Johannisbeeren.',
+    experiment: 'Einen Schuss Portwein oder Glühweingewürz dazugeben – oder die Grütze lauwarm auf Vanilleeis servieren.',
+  },
+  'heiligabend': {
+    title: 'Das Rezept zu Heiligabend', menge: '', zeit: '',
+    herkunft: 'Wird noch gemeinsam festgelegt.', zutaten: [], schritte: [], tipp: '', experiment: '', platzhalter: true,
+  },
+};
+// Rezept als HTML für den Dialog
+function recipeHTML(id) {
+  const r = RECIPES[id]; if (!r) return '<p>Rezept nicht gefunden.</p>';
+  if (r.platzhalter) return `<p>${r.herkunft}</p>`;
+  return `<p class="rz-meta">${r.menge} · ${r.zeit}</p><p class="rz-intro">${r.herkunft}</p>
+    <h3>Zutaten</h3><ul class="rz-list">${r.zutaten.map(z => `<li>${z}</li>`).join('')}</ul>
+    <h3>So geht's</h3><ol class="rz-steps">${r.schritte.map(s => `<li>${s}</li>`).join('')}</ol>
+    <p class="rz-box"><b>Backtipp:</b> ${r.tipp}</p><p class="rz-box exp"><b>Experimentier-Idee:</b> ${r.experiment}</p>`;
+}
