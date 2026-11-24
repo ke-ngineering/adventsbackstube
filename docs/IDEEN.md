@@ -57,7 +57,8 @@ Status: ✅ umgesetzt · 🔨 in Arbeit · 💡 Idee · ❌ verworfen
 ## Lieder – für später
 | Status | Idee |
 |---|---|
-| ✅ | Vierstimmig: Tochter Zion (v14) |
+| ✅ | Vierstimmig: Tochter Zion (v14, Liederbuch), We Three Kings (eigener Satz) |
+| 💡 | Eigene vierstimmige Sätze auch für Deck the Halls, Good King Wenceslas, Joy to the World, Jingle Bells … (nach Melodie-Prüfung) |
 | 💡 | Vierstimmig nachziehen: Es ist ein Ros entsprungen, Herbei o ihr Gläubigen, Ich steh an deiner Krippe hier, Der Christbaum ist der schönste Baum (Liederbuch S. 37–42, Werkzeuge in `tools/noten/`) |
 | 💡 | **Internationale gemeinfreie Lieder** (Anregung: Liste auf midkar.com – deren MIDI-Dateien aber nicht verwenden, keine Nutzungsrechte): God Rest Ye Merry Gentlemen, Greensleeves / What Child Is This, Hark the Herald Angels Sing, I Saw Three Ships, It Came Upon a Midnight Clear, Jolly Old Saint Nicholas. Melodie nach bestem Wissen notieren, als „bitte prüfen“ markieren – oder exakt aus einer vom Tester angehängten MIDI-Datei (nur Melodiestimme) übernehmen. |
 | 💡 | Weitere Lieder aus dem Liederbuch: Vom Himmel hoch, In dulci jubilo, Fröhliche Weihnacht überall, Maria durch ein Dornwald ging, Still still still, Was soll das bedeuten |

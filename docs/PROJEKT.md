@@ -4,7 +4,7 @@
 > Wer (Mensch oder Claude) die Entwicklung fortsetzt, liest zuerst diese Datei.
 > Nach jeder Arbeitssitzung: Status, Entscheidungen und Agenda hier aktualisieren.
 
-Stand: 24.11.2026 (Prototyp v14)
+Stand: 24.11.2026 (Prototyp v15)
 
 ## 1. Vision
 
@@ -69,6 +69,8 @@ mit genug Inhalt für spürbar lange Spielsessions (ca. 20–30 Min neue Tagesin
 | D43 | 24.11. | 23 Lieder, 19 notengetreu aus dem Liederbuch; Liederkiste.com NICHT als Quelle (Noten nur für private Zwecke, keine Veröffentlichung) | Genauigkeit für eine Chorsängerin; Lizenz sauber |
 | D44 | 24.11. | Mehrstimmige Sätze aus dem Liederbuch als Bläsersatz am Levelende; zuerst Tochter Zion, die übrigen 4 folgen mit derselben Methode | Wunsch „gerne mehrstimmig“; Posaunenchor-Bezug; Genauigkeit vor Menge |
 | D45 | 24.11. | Midkar.com-MIDIs NICHT verwendet (Download blockiert; Sequenzen/Arrangements ohne Nutzungsrechte, viele moderne geschützte Titel); gemeinfreie Titel daraus als „für später“ notiert | Rechte & Technik |
+| D46 | 24.11. | Adventskalender als Startseite; Tagesmenü aus Stations-Aufgaben; Lied des Tages; Rezept-Tage 3/6/10/13/17/20/24; Backstube bleibt zum freien Spielen | Vorschlag mit Standardwerten umgesetzt (Fragen zu Tagesmenü/Rezepttagen offen, leicht änderbar) |
+| D47 | 24.11. | Fremde Arrangements (z. B. aus MIDI-Dateien) nie übernehmen; für gemeinfreie Melodien ohne freien Satz schreibt Claude **eigene** vierstimmige Sätze | Rechte; Wunsch nach 4-stimmigem We Three Kings |
 | D12 | 23.11. | Persönliche Inhalte (Name, Nachrichten) **verschlüsselt** im Repo; Schlüssel steht nur im Link-Teil nach `#`, den sie bekommt (wird nie an Server übertragen) | Personalisierung trotz öffentlichem Repo |
 
 ## 3. Spielkonzept
@@ -117,7 +119,14 @@ mit genug Inhalt für spürbar lange Spielsessions (ca. 20–30 Min neue Tagesin
    Level aus zufälligem Weg (Warnsdorff-Heuristik) → immer lösbar; v7 schwerer (D30): 4×4 → 8×8, 8–30 % Lücken; Start-Stern nur L1–2.
    Tipp zeigt gestrichelt einen möglichen Anfang (kostet einen Stern).
 
-### Advents-Rahmen (geplant)
+### Advents-Rahmen (v15 umgesetzt: `js/kalender.js`)
+- ✅ **Startseite = Adventskalender** mit 24 Türchen (durcheinander angeordnet), Türchen öffnet ab dem jeweiligen Dezembertag (lokales Datum), Verpasstes nachholbar, im Testmodus alle offen. Im November Hinweis „Noch X Tage“ + Link zur Backstube.
+- ✅ **Tagesmenü** je Tag 2–4 Aufgaben „Station: N Level“ (Plan in `Kalender.PLAN`); Level zählen, wenn die Station aus dem Türchen gestartet wurde; Gewinn-Dialog meldet Fortschritt, Knopf „Zum Türchen N“.
+- ✅ **Lied des Tages** (`SONG_DAYS`, passend zum Datum: 1. Macht hoch die Tür, 6. Lasst uns froh und munter sein, 24. Stille Nacht), erklingt beim ersten Öffnen, „♪ Lied anhören“ (vierstimmig, wenn vorhanden).
+- ✅ **Belohnung** nach geschafftem Türchen: Stern im Kalender; Rezept an Tag 3, 6, 10, 13, 17, 20, 24 (Rezepttexte folgen, `RECIPES`), Willkommen an Tag 1.
+- Spielstand: `save.cal = {active, days:{Tag:{opened, done:{station:n}, finished}}}`.
+
+**Ursprüngliche Planung:**
 - Kalender-Startseite mit 24 Türchen; Türchen öffnet sich ab dem jeweiligen Datum (lokales Datum).
 - Pro Tag 8–12 Level, Mechanik im Wechsel; Schwierigkeit steigt über den Advent.
 - Sterne (3 = ohne Rückgängig) füllen sichtbar einen Plätzchenteller / die Backstube.
@@ -158,7 +167,7 @@ Ziel: **spielbar ab Di, 1.12.2026**, Link vorher an sie (z. B. am 1. Advent, 29.
 | 23.11. | Mechanik 2 Glasur-Blech + Mechanik 3 Rezeptbuch, Backstube-Startseite (v4) | ✅ (vorgezogen) |
 | 23.11. | v5/v6: Glasur-Blech verständlich (Anleitung, Kurs, Lernhilfe), 4. Station Spritzbeutel | ✅ |
 | 24.11. | v7: Spritzbeutel schwerer · v8: Glasur-Blech mit Lehrplan, Labor, Rezeptkarte | ✅ |
-| 24.11. | Kalender mit 24 Türchen & Datumssperre | ⏳ |
+| 24.11. | Kalender mit 24 Türchen & Datumssperre (v15) | ✅ |
 | 25.11. | Tagesplan, Wendungen, Rezeptseiten | ⏳ |
 | 26.11. | Tagesplan 1–24 (Mechanik, Levelzahl, Wendungen, Goodies); Rezeptseiten | ⏳ |
 | 27.11. | Persönliche Inhalte einbauen; Spielstand-Backup-Code; PWA-Manifest + Icon | ⏳ |
@@ -177,15 +186,18 @@ Ziel: **spielbar ab Di, 1.12.2026**, Link vorher an sie (z. B. am 1. Advent, 29.
   Stille Nacht, Alle Jahre wieder, O Tannenbaum, Kling Glöckchen, Lasst uns froh und munter sein, Jingle Bells, Ihr Kinderlein kommet,
   Leise rieselt der Schnee, O du fröhliche, Morgen kommt der Weihnachtsmann, We Wish You a Merry Christmas (mit Refrain),
   Süßer die Glocken nie klingen, Macht hoch die Tür, Tochter Zion (mit D.C.), Kommet ihr Hirten, Herbei o ihr Gläubigen (mit Refrain),
-  Es ist ein Ros entsprungen, Zu Bethlehem geboren, Es kommt ein Schiff geladen. 4 aus dem Gedächtnis (`ok:false`, im Buch nicht
-  enthalten): We Three Kings, Deck the Halls, Good King Wenceslas, Joy to the World. Pausen = Note 0; `tones(m)` liefert Töne ohne
+  Es ist ein Ros entsprungen, Zu Bethlehem geboren, Es kommt ein Schiff geladen. 3 aus dem Gedächtnis (`ok:false`, im Buch nicht
+  enthalten): Deck the Halls, Good King Wenceslas, Joy to the World. We Three Kings: Tonfolge mit der Melodiestimme einer vom
+  Tester angehängten MIDI-Datei abgeglichen (Strophe, „Field and fountain“, Refrain tongleich; nur Verzierungen des Arrangements abweichend). Pausen = Note 0; `tones(m)` liefert Töne ohne
   Pausen (für Blech, Spritzbeutel, Rezeptbuch). **Lieder-Prüfseite `#lieder`** zeigt Quelle bzw. „bitte prüfen“.
   Abgleich: Meine Gedächtnis-Versionen von Stille Nacht, Herbei, We Wish und Morgen kommt waren tongenau; O Tannenbaum (Rhythmus 2. Hälfte)
   und Jingle Bells (eine punktierte Note) wurden korrigiert. Weitere Lieder im Buch (z. B. Vom Himmel hoch, In dulci jubilo,
   Fröhliche Weihnacht überall, Maria durch ein Dornwald ging) können bei Bedarf ergänzt werden.
   **Mehrstimmig (v14, D44):** Lieder mit `voices:[S,A,T,B]` erklingen am Levelende als vierstimmiger Bläsersatz (`Snd.choir`,
   jede Stimme in Originallage, Sopran etwas lauter); auf `#lieder` „▶ 4-stimmig“. Fertig: **Tochter Zion** (Liederbuch S. 43,
-  Form A–B–A, alle Stimmen mit Rasterhilfe abgelesen, Zusammenklänge geprüft; Takt 7: Bass kreuzt kurz den Tenor – so im Satz).
+  Form A–B–A, alle Stimmen mit Rasterhilfe abgelesen, Zusammenklänge geprüft; Takt 7: Bass kreuzt kurz den Tenor – so im Satz),
+  **We Three Kings** (eigener Satz von Claude im Choralstil: e-Moll-Strophe mit Kadenz-Quartsextvorhalt, „O“ über D–D7, Refrain G-Dur;
+  geprüft: gleiche Längen, keine Stimmkreuzung, auf betonten Zeiten nur Dreiklänge und gewollte Septakkorde).
   **Offen (Werkzeuge in `tools/noten/`):** Es ist ein Ros entsprungen (S. 40, Praetorius – anspruchsvoll, Achtel-Durchgänge),
   Herbei o ihr Gläubigen (S. 41), Ich steh an deiner Krippe hier (S. 42), Der Christbaum ist der schönste Baum (S. 37).
 - Level-Generator: Seeded RNG (mulberry32), Seed aus Levelnummer → jedes Level ist für sie immer gleich.
@@ -194,6 +206,8 @@ Ziel: **spielbar ab Di, 1.12.2026**, Link vorher an sie (z. B. am 1. Advent, 29.
 - Tests: `python3 tools/test_generator.py` (alle Generatoren/Löser in Node), `tools/screenshots.py` (Playwright, 390 px).
 
 ## 7. Offene Fragen
+- Kalender: Passt das Tagesmenü (Umfang ~20–40 Min.)? Passen die Rezept-Tage?
+- Nächste Schritte: Rezepttexte (7), persönliche Inhalte (verschlüsselt), PWA-Icon/„Zum Startbildschirm“, Spielstand-Backup-Code
 - Mehrstimmig: Tochter Zion anhören (`#lieder` → „▶ 4-stimmig“) – klingt der Satz richtig?
 - Lieder prüfen (`#lieder`): v. a. die 4 Gedächtnis-Lieder (We Three Kings, Deck the Halls, Good King Wenceslas, Joy to the World)
 - Prototyp v10 testen: Lehrplan Glasur-Blech Level 1–11 durchspielen – lernt man den Rest-Trick? Labor verständlich? Spritzbeutel schwer genug?

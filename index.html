@@ -6,7 +6,7 @@
 <title>Adventsbackstube</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=14">
+<link rel="stylesheet" href="css/style.css?v=15">
 </head>
 <body>
 <header>
@@ -20,7 +20,8 @@
   </div>
 </header>
 
-<section id="hub" class="hub" aria-label="Stationen"></section>
+<section id="calendar" class="calendar" aria-label="Adventskalender"></section>
+<section id="hub" class="hub" aria-label="Stationen" hidden></section>
 
 <section id="game" hidden>
   <div class="levelbar">
@@ -36,6 +37,7 @@
   </main>
 </section>
 
+<div class="toast" id="toast" role="status"></div>
 <footer>Prototyp <span id="ver"></span> · <span id="status"></span></footer>
 
 <div class="overlay" id="help" role="dialog" aria-modal="true" aria-labelledby="helpTitle">
@@ -60,11 +62,12 @@
   </div>
 </div>
 
-<script src="js/core.js?v=14"></script>
-<script src="js/regal.js?v=14"></script>
-<script src="js/blech.js?v=14"></script>
-<script src="js/spritz.js?v=14"></script>
-<script src="js/buch.js?v=14"></script>
-<script src="js/app.js?v=14"></script>
+<script src="js/core.js?v=15"></script>
+<script src="js/regal.js?v=15"></script>
+<script src="js/blech.js?v=15"></script>
+<script src="js/spritz.js?v=15"></script>
+<script src="js/buch.js?v=15"></script>
+<script src="js/kalender.js?v=15"></script>
+<script src="js/app.js?v=15"></script>
 </body>
 </html>
