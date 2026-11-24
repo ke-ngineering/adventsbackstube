@@ -243,4 +243,4 @@ Wunsch: We Three Kings vierstimmig. Das MIDI-Arrangement (Mannheim Steamroller, 
 | Abspielen nicht stoppbar | zweites Drücken stoppt (■ Stopp) |
 | Musikdaten als MIDI/ABC im Projekt | liegen seit v19.1 in `musik/` (wird bei jedem Test neu erzeugt) |
 | Fuge im Lied-Tool? | steht am Ende der Liste (ab v19.2) |
-
+- Nachtrag: „Leise rieselt der Schnee ist jetzt okay.“ (Liederbuch-Fassung, ruhiger, Flöten)
