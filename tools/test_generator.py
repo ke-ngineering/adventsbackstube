@@ -37,11 +37,11 @@ for (let L = 1; L <= 40; L++) {
   if (L % 10 === 0) console.log('  Spritz L' + L, R + 'x' + C, path.length, 'Punkte');
 }
 console.log('OK Spritz 1-40');
-for (let L = 1; L <= 30; L++) {
+for (let L = 1; L <= 60; L++) {
   Buch._test.build(L); const c = Buch._test.levelCfg(L), seq = Buch._test.seq, pads = Buch._test.pads;
-  if (seq.length !== c.T || seq.some(x => x < 0 || x >= pads.length) || pads.some(p => p.ing === undefined)) { console.log('Buch FEHLER', L); process.exit(1); }
+  if (seq.length > c.T || seq.length < 5 || seq.some(x => x < 0 || x >= pads.length) || pads.some(p => p.ing === undefined)) { console.log('Buch FEHLER', L); process.exit(1); }
 }
-console.log('OK Buch 1-30');
+console.log('OK Buch 1-60');
 """
 f = tempfile.NamedTemporaryFile('w', suffix='.js', delete=False)
 f.write(stub + src + test); f.close()

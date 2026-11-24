@@ -253,3 +253,9 @@ footer{text-align:center;font-size:13px;color:var(--soft);padding:10px 14px 16px
 .pt.chunk.oval{border-radius:50%}
 .tontest{font-size:15px}.tontest td{padding:3px 8px 3px 0}.tontest .ok{color:#4f9d69;font-weight:700}.tontest .bad{color:var(--red);font-weight:700}
 .tontest td{overflow-wrap:anywhere}
+
+/* v12: Lieder-Prüfseite */
+.song-row{display:flex;align-items:center;gap:6px;padding:5px 0;border-bottom:1px solid rgba(0,0,0,.08);flex-wrap:wrap}
+.song-name{flex:1;min-width:140px;font-weight:600;font-size:15px}
+.btn.small.bad{background:var(--red);color:#fff}
+.dialog{max-height:92dvh;overflow-y:auto;-webkit-overflow-scrolling:touch}

@@ -154,3 +154,15 @@ Wunsch zum Gewürzregal: Flüssige Zutaten sollen fließen, andere herunterpurze
 - Auf dem MacBook in Safari ist weiterhin kein Ton zu hören.
 
 **Folge:** v11 (D38–D40). Für Mac-Safari wird das Ergebnis des Ton-Tests gebraucht.
+
+## Runde 11 – Prototyp v11 (24.11.2026)
+**Feedback:**
+- Ton-Test auf dem Mac in Safari: Alle drei Testtöne sind hörbar, ohne geänderte Einstellungen. Danach meldet der Tester: „Sound geht jetzt!“ Der WebKit-Fix aus v10 und v11 wirkt auf Mac und iOS.
+- Wunsch: eine große Auswahl alter, gemeinfreier Weihnachtslieder, z. B. „Star of wonder, star of night …“ (We Three Kings).
+
+**Analyse:** Exakte Notenquellen ließen sich aus der Arbeitsumgebung nicht verlässlich abrufen. Webseiten werden nur zusammengefasst gelesen, und dabei wurden Noten verfälscht. Die neuen Lieder sind deshalb aus dem Gedächtnis notiert und werden über die Prüfseite verifiziert.
+
+**Folge:** v12 (D41).
+
+## Runde 12 – Prototyp v12 (ausstehend)
+**Zu prüfen:** Alle 10 Lieder auf `#lieder` anhören und markieren. Bei „klingt falsch“ die Stelle nennen.

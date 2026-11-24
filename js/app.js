@@ -116,6 +116,27 @@ function tonTest() {
 }
 if (/tontest/.test(location.hash + location.search)) setTimeout(tonTest, 300);
 
+
+// Lieder-Prüfseite: Seite mit #lieder öffnen → jede Melodie anhören und als „stimmt“ / „klingt falsch“ markieren
+function liederCheck() {
+  const marks = save.songCheck || (save.songCheck = {});
+  const list = () => MELODIES.map((m, i) => `<div class="song-row"><button class="btn small" data-play="${i}">▶</button>
+      <span class="song-name">${m.name}</span>
+      <button class="btn small ${marks[m.name] === 'ok' ? 'active' : ''}" data-ok="${i}">stimmt</button>
+      <button class="btn small ${marks[m.name] === 'bad' ? 'bad' : ''}" data-bad="${i}">klingt falsch</button></div>`).join('');
+  api.help('Lieder-Prüfung', `<p>Tippe auf ▶ und hör dir jede Melodie an. Stimmt sie? Dann „stimmt“, sonst „klingt falsch“ – und sag Claude am besten, an welcher Stelle.</p>
+    <div id="songList">${list()}</div><p class="how-tip" id="songSum"></p>`);
+  const sum = () => { const v = Object.values(marks); $('songSum').textContent = `${v.filter(x => x === 'ok').length} bestätigt, ${v.filter(x => x === 'bad').length} falsch, ${MELODIES.length - v.length} offen.`; };
+  $('songList').onclick = e => {
+    const b = e.target.closest('button'); if (!b) return;
+    if (b.dataset.play) { Snd.stop(); if (!Snd.on) Snd.toggle(); Snd.phrase(MELODIES[+b.dataset.play].notes, 'bell', .2); return; }
+    const m = MELODIES[+(b.dataset.ok || b.dataset.bad)]; marks[m.name] = b.dataset.ok ? 'ok' : 'bad'; persist();
+    $('songList').innerHTML = list(); sum();
+  };
+  sum();
+}
+if (/lieder/.test(location.hash + location.search)) setTimeout(liederCheck, 300);
+
 // Beim Öffnen dort weitermachen, wo sie aufgehört hat
 if (save.last && GAMES.some(g => g.id === save.last)) open(save.last); else showHub();
 }
