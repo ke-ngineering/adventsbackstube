@@ -65,6 +65,7 @@ Details zum Konzept: `KONZEPT-ADVENT.md`. Entscheidungen: `PROJEKT.md`.
 | M21 | Weihnachts-Suite: Intrada – Branle gay – Gigue (D69) | ✅ v24 – bitte anhören |
 | M22 | Türchen 24: neues Stück statt „Stille Nacht“ oder zusätzlich? | offen – Auftraggeber entscheidet |
 | M23 | Rückmeldung zu D69 umsetzen: Trommel weg, Läufe deutlich, Echo dezenter, Gigue mit wechselnden Instrumenten (D70) | ✅ v25 – bitte anhören |
+| M24 | Musette: Orgel durch Laute und Cello ersetzen (D71) | ✅ v26 – bitte anhören |
 | M7 | Musik-Rückmeldungen Runde 19 umsetzen (Tempi, Jazz-Trio, Sätze, Joy to the World, GKW) | ✅ v19 |
 | M8 | Ton-Fehler nach Fensterwechsel (D59) | ✅ v19 |
 | M6 | Vierstimmiger Satz für Stille Nacht (Finale) | ✅ v19 |
