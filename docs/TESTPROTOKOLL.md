@@ -187,3 +187,5 @@ Wunsch zum Gewürzregal: Flüssige Zutaten sollen fließen, andere herunterpurze
 ## Runde 15 – Prototyp v15 (ausstehend)
 **Automatisch geprüft:** Geschlossenes Türchen zeigt einen Hinweis. Im Testmodus Türchen 1 geöffnet, „Glasur-Blech 1 Level“ gelöst, und der Fortschritt steht im Tagesmenü (1/1 ✓). Der Gewinn-Dialog bietet „Zum Türchen 1“. Für alle 24 Tage wird ein Lied des Tages gefunden.
 **Zu prüfen:** Kalender-Optik, Tagesmenü-Umfang, Ablauf Türchen → Station → zurück.
+**Zwischenfeedback:** Der Tester hängt zum Testen eine MIDI-Datei von „We Three Kings“ an (Arrangement eines Dritten). Daraus wurde nur die Melodiestimme ausgelesen, um die eigene Notation zu prüfen. Ergebnis: tongleich, Lied gilt jetzt als geprüft. Das Arrangement wurde nicht übernommen.
+Das Rezept zum 24.12. soll gemeinsam überlegt werden.

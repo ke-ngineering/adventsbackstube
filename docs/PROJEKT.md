@@ -185,8 +185,9 @@ Ziel: **spielbar ab Di, 1.12.2026**, Link vorher an sie (z. B. am 1. Advent, 29.
   Stille Nacht, Alle Jahre wieder, O Tannenbaum, Kling Glöckchen, Lasst uns froh und munter sein, Jingle Bells, Ihr Kinderlein kommet,
   Leise rieselt der Schnee, O du fröhliche, Morgen kommt der Weihnachtsmann, We Wish You a Merry Christmas (mit Refrain),
   Süßer die Glocken nie klingen, Macht hoch die Tür, Tochter Zion (mit D.C.), Kommet ihr Hirten, Herbei o ihr Gläubigen (mit Refrain),
-  Es ist ein Ros entsprungen, Zu Bethlehem geboren, Es kommt ein Schiff geladen. 4 aus dem Gedächtnis (`ok:false`, im Buch nicht
-  enthalten): We Three Kings, Deck the Halls, Good King Wenceslas, Joy to the World. Pausen = Note 0; `tones(m)` liefert Töne ohne
+  Es ist ein Ros entsprungen, Zu Bethlehem geboren, Es kommt ein Schiff geladen. 3 aus dem Gedächtnis (`ok:false`, im Buch nicht
+  enthalten): Deck the Halls, Good King Wenceslas, Joy to the World. We Three Kings: Tonfolge mit der Melodiestimme einer vom
+  Tester angehängten MIDI-Datei abgeglichen (Strophe, „Field and fountain“, Refrain tongleich; nur Verzierungen des Arrangements abweichend). Pausen = Note 0; `tones(m)` liefert Töne ohne
   Pausen (für Blech, Spritzbeutel, Rezeptbuch). **Lieder-Prüfseite `#lieder`** zeigt Quelle bzw. „bitte prüfen“.
   Abgleich: Meine Gedächtnis-Versionen von Stille Nacht, Herbei, We Wish und Morgen kommt waren tongenau; O Tannenbaum (Rhythmus 2. Hälfte)
   und Jingle Bells (eine punktierte Note) wurden korrigiert. Weitere Lieder im Buch (z. B. Vom Himmel hoch, In dulci jubilo,
