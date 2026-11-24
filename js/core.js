@@ -69,7 +69,7 @@ const Snd = (() => {
   // Beim ersten Antippen irgendwo: Ton freischalten (stiller Puffer) – hilft Safari/iOS
   const unlock = () => {
     const c = ensure(); if (!c) return;
-    if (!unlocked) { try { const b = c.createBuffer(1, 1, 22050), s = c.createBufferSource(); s.buffer = b; s.connect(c.destination); s.start(0); unlocked = true; } catch (e) {} }
+    if (!unlocked || c.state !== 'running') { try { const b = c.createBuffer(1, 1, 22050), s = c.createBufferSource(); s.buffer = b; s.connect(c.destination); s.start(0); unlocked = c.state === 'running'; } catch (e) {} }
   };
   ['touchend', 'mousedown', 'click', 'keydown'].forEach(ev => document.addEventListener(ev, unlock, {capture: true, passive: true})); // kein pointerup: zählt in Safari (Maus/Trackpad) nicht als Nutzeraktion
   document.addEventListener('visibilitychange', () => { if (!document.hidden && ctx && ctx.state !== 'running') ctx.resume().catch?.(() => {}); });
