@@ -100,7 +100,14 @@ def scale_at(t):
     return set(G_DUR)
 TAIL = 2 * BAR + 9
 TANZ, AUFTAKT = True, 1
-DYN = [[T(57), T(61), .42]]
+DYN = [[T(57), T(61), .7]]
+# Wechselnde Besetzung (D70) – wie Mike Oldfield in seinem „In Dulci Jubilo“ (1975) die Instrumente von Strophe zu Strophe tauscht
+WECHSEL = [[0, ['floeteS', 'floeteS', 'gitarre', 'gitarre']],            # Fugato: Flöten und Lauten
+           [T(19), ['mandoline', 'floeteS', 'gitarre', 'celloS']],        # Zwischenspiel: Mandoline führt
+           [T(23) - 1, ['glockenS', 'floeteS', 'mandoline', 'celloS']],   # Cantus firmus im Glockenspiel
+           [T(39) - 1, ['floeteS', 'violineS', 'trompeteS', 'gitarre']],  # Kanon: Flöte oben, Trompete unten
+           [T(57), ['spieluhrT', 'spieluhrT', 'gitarre', 'gitarre']],     # Echo: Spieluhren
+           [T(61), ['trompeteS', 'violineS', 'bratscheS', 'celloS']]]     # Schluss: Trompete mit Streichern
 
 
 if __name__ == '__main__':
@@ -108,4 +115,4 @@ if __name__ == '__main__':
     v = K.compose(me)
     v = K.glaetten(K.akkordtreue(K.clean(K.akkordtreue(K.clean(v, me), me, 3), me), me, 3), me)
     print('Längen', [laenge(x) for x in v], 'Kanon-Akkorde', ' '.join(KANON), file=sys.stderr)
-    print(json.dumps({'voices': v, 'dyn': DYN}))
+    print(json.dumps({'voices': v, 'dyn': DYN, 'wechsel': WECHSEL}))

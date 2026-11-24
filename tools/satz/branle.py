@@ -101,7 +101,7 @@ def scale_at(t): return set(G_DUR)
 TAIL = 2 * BAR
 
 # Dynamik: Echo-Stellen leise (Faktor), für Spiel und MIDI
-DYN = [[ab['Echo'], ab['A3'], .42], [ab['A4'], ab['B3'], .5]]
+DYN = [[ab['Echo'], ab['A3'], .7], [ab['A4'], ab['B3'], .74]]
 
 
 def figur(v, idx):
