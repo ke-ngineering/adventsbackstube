@@ -69,6 +69,6 @@ Status: ✅ umgesetzt · 🔨 in Arbeit · 💡 Idee · ❌ verworfen
 - Adeste Fideles: die MIDI enthält einen vierstimmigen Satz; übernommen wird bewusst nur die Melodie (Herkunft des Satzes unbekannt).
 
 ## Musik – offen (v19)
-- **Carol of the Bells** (Leontowytsch 1914, gemeinfrei): entfernt, bis eine gemeinfreie Partitur vorliegt; dann Ostinato + Stimmen genau übernehmen.
+- ~~Carol of the Bells~~ – erledigt mit der Leontowytsch-Partitur (D61).
 - **Morning Star**: auf Wunsch entfernt (unbekannt).
 - Weitere vierstimmige Sätze aus dem Liederbuch: Es ist ein Ros (S. 40), Ich steh an deiner Krippe (S. 42), Christbaum (S. 37); Herbei (S. 41) gäbe es auch im Liederbuch – derzeit eigener Satz.

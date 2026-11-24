@@ -49,7 +49,8 @@ Details zum Konzept: `KONZEPT-ADVENT.md`. Entscheidungen: `PROJEKT.md`.
 | # | Aufgabe | Status |
 |---|---|---|
 | T1 | Auftraggeber testet nach `TESTPLAN.md` | ❓ |
-| M5 | Carol of the Bells: gemeinfreie Partitur (Leontowytsch) vom Auftraggeber, dann neu einbauen; Away in a Manger | ❓ Partitur fehlt |
+| M5 | Carol of the Bells nach Leontowytsch-Partitur (D61) | ✅ v19 |
+| M9 | Away in a Manger (Melodiequelle nötig) | ⏳ für später |
 | M7 | Musik-Rückmeldungen Runde 19 umsetzen (Tempi, Jazz-Trio, Sätze, Joy to the World, GKW) | ✅ v19 |
 | M8 | Ton-Fehler nach Fensterwechsel (D59) | ✅ v19 |
 | M6 | Vierstimmiger Satz für Stille Nacht (Finale) | ✅ v19 |

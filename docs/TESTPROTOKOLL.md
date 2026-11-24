@@ -225,7 +225,7 @@ Wunsch: We Three Kings vierstimmig. Das MIDI-Arrangement (Mannheim Steamroller, 
 | Good King Wenceslas | bricht ab, Anfang seltsam | Satz von Th. Helmore (1853) aus der PDF des Auftraggebers |
 | Joy to the World | fragmentiert, Rhythmus falsch | Melodie neu nach Lowell Masons „Antioch“ |
 | Hark! | Satz im Stil Mendelssohns | eigener vierstimmiger Satz, Chor |
-| Carol of the Bells | schön, aber fragmentiert | vorerst entfernt – genaue Noten fehlen (Bitte: gemeinfreie Partitur Leontowytsch, z. B. IMSLP) |
+| Carol of the Bells | schön, aber fragmentiert | Partitur vom Auftraggeber (IMSLP) → alle vier Stimmen nach Leontowytsch (D61) |
 | Morning Star | weglassen | entfernt |
 | Ton | nach 2–3 Fensterwechseln kein Ton mehr | D59; im Test 6 Wechsel simuliert, Ton läuft weiter |
 
