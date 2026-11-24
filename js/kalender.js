@@ -12,8 +12,8 @@ const ORDER = [13, 6, 21, 2, 17, 9, 24, 11, 4, 19, 1, 15, 8, 22, 5, 12, 18, 3, 2
 const SONG_DAYS = [null, 'Tochter Zion, freue dich', 'Macht hoch die Tür', 'Kling, Glöckchen, klingelingeling', 'Es kommt ein Schiff geladen',
   'Leise rieselt der Schnee', 'Lasst uns froh und munter sein', 'O Tannenbaum', 'Jingle Bells', 'Good King Wenceslas', 'Carol of the Bells',
   'We Wish You a Merry Christmas', 'Süßer die Glocken nie klingen', 'Hark! The Herald Angels Sing', 'Deck the Halls', 'Ihr Kinderlein kommet',
-  'Gigue über „I Saw Three Ships“', 'Es ist ein Ros entsprungen', 'We Three Kings', 'Morgen kommt der Weihnachtsmann', 'O du fröhliche',
-  'Joy to the World', 'Fuge über „Es kommt ein Schiff geladen“', 'Herbei, o ihr Gläubigen', 'Stille Nacht, heilige Nacht'];
+  'Gigue über „I Saw Three Ships“', 'Es ist ein Ros entsprungen', 'We Three Kings', 'Morgen kommt der Weihnachtsmann', 'Kommt und lasst uns Christum ehren',
+  'Joy to the World', 'Fuge über „Es kommt ein Schiff geladen“', 'Herbei, o ihr Gläubigen', 'O du fröhliche'];  // D72: 24. = O du fröhliche (Orgelsatz), Feier danach: Weihnachts-Suite
 const songOfDay = d => MELODIES.find(m => m.name === SONG_DAYS[d]) || MELODIES[d % MELODIES.length];
 
 let api;
@@ -103,6 +103,7 @@ function openDay(d) {
       ${sdone ? `<span class="t-ok">${kette ? '✓' : '★'.repeat(st.special || 1)}</span>` : `<button class="btn small red" data-special="${kette ? kdone : 0}">Los</button>`}</div>` : '';
   const neuGame = p.neu.ids.find(x => x.startsWith('game:'));
   const bald = neuGame && !ready(neuGame.slice(5)) ? `<p class="soft">${SPIELE_BALD}</p>` : '';
+  const fest = d === 24 && st.finished ? ALLE_LIEDER.find(m => m.teile) : null; // D72: nach dem letzten Rätsel erklingt die Weihnachts-Suite
   api.screen.innerHTML = `<div class="dayview">
       <div class="day-head"><span class="day-num">${d}</span><div><b>${d}. Dezember</b><br><span class="soft">Lied des Tages: „${song.name}“ · ${Snd.styleName(song.style)}${song.voices ? ', vierstimmig' : ''}</span></div></div>
       <div class="story">${Art.kruemel(64, first ? 'staunen' : 'froh')}<p>${p.story}</p></div>
@@ -110,7 +111,7 @@ function openDay(d) {
       <h3 class="menu-h">Tagesmenü</h3>
       <div class="tasks">${rows}${srow}</div>
       <div class="reward" id="reward">${st.finished ? rewardHTML(d) : rewardTeaser(d)}</div>
-      <div class="cal-foot"><button class="btn" id="toGrid">‹ Alle Türchen</button><button class="btn" id="playSong">♪ Lied anhören</button></div>
+      <div class="cal-foot"><button class="btn" id="toGrid">‹ Alle Türchen</button><button class="btn" id="playSong">♪ Lied anhören</button>${fest ? '<button class="btn" id="playFest">♪ Festmusik</button>' : ''}</div>
     </div>`;
   api.screen.querySelector('.tasks').onclick = e => {
     const b = e.target.closest('[data-go],[data-special]'); if (!b) return; Snd.tap();
@@ -121,17 +122,19 @@ function openDay(d) {
   $('toGrid').onclick = () => showGrid(api);
   $('reward').onclick = e => { const b = e.target.closest('[data-recipe]'); if (b) showRecipe(b.dataset.recipe); if (e.target.closest('[data-dose]')) showDose(); };
   $('playSong').onclick = () => Player.toggle('tag' + d, $('playSong'), () => Snd.song(song));
-  if (st.finished && !st.gefeiert) { st.gefeiert = true; persist(); const r = $('reward'); r.classList.add('feiern'); Snd.stop(); setTimeout(() => playSong(song), 500); }
+  if (fest) $('playFest').onclick = () => Player.toggle('fest', $('playFest'), () => Snd.song(fest));
+  if (st.finished && !st.gefeiert) { st.gefeiert = true; persist(); const r = $('reward'); r.classList.add('feiern'); Snd.stop();
+    setTimeout(() => fest ? Player.toggle('fest', $('playFest'), () => Snd.song(fest)) : playSong(song), 500); } // Heiligabend: Feier mit der Weihnachts-Suite
   api.setTitle(`Türchen ${d}`);
 }
 function playSong(song, kurz) { Snd.song(song, .2, kurz); }
 function rewardTeaser(d) {
   const r = PLAN[d].recipe;
-  return `<span class="soft">Schaffst du das ganze Tagesmenü, bekommst du ein <b>Plätzchen für deine Dose</b>${r ? ', ein <b>Rezept</b>' : ''} und das Lied des Tages.</span>`;
+  return `<span class="soft">Schaffst du das ganze Tagesmenü, bekommst du ein <b>Plätzchen für deine Dose</b>${r ? ', ein <b>Rezept</b>' : ''} und ${d === 24 ? 'zur Feier eine <b>Festmusik</b>' : 'das Lied des Tages'}.</span>`;
 }
 function rewardHTML(d) {
   const p = PLAN[d], c = COOKIES[p.cookie], rz = p.recipe && RECIPES[p.recipe];
-  return `<div class="reward-cookie">${Art.cookie(p.cookie, 96)}</div><b>${c.name}</b><br><span class="soft">${c.text}</span>
+  return `<div class="reward-cookie">${Art.cookie(p.cookie, 96)}</div><b>${c.name}</b><br><span class="soft">${c.text}</span>${d === 24 ? '<p class="soft">Zur Feier spielt die Weihnachts-Suite: Intrada, Branle und Gigue. Mit „♪ Festmusik“ hörst du sie jederzeit wieder.</p>' : ''}
     <div class="reward-btns"><button class="btn small" data-dose="1">Zur Plätzchendose</button>${rz && !rz.platzhalter ? `<button class="btn small red" data-recipe="${p.recipe}">Rezept: ${rz.title}</button>` : ''}</div>`;
 }
 const unlockedRecipes = () => PLAN.map((p, d) => p && p.recipe && day(d).finished ? p.recipe : null).filter(id => id && RECIPES[id] && !RECIPES[id].platzhalter);

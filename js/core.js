@@ -1,6 +1,6 @@
 /* Adventsbackstube – gemeinsame Grundlagen: Spielstand, Zutaten, Klang, Melodien, Hilfsfunktionen.
    Wird von allen Spiel-Modulen (regal.js, blech.js, buch.js) und app.js genutzt. */
-const VERSION = 'v26';
+const VERSION = 'v27';
 const TEST = /(^|[#?&])test/.test(location.hash + location.search);
 const $ = id => document.getElementById(id);
 const wait = ms => new Promise(r => setTimeout(r, ms));
@@ -108,7 +108,7 @@ const Snd = (() => {
   };
   // Bei jedem Antippen: Ton freischalten (stiller Puffer) – hilft Safari/iOS. Hängt er danach noch, beim nächsten Klick neu anlegen.
   const unlock = () => {
-    const c = ensure(); if (!c) return; if (!alleGestartet) setTimeout(ladenAlle, 300);
+    const c = ensure(); if (!c) return; if (!alleGestartet) setTimeout(ladenAlle, 300); else nachladen();
     if (!unlocked || c.state !== 'running') {
       try { const b = c.createBuffer(1, 1, 22050), s = c.createBufferSource(); s.buffer = b; s.connect(c.destination); s.start(0); unlocked = c.state === 'running'; } catch (e) {}
       setTimeout(() => { if (ctx === c && c.state !== 'running' && document.visibilityState === 'visible') stale = true; }, 600);
@@ -357,7 +357,7 @@ const Snd = (() => {
   const FAKTOR = {orgel: 4.5, trompete: 2.1, posaune: 2.3, chor: 2.6, violine: 2.6, bratsche: 2.6, cello: 2.4, floete: 2.2, glocken: .38, spieluhr: 1.6, roehrenglocken: 1.5, pauke: 1.5, trommel: 1.3};
   let aufnahmenAn = save.klang !== 'synth';
   async function laden(set) {
-    const c = ensure(); if (!c) return false; if (ladeStatus[set] === 'ok') return true; ladeStatus[set] = 'lädt'; bufs[set] = bufs[set] || {};
+    const c = dekodierer(); if (!c) return false; if (ladeStatus[set] === 'ok' || ladeStatus[set] === 'lädt') return ladeStatus[set] === 'ok'; ladeStatus[set] = 'lädt'; bufs[set] = bufs[set] || {};
     try {
       await Promise.all(SETS[set].filter(n => !bufs[set][n]).map(async n => {
         const r = await fetch(`klang/${set}/o${n}.mp3?v=${VERSION}`); if (!r.ok) throw new Error(r.status);
@@ -368,8 +368,14 @@ const Snd = (() => {
       ladeStatus[set] = 'ok'; return true;
     } catch (e) { ladeStatus[set] = 'fehler'; return false; }
   }
-  let alleGestartet = false;
+  /* Vorladen beim Spielstart (D72): Aufnahmen werden schon vor dem ersten Antippen geladen und entpackt – dafür genügt ein
+     „stiller“ OfflineAudioContext (braucht keine Nutzeraktion). AudioBuffer lassen sich danach im echten Kontext abspielen.
+     Gibt es den echten Kontext schon, wird er benutzt. Scheitert etwas, versucht es das erste Antippen noch einmal. */
+  let dekoder = null, alleGestartet = false, wiederholt = false;
+  const dekodierer = () => { if (ctx) return ctx; try { return dekoder || (dekoder = new (window.OfflineAudioContext || window.webkitOfflineAudioContext)(1, 1, 44100)); } catch (e) { return null; } };
   async function ladenAlle() { if (alleGestartet || !aufnahmenAn) return; alleGestartet = true; for (const set in SETS) await laden(set); }
+  function nachladen() { if (wiederholt || !aufnahmenAn) return; const fehl = Object.keys(SETS).filter(k => ladeStatus[k] === 'fehler'); if (!fehl.length) return; wiederholt = true; setTimeout(() => fehl.forEach(laden), 300); }
+  if (on && aufnahmenAn) (document.readyState === 'complete' ? setTimeout(ladenAlle, 600) : window.addEventListener && window.addEventListener('load', () => setTimeout(ladenAlle, 600)));
   const geladen = set => aufnahmenAn && ladeStatus[set] === 'ok';
   /* Einschwingzeit einer Aufnahme (D70): Zeit, bis die Hüllkurve 40 % ihres Spitzenwerts erreicht. Gestrichene Saiten brauchen
      dafür 0,1–0,2 s – so lang wie eine schnelle Achtel. Kurze Noten überspringen diesen Anlauf, damit Läufe deutlich klingen. */
