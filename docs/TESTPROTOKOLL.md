@@ -234,3 +234,13 @@ Wunsch: We Three Kings vierstimmig. Das MIDI-Arrangement (Mannheim Steamroller, 
 - Joy to the World „klingt noch etwas komisch und abgebrochen“ → Ursache vermutlich: Bläser-Klang machte Sechzehntel zu kurzen Stößen und spielte die einstimmige Melodie eine Oktave tief. v19.1: vierstimmiger Posaunenchor-Satz, Tempo −15 %, weichere kurze Bläsertöne. Bitte erneut anhören.
 - Musikdaten liegen jetzt als MIDI/ABC/JSON in `musik/`.
 
+## Runde 20 – Rückmeldung Musik (24.11.)
+| Punkt | Änderung v20 |
+|---|---|
+| Leise rieselt der Schnee: „falsche Melodie“ | Noten erneut mit dem Liederbuch (S. 36, 6/8, F-Dur) verglichen: stimmen Ton für Ton überein. **Rückfrage an den Auftraggeber**, welche Melodie gemeint ist |
+| Jazz-Trio klingt komisch | ersetzt durch Folk-Duo (Mandoline + Gitarren-Fingerpicking), D64 |
+| Süßer die Glocken zu schnell | 70 % Tempo |
+| Abspielen nicht stoppbar | zweites Drücken stoppt (■ Stopp) |
+| Musikdaten als MIDI/ABC im Projekt | liegen seit v19.1 in `musik/` (wird bei jedem Test neu erzeugt) |
+| Fuge im Lied-Tool? | steht am Ende der Liste (ab v19.2) |
+

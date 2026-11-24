@@ -11,7 +11,7 @@ for (const d of ['', 'abc', 'midi']) fs.mkdirSync(path.join(OUT, d), {recursive:
 const slug = s => s.toLowerCase().replace(/ä/g, 'ae').replace(/ö/g, 'oe').replace(/ü/g, 'ue').replace(/ß/g, 'ss').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 const BASE = .2; // Sekunden pro Achtel im Spiel (× tempo des Liedes)
 // General-MIDI-Instrumente je Besetzung (Programmnummer 0–127)
-const GM = {bell: 9, blech: 57, brass: 57, streicher: 48, chor: 52, holz: 73, orgel: 19, spieluhr: 10, epiano: 4, bass: 32};
+const GM = {bell: 9, blech: 57, brass: 57, streicher: 48, chor: 52, holz: 73, orgel: 19, spieluhr: 10, epiano: 4, bass: 32, folk: 105, mandoline: 105, gitarre: 25};
 const VOICE = ['Sopran', 'Alt', 'Tenor', 'Bass'];
 
 // ---------- MIDI (Typ 1) ----------
@@ -88,10 +88,10 @@ MELODIES.forEach((m, k) => {
   const id = slug(m.name), usq = Math.round(BASE * (m.tempo || 1) * 2 * 1e6);
   let tracks;
   if (m.voices) tracks = m.voices.map((v, i) => track(notesToEv(v, i ? 80 : 96), VOICE[i], i, GM[m.style] ?? 0));
-  else if (m.style === 'jazz' && m.chords) {
-    const {ev} = Snd.jazzEvents(m), parts = {};
+  else if (m.style === 'folk' && m.chords) {
+    const {ev} = Snd.folkEvents(m), parts = {};
     for (const e of ev) (parts[e.part] = parts[e.part] || []).push({t: e.t * T8, n: e.n, len: e.len * T8, vel: Math.min(127, Math.round(e.vol * 520))});
-    tracks = Object.entries(parts).map(([name, evs], i) => name === 'Besen' ? track(evs, name, 9, 0) : track(evs, name, i, name === 'Kontrabass' ? GM.bass : GM.epiano));
+    tracks = Object.entries(parts).map(([name, evs], i) => track(evs, name, i, name === 'Gitarre' ? GM.gitarre : GM.mandoline));
   } else tracks = [track(notesToEv(m.notes, 96), 'Melodie', 0, GM[m.style] ?? 0)];
   fs.writeFileSync(path.join(OUT, 'midi', id + '.mid'), midiFile(tracks, usq, m.name));
   fs.writeFileSync(path.join(OUT, 'abc', id + '.abc'), abcFile(m, k + 1));

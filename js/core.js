@@ -1,6 +1,6 @@
 /* Adventsbackstube – gemeinsame Grundlagen: Spielstand, Zutaten, Klang, Melodien, Hilfsfunktionen.
    Wird von allen Spiel-Modulen (regal.js, blech.js, buch.js) und app.js genutzt. */
-const VERSION = 'v19.2';
+const VERSION = 'v20';
 const TEST = /(^|[#?&])test/.test(location.hash + location.search);
 const $ = id => document.getElementById(id);
 const wait = ms => new Promise(r => setTimeout(r, ms));
@@ -45,6 +45,20 @@ function prog(id) {
   return save.games[id] || (save.games[id] = {level:1, best:{}});
 }
 const starsOf = p => Object.values(p.best || {}).reduce((a, b) => a + b, 0);
+/* ---- Abspiel-Knöpfe (D64): erneutes Drücken stoppt; der Knopf zeigt ■ solange das Lied läuft ---- */
+const Player = {key: null, btn: null, label: '', timer: 0,
+  toggle(key, btn, start) { // start() spielt und liefert die Dauer in Sekunden
+    const same = this.key === key; this.reset(); Snd.stop();
+    if (same) return false;
+    if (!Snd.on) Snd.toggle();
+    const d = start() || 0; this.key = key; this.btn = btn; this.label = btn ? btn.textContent : '';
+    if (btn) btn.textContent = '■ Stopp';
+    this.timer = setTimeout(() => this.reset(), d * 1000 + 300);
+    return true;
+  },
+  reset() { clearTimeout(this.timer); if (this.btn) this.btn.textContent = this.label; this.key = null; this.btn = null; },
+};
+
 /* ---- Ausgepackte Inhalte (Kalender 2.0) und Spiele-Verzeichnis ----
    Feat.has(id) wird von kalender.js gesetzt; Spiele[id] von app.js. */
 const Feat = {has: () => true};
@@ -207,7 +221,7 @@ const Snd = (() => {
   const STYLE = {
     bell: {v: ['bell'], name: 'Glockenspiel'}, blech: {v: ['brass'], name: 'Posaunenchor'}, brass: {v: ['brass'], name: 'Posaunenchor'},
     streicher: {v: ['streicher'], name: 'Streichquartett'}, chor: {v: ['chor'], name: 'Chor'}, holz: {v: ['holz'], name: 'Flöten'},
-    orgel: {v: ['orgel'], name: 'Orgel'}, epiano: {v: ['epiano'], name: 'E-Piano'}, spieluhr: {v: ['spieluhr'], name: 'Spieluhr'}, jazz: {v: ['epiano', 'epiano', 'epiano', 'bass'], name: 'Jazz-Trio', swing: true},
+    orgel: {v: ['orgel'], name: 'Orgel'}, epiano: {v: ['epiano'], name: 'E-Piano'}, spieluhr: {v: ['spieluhr'], name: 'Spieluhr'}, folk: {v: ['mandoline'], name: 'Mandoline & Gitarre'}, mandoline: {v: ['mandoline'], name: 'Mandoline'},
   };
   const styleOf = s => STYLE[s] || STYLE.bell;
   const swingT = (t8, tempo) => { const beat = Math.floor(t8 / 2), off = t8 - beat * 2; return (beat * 2 + (off >= 1 ? 1.34 + (off - 1) * .66 : off * 1.34)) * tempo; };
@@ -238,7 +252,7 @@ const Snd = (() => {
     if (st.swing) { for (let b = 0; b * 2 < p; b++) besen(t0 + b * tempo * 2); bassLine(notes, t0, tempo); }
     return t0 + p * tempo - c.currentTime;
   }
-  /* Jazz-Trio (D60): Melodie auf dem E-Piano, Begleitakkorde (Terz + Septime + None) im Charleston-Rhythmus,
+  /* Akkord-Hilfen (D60, für Folk-Duo D64). Ursprünglich Jazz-Trio: Melodie auf dem E-Piano, Begleitakkorde (Terz + Septime + None) im Charleston-Rhythmus,
      Walking Bass auf jeder Viertel (Grundton → Akkordtöne → chromatischer Anlauf zum nächsten Grundton), Besen mit Akzent auf 2 und 4.
      Braucht m.chords = [[Symbol, Achtel], …] über die ganze Melodie und m.meter (Viertel pro Takt), m.pickup (Achtel Auftakt). */
   const PC = {C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11};
@@ -251,46 +265,72 @@ const Snd = (() => {
     return {root, bass: sl ? pc(sl) : root, tones: iv.map(x => (root + x) % 12), guide: [third, sev, 14].map(x => (root + x) % 12), fifth: (root + 7) % 12};
   }
   const near = (pc, around) => { let n = around - ((around - pc) % 12 + 12) % 12; if (around - n > 6) n += 12; return n; };
-  // Arrangement als Ereignisliste (Zeiten in Achteln, geswingt) – fürs Abspielen und für den MIDI-Export
-  function jazzEvents(m) {
-    const meter = m.meter || 4, pk = m.pickup || 0, ev = [], S = x => swingT(x, 1);
-    let p = 0; for (const [n, d] of m.notes) { if (n) ev.push({i: 'epiano', n, t: S(p), len: (S(p + d) - S(p)) * .9, vol: .17, part: 'Melodie'}); p += d; }
-    const total = p, segs = []; let q = 0; for (const [sym, d] of m.chords) { segs.push({a: q, b: q + d, c: chordOf(sym)}); q += d; }
-    const segAt = x => segs.find(g => x >= g.a && x < g.b) || segs[segs.length - 1];
-    // Walking Bass (Viertel = 2 Achtel)
-    let last = 43;
-    for (let x = 0; x < total; x += 2) {
-      const g = segAt(x), nx = segAt(x + 2), first = x === g.a || x === 0, beforeNew = x + 2 < total && nx !== g;
-      let n;
-      if (first) n = near(g.c.bass, last);
-      else if (beforeNew) { const target = near(nx.c.bass, last); n = target + (last >= target ? 1 : -1); }
-      else { const opts = [g.c.tones[2], g.c.tones[1], (g.c.root + 9) % 12].map(pc => near(pc, last)); n = opts[(x / 2) % opts.length]; }
-      while (n < 36) n += 12; while (n > 52) n -= 12;
-      if (meter === 3 && !first && ((x - pk) / 2) % 3 === 1) continue; // Walzer: Bass auf 1 und 3
-      ev.push({i: 'bass', n, t: x, len: meter === 3 && first ? 3.4 : 1.8, vol: .28, part: 'Kontrabass'}); last = n;
+  /* Gezupfte Saiten (D64): Karplus-Strong – jede Tonhöhe wird einmal als Klangpuffer berechnet und dann wiederverwendet.
+     hell = Mandoline (Melodie), sonst Gitarre (Begleitung). Feinstimmung über einen Allpass für genaue Tonhöhe. */
+  const pluckCache = {};
+  function pluckBuffer(n, hell) {
+    const key = n + (hell ? 'h' : 'g'); if (pluckCache[key]) return pluckCache[key];
+    const sr = ctx.sampleRate, f = hz(n), len = Math.floor(sr * (hell ? 1.6 : 2.4)), buf = ctx.createBuffer(1, len, sr), y = buf.getChannelData(0);
+    const P = sr / f - .5, N = Math.floor(P), frac = P - N, c = (1 - frac) / (1 + frac);
+    const decay = hell ? .9965 : .9985 - Math.max(0, n - 60) * .00004;
+    const r = rng(n * 31 + (hell ? 7 : 3));
+    // Anschlag: Rauschen, bei der Gitarre weicher (geglättet)
+    let prev = 0; for (let i = 0; i < N && i < len; i++) { const w = r() * 2 - 1; prev = hell ? w : prev * .5 + w * .5; y[i] = prev * .9; }
+    let ap = 0, apIn = 0;
+    for (let i = N; i < len; i++) {
+      const x = (y[i - N] + (i - N - 1 >= 0 ? y[i - N - 1] : 0)) * .5 * decay;
+      const out = c * x + apIn - c * ap; apIn = x; ap = out; y[i] = out;
     }
-    // Begleitung: Charleston (1 und 2+) bzw. Walzer (2 und 3); Besen: jede Viertel leise, 2 und 4 betont
-    for (let bar = pk ? pk - meter * 2 : 0; bar < total; bar += meter * 2) {
-      const hits = meter === 3 ? [[2, 1.6], [4, 1.6]] : [[0, 2.6], [3, 1.2]];
-      for (const [off, len] of hits) {
-        const x = bar + off; if (x < 0 || x >= total) continue; const g = segAt(x);
-        g.c.guide.forEach(pc => ev.push({i: 'epiano', n: near(pc, 60), t: S(x), len, vol: .06, part: 'Begleitung'}));
+    return (pluckCache[key] = buf);
+  }
+  INSTR.zupf = (n, t, len, vol = .22, hell = false) => {
+    const s = ctx.createBufferSource(), g = ctx.createGain(), lp = ctx.createBiquadFilter();
+    s.buffer = pluckBuffer(n, hell); lp.type = 'lowpass'; lp.frequency.value = hell ? 6000 : 3200;
+    const end = t + Math.max(.15, len), dur = s.buffer.duration; vol *= 1 + Math.max(0, n - 60) * .04; // hohe Saiten klingen leiser – ausgleichen
+    g.gain.setValueAtTime(vol, t); g.gain.setValueAtTime(vol, Math.min(end, t + dur - .1)); g.gain.exponentialRampToValueAtTime(0.0001, Math.min(t + dur, end + .12));
+    s.connect(lp).connect(g).connect(master); s.start(t); s.stop(Math.min(t + dur, end + .15)); track(s);
+  };
+  INSTR.mandoline = (n, t, len, vol = .2) => INSTR.zupf(n, t, len, vol, true);
+  INSTR.gitarre = (n, t, len, vol = .16) => INSTR.zupf(n, t, len, vol, false);
+  /* Folk-Duo: Melodie auf der Mandoline (lange Töne als Tremolo), Begleitung als Fingerpicking auf der Gitarre:
+     Daumen spielt Wechselbass (Grundton – Quinte), die Finger zupfen Akkordtöne dazwischen. Akkorde werden zu Dreiklängen vereinfacht (Sept bleibt). */
+  function folkEvents(m) {
+    const meter = m.meter || 4, pk = m.pickup || 0, ev = [];
+    let p = 0;
+    for (const [n, d] of m.notes) {
+      if (n) {
+        if (d >= 3) for (let x = 0; x < d - .01; x += .5) ev.push({i: 'mandoline', n, t: p + x, len: .5, vol: x ? .11 : .2, part: 'Mandoline'}); // Tremolo
+        else ev.push({i: 'mandoline', n, t: p, len: d, vol: .2, part: 'Mandoline'});
       }
-      for (let b = 0; b < meter; b++) { const x = bar + b * 2; if (x < 0 || x >= total) continue; ev.push({i: 'besen', n: 38, t: x, len: .5, vol: (meter === 4 ? b % 2 === 1 : b > 0) ? .16 : .07, part: 'Besen'}); }
+      p += d;
+    }
+    const total = p, segs = []; let q = 0;
+    for (const [sym, d] of m.chords) { segs.push({a: q, b: q + d, c: chordOf(sym.replace(/maj7|m7b5|6|9/g, m => m === 'm7b5' ? 'm' : '').replace(/m7/g, 'm'))}); q += d; }
+    const segAt = x => segs.find(g => x >= g.a && x < g.b) || segs[segs.length - 1];
+    const pat4 = ['B', 'h', 'A', 'm', 'B', 'h', 'A', 'm'], pat3 = ['B', 'm', 'h', 'm', 'A', 'm'];
+    for (let x = 0; x < total; x++) {
+      const pos = ((x - pk) % (meter * 2) + meter * 2) % (meter * 2), role = (meter === 3 ? pat3 : pat4)[pos], g = segAt(x).c;
+      const bass = near(g.bass, 45), fifth = near(g.fifth, bass + 7);
+      let n;
+      if (role === 'B') n = bass; else if (role === 'A') n = fifth > 52 ? fifth - 12 : fifth;
+      else { const tones = g.tones.map(pc => near(pc, 60)).sort((a, b) => a - b); n = role === 'h' ? tones[tones.length - 1] : tones[Math.floor(tones.length / 2)]; }
+      if (x < pk && role !== 'B' && role !== 'A') continue;
+      ev.push({i: 'gitarre', n, t: x, len: role === 'B' || role === 'A' ? 2 : 1.6, vol: role === 'B' ? .19 : role === 'A' ? .15 : .1, part: 'Gitarre'});
+      if (pos === 0) ev.push({i: 'gitarre', n: near(g.tones[1], 64), t: x + .02, len: 2, vol: .09, part: 'Gitarre'}); // Pinch auf der Eins
     }
     return {ev, total};
   }
-  function jazz(m, tempo) {
-    const c = ensure(); if (!c) return 0; const t0 = c.currentTime + .08, {ev, total} = jazzEvents(m);
-    for (const e of ev) { const t = t0 + e.t * tempo; if (e.i === 'besen') besen(t, e.vol); else INSTR[e.i](e.n, t, e.len * tempo, e.vol); }
-    return t0 + total * tempo - c.currentTime + .5;
+  function folk(m, tempo) {
+    const c = ensure(); if (!c) return 0; const t0 = c.currentTime + .1, {ev, total} = folkEvents(m);
+    for (const e of ev) INSTR[e.i](e.n, t0 + e.t * tempo, e.len * tempo, e.vol);
+    return t0 + total * tempo - c.currentTime + .6;
   }
   // Ein Lied in seiner Besetzung abspielen (Grundtempo × eigenes Tempo des Liedes)
   function song(m, base = .2, kurz = false) {
     const tempo = base * (m.tempo || 1);
-    if (kurz) return phrase(m.notes.slice(0, 24), m.style === 'jazz' ? 'epiano' : m.style, tempo);
+    if (kurz) return phrase(m.notes.slice(0, 24), m.style, tempo);
     if (m.voices) return choir(m.voices, tempo, m.style);
-    if (m.style === 'jazz' && m.chords) return jazz(m, tempo);
+    if (m.style === 'folk' && m.chords) return folk(m, tempo);
     return phrase(m.notes, m.style, tempo);
   }
   function bassLine(notes, t0, tempo) { // Jazz: einfacher Bass auf jedem Viertel – Grundton des Taktes aus der Melodie (Tiefster Ton je Halbtakt)
@@ -302,7 +342,7 @@ const Snd = (() => {
   function note(n, len = .35) { const c = ensure(); if (!c) return; bell(n, c.currentTime + .01, len); }
   function stop() { playing.forEach(o => { try { o.stop(); } catch (e) {} }); playing = []; }
   function toggle() { on = !on; save.sound = on; persist(); if (!on) stop(); else phrase([[72, 1], [76, 1], [79, 2]], 'bell', .14); return on; } // Einschalten spielt einen kleinen Klang zum Testen
-  return {tap, pour, nope, note, phrase, choir, song, jazzEvents, stop, toggle, styleName: s => styleOf(s).name, get state() { return ctx ? ctx.state : 'noch nicht gestartet'; }, ensure, get on() { return on; }};
+  return {tap, pour, nope, note, phrase, choir, song, folkEvents, stop, toggle, styleName: s => styleOf(s).name, get state() { return ctx ? ctx.state : 'noch nicht gestartet'; }, ensure, get on() { return on; }};
 })();
 
 /* ---- Melodien (gemeinfrei). [MIDI-Note, Dauer in Achteln], 60 = c', Note 0 = Pause ----
@@ -350,7 +390,7 @@ const MELODIES = [
     [78,2],[78,1],[79,1],[78,1],[76,1],[74,2],[71,2],[69,1],[69,1],[71,2],[76,2],[73,2],[74,4],[69,2],
     [74,2],[74,2],[74,2],[73,4],[73,2],[74,2],[73,2],[71,2],[69,4],[76,2],
     [78,2],[76,1],[76,1],[74,1],[74,1],[81,2],[78,2],[69,1],[69,1],[71,2],[76,2],[73,2],[74,6]]},
-  {name:'Süßer die Glocken nie klingen', src:SIA, notes:[
+  {name:'Süßer die Glocken nie klingen', tempo:1.43, src:SIA, notes:[
     [69,1.5],[69,.5],[69,1],[69,1],[67,1],[69,1],[72,3],[67,3],[67,1.5],[67,.5],[67,1],[67,1],[65,1],[67,1],[69,5],[0,1],
     [72,1.5],[72,.5],[72,1],[72,1],[69,1],[65,1],[77,3],[74,3],[72,1.5],[74,.5],[72,1],[72,1],[70,1],[67,1],[65,5],[0,1],
     [67,1.5],[67,.5],[67,1],[69,1],[69,1],[69,1],[72,1.5],[70,.5],[67,1],[69,3],[67,1.5],[67,.5],[67,1],[69,1],[69,1],[69,1],[72,1.5],[70,.5],[67,1],[69,3],
@@ -430,11 +470,11 @@ const MELODIES = [
 MELODIES.forEach(m => { if (m.voices && !m.notes) m.notes = m.voices[0]; }); // Melodie = Sopran
 // Besetzung je Lied (D55): passend zum Charakter des Stücks
 const BESETZUNG = {'Stille Nacht, heilige Nacht': 'chor', 'Alle Jahre wieder': 'spieluhr', 'O Tannenbaum': 'streicher', 'Kling, Glöckchen, klingelingeling': 'bell',
-  'Lasst uns froh und munter sein': 'holz', 'Jingle Bells': 'jazz', 'Ihr Kinderlein kommet': 'holz', 'Leise rieselt der Schnee': 'holz', 'O du fröhliche': 'orgel',
-  'Morgen kommt der Weihnachtsmann': 'spieluhr', 'We Wish You a Merry Christmas': 'jazz', 'Süßer die Glocken nie klingen': 'bell', 'Macht hoch die Tür': 'blech',
+  'Lasst uns froh und munter sein': 'holz', 'Jingle Bells': 'folk', 'Ihr Kinderlein kommet': 'holz', 'Leise rieselt der Schnee': 'holz', 'O du fröhliche': 'orgel',
+  'Morgen kommt der Weihnachtsmann': 'spieluhr', 'We Wish You a Merry Christmas': 'folk', 'Süßer die Glocken nie klingen': 'bell', 'Macht hoch die Tür': 'blech',
   'Tochter Zion, freue dich': 'blech', 'Kommet, ihr Hirten': 'holz', 'Herbei, o ihr Gläubigen': 'chor', 'Es ist ein Ros entsprungen': 'chor', 'Zu Bethlehem geboren': 'streicher',
-  'Es kommt ein Schiff geladen': 'chor', 'We Three Kings': 'streicher', 'Deck the Halls': 'jazz', 'Good King Wenceslas': 'blech', 'Joy to the World': 'blech',
-  'I Saw Three Ships': 'holz', 'Hark! The Herald Angels Sing': 'chor', 'Kommt und lasst uns Christum ehren': 'streicher', 'God Rest Ye Merry, Gentlemen': 'jazz',};
+  'Es kommt ein Schiff geladen': 'chor', 'We Three Kings': 'streicher', 'Deck the Halls': 'folk', 'Good King Wenceslas': 'blech', 'Joy to the World': 'blech',
+  'I Saw Three Ships': 'holz', 'Hark! The Herald Angels Sing': 'chor', 'Kommt und lasst uns Christum ehren': 'streicher', 'God Rest Ye Merry, Gentlemen': 'folk',};
 MELODIES.forEach(m => { m.style = m.style || BESETZUNG[m.name] || 'bell'; });
 const tones = m => m.notes.filter(x => x[0] > 0); // ohne Pausen – für Stationen, die Ton für Ton spielen
 const melodyFor = L => MELODIES[(L - 1) % MELODIES.length];
