@@ -26,6 +26,9 @@ PLANS = {
   # Stille Nacht (C-Dur, 6/8) – schlichter Chorsatz für Heiligabend
  'Stille Nacht, heilige Nacht': '''C:6 | C:6 | C:6 | C:6 | G:6 | G7:6 | C:6 | C:6 | F:6 | F:4 F/A:2 | C:6 | C:6 | F:6 | F:4 F/A:2 | C:6 | C:6 |
    G:6 | G7:6 | C/E:6 | C:6 | C:6 | G7:6 | C:12''',
+  # Joy to the World (D-Dur, 2/4) – Posaunenchor
+ 'Joy to the World': '''D:4 | D:4 | D:2 A7:2 | D:3 D/F#:1 | G:4 | A:4 | D:4 | D:2 G:1 D/F#:1 | A7:2 D:2 | D:4 | D:4 | A7:4 | A7:4 |
+   D:3 G:1 | D/A:2 D:1 Em:1 | D/A:2 A7:2 | D:4''',
 }
 for name, plan in PLANS.items():
     m = mel(name); ch = bars(plan)

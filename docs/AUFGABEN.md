@@ -51,6 +51,8 @@ Details zum Konzept: `KONZEPT-ADVENT.md`. Entscheidungen: `PROJEKT.md`.
 | T1 | Auftraggeber testet nach `TESTPLAN.md` | ❓ |
 | M5 | Carol of the Bells nach Leontowytsch-Partitur (D61) | ✅ v19 |
 | M9 | Away in a Manger (Melodiequelle nötig) | ⏳ für später |
+| M10 | Musikdaten als MIDI/ABC/JSON exportieren (`musik/`) | ✅ v19.1 |
+| M11 | Joy to the World überarbeiten (Satz, Tempo, Bläserklang) | ✅ v19.1 – bitte anhören |
 | M7 | Musik-Rückmeldungen Runde 19 umsetzen (Tempi, Jazz-Trio, Sätze, Joy to the World, GKW) | ✅ v19 |
 | M8 | Ton-Fehler nach Fensterwechsel (D59) | ✅ v19 |
 | M6 | Vierstimmiger Satz für Stille Nacht (Finale) | ✅ v19 |

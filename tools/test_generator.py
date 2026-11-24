@@ -126,3 +126,10 @@ console.log('OK', MELODIES.length, 'Melodien,', MELODIES.filter(m => m.ok !== fa
 f = tempfile.NamedTemporaryFile('w', suffix='.js', delete=False)
 f.write(stub + src + test); f.close()
 subprocess.run(['node', f.name], check=True)
+
+# Musikdaten exportieren (prüft zugleich, dass alle Lieder als MIDI/ABC schreibbar sind)
+import subprocess as _sp
+_r = _sp.run(['node', 'tools/musik_export.js'], capture_output=True, text=True)
+print(_r.stdout.strip() or _r.stderr.strip())
+if _r.returncode: raise SystemExit(1)
+
