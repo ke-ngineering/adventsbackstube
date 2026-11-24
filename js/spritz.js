@@ -108,7 +108,7 @@ function up() {
   if (!drawing) return; drawing = false; save();
   if (path.length === dots.size) finish();
 }
-function note() { const n = mel.notes; Snd.note(n[(path.length - 1) % n.length][0], .35); }
+function note() { const n = tones(mel); Snd.note(n[(path.length - 1) % n.length][0], .35); }
 function flashStart() { const s = document.querySelector('.sp.start'); if (s) { s.classList.remove('pulse'); void s.offsetWidth; s.classList.add('pulse'); } }
 const pts = arr => arr.map(i => `${i % C + .5},${Math.floor(i / C) + .5}`).join(' ');
 function draw() {

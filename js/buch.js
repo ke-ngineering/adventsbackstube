@@ -18,7 +18,7 @@ function build(L) {
   cfg = levelCfg(L); const r = rng(L * 31337 + 7);
   if (cfg.melodic) {
     mel = MELODIES[Math.floor((L - 1) / 2) % MELODIES.length];
-    const notes = mel.notes.slice(0, cfg.T).map(x => x[0]);
+    const notes = tones(mel).slice(0, cfg.T).map(x => x[0]);
     cfg.T = notes.length; // kurze Lieder: Folge so lang wie das Lied
     const uniq = [...new Set(notes)].sort((a, b) => a - b);
     pads = uniq.map(n => ({note: n})); seq = notes.map(n => uniq.indexOf(n));

@@ -164,5 +164,14 @@ Wunsch zum Gewürzregal: Flüssige Zutaten sollen fließen, andere herunterpurze
 
 **Folge:** v12 (D41).
 
-## Runde 12 – Prototyp v12 (ausstehend)
-**Zu prüfen:** Alle 10 Lieder auf `#lieder` anhören und markieren. Bei „klingt falsch“ die Stelle nennen.
+## Runde 12 – Prototyp v12 (24.11.2026)
+**Feedback:** Der Tester schlägt liederkiste.com als Quelle vor und erlaubt, das fremde öffentliche Repository des Liederbuchs „Singen im Advent“ zu lesen.
+
+**Analyse:**
+- Liederkiste: keine Noten im Textformat. Die Notenblätter sind nur für private oder gemeinnützige Nutzung freigegeben, nicht zur Veröffentlichung, deshalb nicht verwendet.
+- „Singen im Advent“: gemeinfrei und frei verbreitbar. Das Repository enthält nur das PDF (44 Seiten, Noten als Grafik). Claude hat die Noten aus den gerenderten Seiten abgelesen und eigene Versionen damit abgeglichen.
+
+**Folge:** v13 (D42, D43): 23 Lieder, davon 19 aus dem Liederbuch.
+
+## Runde 13 – Prototyp v13 (ausstehend)
+**Zu prüfen:** Lieder auf `#lieder` anhören, vor allem die 4 „bitte prüfen“-Lieder.
