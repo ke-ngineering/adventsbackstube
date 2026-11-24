@@ -177,8 +177,8 @@ function liederCheck() {
   const sum = () => { const v = Object.values(marks); $('songSum').textContent = `${v.filter(x => x === 'ok').length} bestätigt, ${v.filter(x => x === 'bad').length} falsch, ${MELODIES.length - v.length} offen.`; };
   $('songList').onclick = e => {
     const b = e.target.closest('button'); if (!b) return;
-    if (b.dataset.play) { Snd.stop(); if (!Snd.on) Snd.toggle(); Snd.song(MELODIES[+b.dataset.play]); return; }
-    if (b.dataset.mel) { Snd.stop(); if (!Snd.on) Snd.toggle(); const m = MELODIES[+b.dataset.mel]; Snd.phrase(m.notes, m.style === 'jazz' ? 'epiano' : m.style, .2 * (m.tempo || 1)); return; }
+    if (b.dataset.play) { Player.toggle('p' + b.dataset.play, b, () => Snd.song(MELODIES[+b.dataset.play])); return; }
+    if (b.dataset.mel) { const m = MELODIES[+b.dataset.mel]; Player.toggle('m' + b.dataset.mel, b, () => Snd.phrase(m.notes, m.style, .2 * (m.tempo || 1))); return; }
     const m = MELODIES[+(b.dataset.ok || b.dataset.bad)]; marks[m.name] = b.dataset.ok ? 'ok' : 'bad'; persist();
     $('songList').innerHTML = list(); sum();
   };

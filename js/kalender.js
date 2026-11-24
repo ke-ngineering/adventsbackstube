@@ -120,7 +120,7 @@ function openDay(d) {
   };
   $('toGrid').onclick = () => showGrid(api);
   $('reward').onclick = e => { const b = e.target.closest('[data-recipe]'); if (b) showRecipe(b.dataset.recipe); if (e.target.closest('[data-dose]')) showDose(); };
-  $('playSong').onclick = () => { Snd.stop(); if (!Snd.on) Snd.toggle(); playSong(song); };
+  $('playSong').onclick = () => Player.toggle('tag' + d, $('playSong'), () => Snd.song(song));
   if (st.finished && !st.gefeiert) { st.gefeiert = true; persist(); const r = $('reward'); r.classList.add('feiern'); Snd.stop(); setTimeout(() => playSong(song), 500); }
   api.setTitle(`Türchen ${d}`);
 }
