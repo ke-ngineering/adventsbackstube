@@ -4,7 +4,7 @@
 > Wer (Mensch oder Claude) die Entwicklung fortsetzt, liest zuerst diese Datei.
 > Nach jeder Arbeitssitzung: Status, Entscheidungen und Agenda hier aktualisieren.
 
-Stand: 24.11.2026 (Prototyp v11)
+Stand: 24.11.2026 (Prototyp v12)
 
 ## 1. Vision
 
@@ -64,6 +64,7 @@ mit genug Inhalt für spürbar lange Spielsessions (ca. 20–30 Min neue Tagesin
 | D38 | 24.11. | „Gewürzregal“ heißt jetzt **„Vorratsregal“** (interne id bleibt `regal`) | Tester: Es sind nicht nur Gewürze (Honig, Kirschen …) |
 | D39 | 24.11. | Keine überlappenden Melodien: letztes volles Glas spielt kein Teilstück, Gewinn-Melodie startet nach kurzer Pause und stoppt laufende Klänge | Tester: Teilstück + ganze Melodie überlagern sich |
 | D40 | 24.11. | iPhone-Ton-Einstellung (audioSession) nur noch auf iPhone/iPad setzen, nicht auf dem Mac | Ton auf iOS jetzt ok, auf Mac-Safari weiterhin still – Ausschluss einer möglichen Ursache |
+| D41 | 24.11. | Liedersammlung auf 10 gemeinfreie Lieder erweitert + Lieder-Prüfseite `#lieder` | Tester: „ruhig eine große Auswahl“, z. B. We Three Kings; Spielerin singt im Chor → Noten müssen stimmen |
 | D12 | 23.11. | Persönliche Inhalte (Name, Nachrichten) **verschlüsselt** im Repo; Schlüssel steht nur im Link-Teil nach `#`, den sie bekommt (wird nie an Server übertragen) | Personalisierung trotz öffentlichem Repo |
 
 ## 3. Spielkonzept
@@ -167,14 +168,18 @@ Ziel: **spielbar ab Di, 1.12.2026**, Link vorher an sie (z. B. am 1. Advent, 29.
 - Modul-Schnittstelle: `{id, title, sub, desc, start(level, resume, api), stop()}`; `api` = stage/controls/legend/status/getCur/saveCur/restart/win.
 - Cache: Dateien mit `?v=N` einbinden und `VERSION` in core.js hochzählen.
 - Spielstand: `localStorage`-Key `adventsbackstube.v1` → `{level, best, cur, sound, last, games:{blech:{level,best,cur}, buch:{…}}}`; Vorratsregal (`regal`) nutzt die obersten Felder (abwärtskompatibel), `last` = zuletzt geöffnete Station. Bleibt im Browser erhalten, solange Browserdaten nicht gelöscht werden / kein privater Modus.
-- Klang: Web Audio, alles synthetisch (`Snd`-Modul). iPhone: `navigator.audioSession.type = 'playback'`, damit der Stummschalter Web Audio nicht stummschaltet (Safari 16.4+). Einschalten des Tons spielt einen Testklang. WebKit-Fix: Ton wird bei jedem Zustand ≠ `running` (auch `interrupted`) fortgesetzt, Freischalten mit stillem Puffer beim ersten Antippen, Fortsetzen nach Tab-Wechsel. **Ton-Test:** Seite mit `#tontest` öffnen → Diagnose + 3 Testtöne (Spiel-Klang, einfacher Ton, Audio-Datei). Melodien als `[MIDI-Note, Dauer in Achteln]` in `MELODIES`; nur gemeinfreie Lieder (derzeit: Stille Nacht, Gruber 1818).
+- Klang: Web Audio, alles synthetisch (`Snd`-Modul). iPhone: `navigator.audioSession.type = 'playback'`, damit der Stummschalter Web Audio nicht stummschaltet (Safari 16.4+). Einschalten des Tons spielt einen Testklang. WebKit-Fix: Ton wird bei jedem Zustand ≠ `running` (auch `interrupted`) fortgesetzt, Freischalten mit stillem Puffer beim ersten Antippen, Fortsetzen nach Tab-Wechsel. **Ton-Test:** Seite mit `#tontest` öffnen → Diagnose + 3 Testtöne (Spiel-Klang, einfacher Ton, Audio-Datei). Melodien als `[MIDI-Note, Dauer in Achteln]` in `MELODIES`; nur gemeinfreie Lieder. **Liedersammlung (v12, 10 Lieder):** Stille Nacht, Morgen kommt der Weihnachtsmann, Jingle Bells,
+  Deck the Halls, We Three Kings, We Wish You a Merry Christmas, O Tannenbaum (1. Satz), Good King Wenceslas, Joy to the World
+  (Anfang), Herbei o ihr Gläubigen (Anfang). Notiert aus dem Gedächtnis – exakte Notenquellen waren aus der Arbeitsumgebung nicht
+  verlässlich abrufbar. **Lieder-Prüfseite `#lieder`:** jede Melodie anhören, als „stimmt“/„klingt falsch“ markieren (lokal gespeichert,
+  `save.songCheck`). Falsche Melodien korrigieren oder entfernen, bevor sie live gehen.
 - Level-Generator: Seeded RNG (mulberry32), Seed aus Levelnummer → jedes Level ist für sie immer gleich.
   DFS-Solver prüft Lösbarkeit (Knotenlimit 60k), sonst neuer Versuch; Notfall: Extraglas.
 - Hosting-Optionen: GitHub Pages (bevorzugt, Link + „Zum Startbildschirm“) oder claude.ai-Artifact-Link (Vorschau).
 - Tests: `python3 tools/test_generator.py` (alle Generatoren/Löser in Node), `tools/screenshots.py` (Playwright, 390 px).
 
 ## 7. Offene Fragen
-- Ton auf Mac-Safari: Ergebnis des Ton-Tests (`#tontest`) – welche der 3 Testtöne sind hörbar, welcher Zustand wird angezeigt?
+- Lieder prüfen (`#lieder`): Welche Melodien klingen falsch? Weitere Wunschlieder (Notennamen vom Tester willkommen)
 - Prototyp v10 testen: Lehrplan Glasur-Blech Level 1–11 durchspielen – lernt man den Rest-Trick? Labor verständlich? Spritzbeutel schwer genug?
 - Weiterhin offen: Rezeptbuch (Tempo, Lieder erkannt, Melodien korrekt?)
 - Wie verteilen sich die 4 Stationen auf die 24 Adventstage? → danach gemeinsam evaluieren, was das eigentliche Spiel braucht (Schwierigkeitskurve, Wendungen, Animation).
