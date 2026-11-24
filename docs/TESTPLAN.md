@@ -91,7 +91,8 @@ Allgemein:
 - [ ] Jazz-Trio (Jingle Bells, We Wish You, Deck the Halls, God Rest Ye): Swing und Besen hörbar, nicht zu laut?
 - [ ] Ton auf iPhone mit **Stummschalter an** (sollte trotzdem klingen), Mac-Safari, Android.
 - [ ] Ruckelt es bei langen Liedern auf dem Handy? (Viele Instrumente werden live erzeugt.)
-- [ ] Im Lied-Tool oben „Klang: echte Aufnahmen / nachgebaut“: Lädt „alle 10 Instrumente“? Klingen die Aufnahmen besser? Sind die Instrumente gleich laut?
+- [ ] Im Lied-Tool oben „Klang: echte Aufnahmen / nachgebaut“: Lädt „alle 11 Instrumente“? Klingen die Aufnahmen besser? Sind die Instrumente gleich laut?
+- [ ] Im Lied-Tool ganz unten „Carol of the Bells (Glockenfassung)“ anhören: Glockenspiel oben, Spieluhren in der Mitte, Röhrenglocken unten – schöner als das Streichquartett?
 - [ ] Ohne Internet (Flugmodus nach dem ersten Laden bzw. vor dem ersten Laden): Musik spielt trotzdem (Nachbildung).
 
 ## 5. Speichern und Sicherheit

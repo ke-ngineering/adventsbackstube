@@ -11,7 +11,8 @@ Klangsammlung **MuseScore General** (Debian-Paket `musescore-general-soundfont`)
 | `violine`, `bratsche`, `cello` | Violine (40), Viola (41), Cello (42) | Streichquartett |
 | `floete` | Flöte (73) | Flöten, Gigue |
 | `glocken` | Glockenspiel (9) | Glockenspiel-Lieder |
-| `spieluhr` | Spieluhr (10) | Spieluhr-Lieder |
+| `spieluhr` | Spieluhr (10) | Spieluhr-Lieder, Mittelstimmen der Glockenfassung |
+| `roehrenglocken` | Röhrenglocken (14) | tiefe Stimme der Glockenfassung von Carol of the Bells |
 
 Fehlt eine Aufnahme oder scheitert das Laden, spielt das Spiel automatisch den nachgebauten Klang (D67).
 
