@@ -75,6 +75,8 @@ mit genug Inhalt für spürbar lange Spielsessions (ca. 20–30 Min neue Tagesin
 | D49 | 24.11. | Ton-Freischaltung nur bei mousedown/click/touchend/keydown (nicht pointerup); blockierter AudioContext wird beim nächsten Antippen neu angelegt | Kein Ton in Safari (Mac) mit v15/16: pointerup zählt dort bei Maus/Trackpad nicht als Nutzeraktion |
 | D50 | 24.11. | **Sicherungscode** für den Spielstand: `ABS1-<base64url(JSON)>-<Prüfsumme>`, Kopieren/Zurückholen im Kalender („Spielstand sichern“), Zurückholen mit Bestätigung durch zweites Tippen | Fortschritt liegt nur im Browser; iOS-Startbildschirm-Apps haben eigenen Speicher; Handywechsel. Speicherformat selbst unverändert (CLAUDE.md Regel 9) |
 | D51 | 24.11. | **App-Symbol + Manifest** (Lebkuchenstern mit Zuckerguss auf Weihnachtsrot, `icons/`, `manifest.webmanifest`), Anleitung „Als App aufs Handy“ im Kalender. **Kein Service Worker** | Startbildschirm-App ohne Browserleiste; ein Service Worker würde Updates im Advent verzögern (alte Version aus dem Cache) |
+| D52 | 24.11. | **Keine persönlichen Botschaften** hinter den Türchen | Entscheidung des Auftraggebers. Spitzname für die Begrüßung noch offen; ohne ihn bleibt es bei neutralen Texten, die Verschlüsselung (Abschnitt 4) wird dann nicht gebraucht |
+| D53 | 24.11. | Rezept zum 24.12.: **„Bratapfel-Wolke“** – eigenes Rezept, Kombination der Vorschläge 1 (luftiger Joghurt-Frischkäse-Kuchen), 2 (Bratapfel, Marzipan, Mandeln) und 4 (Orange, Cranberries); Spekulatiusboden; **ohne Alkohol** (auch Experimentier-Idee der Roten Grütze ohne Portwein) | Wunsch: fruchtig + luftig mit Joghurt/Frischkäse; 2 „witzig“, 1 und 4 auch; kein Alkohol. Am Vortag backbar. Probebacken empfohlen |
 | D12 | 23.11. | Persönliche Inhalte (Name, Nachrichten) **verschlüsselt** im Repo; Schlüssel steht nur im Link-Teil nach `#`, den sie bekommt (wird nie an Server übertragen) | Personalisierung trotz öffentlichem Repo |
 
 ## 3. Spielkonzept
@@ -158,7 +160,7 @@ Werden **nie im Klartext** ins Repo geschrieben. Ablauf: Auftraggeber nennt Inha
 Ohne Schlüssel zeigt das Spiel neutrale Standardtexte. Klartext und Schlüssel nirgends speichern außer beim Auftraggeber.
 
 - [ ] Name / Spitzname für die Begrüßung
-- [ ] 3–5 kurze Nachrichten + an welchen Tagen
+- [x] ~~3–5 kurze Nachrichten~~ – entfällt (D52)
 - [ ] optional: 1–2 eigene Rezepte
 - [ ] optional: Insider-Witz (z. B. als Zutat oder Plätzchenname)
 
@@ -212,7 +214,7 @@ Ziel: **spielbar ab Di, 1.12.2026**, Link vorher an sie (z. B. am 1. Advent, 29.
 
 ## 7. Offene Fragen
 - Kalender: Passt das Tagesmenü (Umfang ~20–40 Min.)? Passen die Rezept-Tage?
-- Rezept zum 24.12.: eigenes Rezept gemeinsam ausdenken – Wunsch: Kuchen, fruchtig, luftig mit Joghurt/Frischkäse. Vorschläge (v17): Winterwolke (luftiger Joghurt-Frischkäse-Kuchen mit Glühwein-Kirschen), Bratapfel-Joghurt-Torte, Pavlova-Kranz mit Frischkäsecreme und Granatapfel, Orangen-Joghurt-Gugelhupf
+- Rezept zum 24.12.: Entwurf „Bratapfel-Wolke“ (D53) – passt er? Probebacken? (früher: eigenes Rezept gemeinsam ausdenken – Wunsch: Kuchen, fruchtig, luftig mit Joghurt/Frischkäse. Vorschläge (v17): Winterwolke (luftiger Joghurt-Frischkäse-Kuchen mit Glühwein-Kirschen), Bratapfel-Joghurt-Torte, Pavlova-Kranz mit Frischkäsecreme und Granatapfel, Orangen-Joghurt-Gugelhupf)
 - Nächste Schritte: persönliche Inhalte (verschlüsselt) – Zweck dem Auftraggeber erklärt (Begrüßung mit Spitzname, kleine Briefchen hinter einzelnen Türchen); v17 testen (Sicherungscode, App-Symbol auf iPhone/Android)
 - Mehrstimmig: Tochter Zion anhören (`#lieder` → „▶ 4-stimmig“) – klingt der Satz richtig?
 - Lieder prüfen (`#lieder`): v. a. die 4 Gedächtnis-Lieder (We Three Kings, Deck the Halls, Good King Wenceslas, Joy to the World)

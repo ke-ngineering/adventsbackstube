@@ -147,7 +147,7 @@ function showRecipe(id) {
   api.help(RECIPES[id].title, recipeHTML(id) + '<p><button class="btn small" id="rzCopy">Rezept kopieren</button> <span class="soft" id="rzMsg"></span></p>');
   $('helpBody').onclick = null;
   $('rzCopy').onclick = () => {
-    const r = RECIPES[id], txt = `${r.title} (${r.menge})\n\nZutaten:\n${r.zutaten.map(z => '- ' + z).join('\n')}\n\nZubereitung:\n${r.schritte.map((s, i) => (i + 1) + '. ' + s).join('\n')}\n\nTipp: ${r.tipp}\nExperiment: ${r.experiment}`;
+    const r = RECIPES[id], txt = `${r.title} (${r.menge})\n\nZutaten:\n${r.zutaten.map(z => '- ' + z.replace(/<[^>]+>/g, '')).join('\n')}\n\nZubereitung:\n${r.schritte.map((s, i) => (i + 1) + '. ' + s).join('\n')}\n\nTipp: ${r.tipp}\nExperiment: ${r.experiment}`;
     navigator.clipboard?.writeText(txt).then(() => { $('rzMsg').textContent = 'Kopiert!'; }, () => { $('rzMsg').textContent = 'Kopieren hat nicht geklappt.'; });
   };
 }
