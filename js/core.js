@@ -1,6 +1,6 @@
 /* Adventsbackstube – gemeinsame Grundlagen: Spielstand, Zutaten, Klang, Melodien, Hilfsfunktionen.
    Wird von allen Spiel-Modulen (regal.js, blech.js, buch.js) und app.js genutzt. */
-const VERSION = 'v21';
+const VERSION = 'v22';
 const TEST = /(^|[#?&])test/.test(location.hash + location.search);
 const $ = id => document.getElementById(id);
 const wait = ms => new Promise(r => setTimeout(r, ms));
@@ -108,7 +108,7 @@ const Snd = (() => {
   };
   // Bei jedem Antippen: Ton freischalten (stiller Puffer) – hilft Safari/iOS. Hängt er danach noch, beim nächsten Klick neu anlegen.
   const unlock = () => {
-    const c = ensure(); if (!c) return;
+    const c = ensure(); if (!c) return; if (!alleGestartet) setTimeout(ladenAlle, 300);
     if (!unlocked || c.state !== 'running') {
       try { const b = c.createBuffer(1, 1, 22050), s = c.createBufferSource(); s.buffer = b; s.connect(c.destination); s.start(0); unlocked = c.state === 'running'; } catch (e) {}
       setTimeout(() => { if (ctx === c && c.state !== 'running' && document.visibilityState === 'visible') stale = true; }, 600);
@@ -133,10 +133,11 @@ const Snd = (() => {
       const conv = ctx.createConvolver(); conv.buffer = ir; master.connect(send).connect(conv).connect(ctx.destination);
     } catch (e) {}
   }
-  const ROOM = {orgelA: .5, orgel: .55, chor: .45, blech: .38, brass: .38, streicher: .35, holz: .3, tanz: .26, spieluhr: .22, bell: .25, folk: .16, epiano: .15};
+  const ROOM = {orgel: .5, chor: .45, blech: .38, brass: .38, streicher: .35, holz: .3, tanz: .26, spieluhr: .22, bell: .25, folk: .16, epiano: .15};
   function room(style) { if (!send) return; const v = ROOM[style] ?? .2, t = ctx.currentTime; send.gain.setTargetAtTime(v, t, .05); dry.gain.setTargetAtTime(1 - v * .35, t, .05); }
   // Lebendiges Spiel (D66): Betonung nach Taktschwerpunkten, kleine Schwankungen in Lautstärke und Einsatz – wie bei echten Musikern
-  const VOL = {orgelA: .32, bell: 1, brass: .16, streicher: .11, chor: .12, holz: .14, orgel: .07, spieluhr: .2, epiano: .16, bass: .3, mandoline: .2, gitarre: .16, zupf: .22};
+  const VOLB = {orgelS: .045, chorS: .07, floeteS: .11, violineS: .07, bratscheS: .07, celloS: .08, trompeteS: .09, posauneS: .09, glockenS: .7, spieluhrS: .14, gitarre: .17, bass: .3};
+  const VOL = {orgelS: .07, chorS: .12, floeteS: .14, violineS: .11, bratscheS: .1, celloS: .1, trompeteS: .14, posauneS: .12, glockenS: 1, spieluhrS: .2, bell: 1, brass: .16, streicher: .11, chor: .12, holz: .14, orgel: .07, spieluhr: .2, epiano: .16, bass: .3, mandoline: .2, gitarre: .16, zupf: .22};
   let human = rng(1);
   function feel(p, meter, pickup) { // Faktor für die Lautstärke an Position p (in Achteln)
     const bar = (meter || 4) * 2, x = ((p - (pickup || 0)) % bar + bar) % bar;
@@ -243,9 +244,10 @@ const Snd = (() => {
   }
   // Stil → Instrument je Stimme (Sopran, Alt, Tenor, Bass) und Lautstärke
   const STYLE = {
-    bell: {v: ['bell'], name: 'Glockenspiel'}, blech: {v: ['brass'], name: 'Posaunenchor'}, brass: {v: ['brass'], name: 'Posaunenchor'},
-    streicher: {v: ['streicher'], name: 'Streichquartett'}, chor: {v: ['chor'], name: 'Chor'}, holz: {v: ['holz'], name: 'Flöten'},
-    orgel: {v: ['orgel'], name: 'Orgel'}, epiano: {v: ['epiano'], name: 'E-Piano'}, spieluhr: {v: ['spieluhr'], name: 'Spieluhr'}, folk: {v: ['mandoline'], name: 'Mandoline & Gitarre'}, tanz: {v: ['holz', 'holz', 'gitarre', 'gitarre'], name: 'Flöten & Laute'}, orgelA: {v: ['orgelA'], name: 'Orgel (Aufnahme)'}, mandoline: {v: ['mandoline'], name: 'Mandoline'},
+    bell: {v: ['glockenS'], name: 'Glockenspiel'}, blech: {v: ['trompeteS', 'trompeteS', 'posauneS', 'posauneS'], name: 'Posaunenchor'}, brass: {v: ['trompeteS', 'trompeteS', 'posauneS', 'posauneS'], name: 'Posaunenchor'},
+    streicher: {v: ['violineS', 'violineS', 'bratscheS', 'celloS'], name: 'Streichquartett'}, chor: {v: ['chorS'], name: 'Chor'}, holz: {v: ['floeteS'], name: 'Flöten'},
+    orgel: {v: ['orgelS'], name: 'Orgel'}, epiano: {v: ['epiano'], name: 'E-Piano'}, spieluhr: {v: ['spieluhrS'], name: 'Spieluhr'},
+    folk: {v: ['mandoline'], name: 'Mandoline & Gitarre'}, tanz: {v: ['floeteS', 'floeteS', 'gitarre', 'gitarre'], name: 'Flöten & Laute'}, mandoline: {v: ['mandoline'], name: 'Mandoline'},
   };
   const styleOf = s => STYLE[s] || STYLE.bell;
   const swingT = (t8, tempo) => { const beat = Math.floor(t8 / 2), off = t8 - beat * 2; return (beat * 2 + (off >= 1 ? 1.34 + (off - 1) * .66 : off * 1.34)) * tempo; };
@@ -260,7 +262,7 @@ const Snd = (() => {
         const ta = t0 + p * tempo, tb = t0 + (p + d) * tempo;
         if (n) {
           const nn = style === 'blech' || style === 'brass' ? n + 12 : n;
-          const base = ins === INSTR.brass ? (lead ? .14 : .09) : ins === INSTR.bass ? .3 : ins === INSTR.gitarre ? .17 : lead ? VOL[name] : st.v[0] === 'orgelA' ? .2 : (st.v[0] === 'orgel' ? .045 : st.v[0] === 'holz' ? .11 : .07);
+          const base = (lead ? VOL[name] : VOLB[name]) || .08;
           ins(nn, Math.max(t0, ta + jitter()), (tb - ta) * .94, base * feel(p, meter, pickup));
         }
         p += d;
@@ -276,7 +278,7 @@ const Snd = (() => {
     let p = 0;
     for (const [n, d] of notes) {
       const ta = t0 + p * tempo, tb = t0 + (p + d) * tempo;
-      if (n) ins(n, Math.max(t0, ta + jitter()), (tb - ta) * .92, (VOL[name] || .15) * feel(p, meter, pickup));
+      if (n) ins(voice === 'blech' || voice === 'brass' ? n + 12 : n, Math.max(t0, ta + jitter()), (tb - ta) * .92, (VOL[name] || .15) * feel(p, meter, pickup));
       p += d;
     }
     return t0 + p * tempo - c.currentTime + .6;
@@ -320,25 +322,42 @@ const Snd = (() => {
     g.gain.setValueAtTime(vol, t); g.gain.setValueAtTime(vol, Math.min(end, t + dur - .1)); g.gain.exponentialRampToValueAtTime(0.0001, Math.min(t + dur, end + .12));
     s.connect(lp).connect(g).connect(master); s.start(t); s.stop(Math.min(t + dur, end + .15)); track(s);
   };
-  /* Aufnahmen (D66, Test): echte Instrumententöne (MuseScore General, MIT) – je 3 Halbtöne ein Ton, dazwischen umgestimmt */
-  const SETS = {orgelA: {pfad: 'klang/orgel/o', toene: [36, 39, 42, 45, 48, 51, 54, 57, 60, 63, 66, 69, 72, 75, 78, 81]}}, bufs = {};
+  /* Aufnahmen (D66/D67): echte Instrumententöne aus MuseScore General (MIT), je 3 Halbtöne ein Ton, dazwischen umgestimmt.
+     Werden nach dem ersten Antippen im Hintergrund geladen. Solange eine Aufnahme fehlt (oder das Laden scheitert),
+     spielt automatisch der nachgebaute Klang – das Spiel bleibt also nie stumm. */
+  const SETS = {orgel: [36, 39, 42, 45, 48, 51, 54, 57, 60, 63, 66, 69, 72, 75, 78, 81], trompete: [54, 57, 60, 63, 66, 69, 72, 75, 78, 81, 84], posaune: [36, 39, 42, 45, 48, 51, 54, 57, 60, 63, 66, 69, 72], chor: [40, 43, 46, 49, 52, 55, 58, 61, 64, 67, 70, 73, 76, 79], violine: [55, 58, 61, 64, 67, 70, 73, 76, 79, 82, 85, 88], bratsche: [48, 51, 54, 57, 60, 63, 66, 69, 72, 75, 78], cello: [36, 39, 42, 45, 48, 51, 54, 57, 60, 63, 66, 69], floete: [60, 63, 66, 69, 72, 75, 78, 81, 84, 87, 90, 93, 96], glocken: [60, 63, 66, 69, 72, 75, 78, 81, 84, 87, 90, 93, 96], spieluhr: [60, 63, 66, 69, 72, 75, 78, 81, 84, 87, 90, 93, 96]}, bufs = {}, ladeStatus = {};
+  // Lautstärke-Ausgleich: Aufnahme-Pegel = Synthese-Lautstärke × Faktor
+  const FAKTOR = {orgel: 4.5, trompete: 2.1, posaune: 2.3, chor: 2.6, violine: 2.6, bratsche: 2.6, cello: 2.4, floete: 2.2, glocken: .38, spieluhr: 1.6};
+  let aufnahmenAn = save.klang !== 'synth';
   async function laden(set) {
-    const c = ensure(); if (!c) return false; const S = SETS[set]; bufs[set] = bufs[set] || {};
-    await Promise.all(S.toene.filter(n => !bufs[set][n]).map(async n => {
-      const r = await fetch(`${S.pfad}${n}.mp3?v=${VERSION}`), a = await r.arrayBuffer();
-      bufs[set][n] = await new Promise((ok, err) => { const p = c.decodeAudioData(a, ok, err); if (p && p.then) p.then(ok, err); });
-    }));
-    return true;
+    const c = ensure(); if (!c) return false; if (ladeStatus[set] === 'ok') return true; ladeStatus[set] = 'lädt'; bufs[set] = bufs[set] || {};
+    try {
+      await Promise.all(SETS[set].filter(n => !bufs[set][n]).map(async n => {
+        const r = await fetch(`klang/${set}/o${n}.mp3?v=${VERSION}`); if (!r.ok) throw new Error(r.status);
+        const a = await r.arrayBuffer();
+        bufs[set][n] = await new Promise((ok, err) => { const p = c.decodeAudioData(a, ok, err); if (p && p.then) p.then(ok, err); });
+      }));
+      ladeStatus[set] = 'ok'; return true;
+    } catch (e) { ladeStatus[set] = 'fehler'; return false; }
   }
-  const geladen = set => !!bufs[set] && SETS[set].toene.every(n => bufs[set][n]);
+  let alleGestartet = false;
+  async function ladenAlle() { if (alleGestartet || !aufnahmenAn) return; alleGestartet = true; for (const set in SETS) await laden(set); }
+  const geladen = set => aufnahmenAn && ladeStatus[set] === 'ok';
   function aufnahme(set, n, t, len, vol) {
-    const S = SETS[set], s0 = S.toene.reduce((a, b) => Math.abs(b - n) < Math.abs(a - n) ? b : a), b = bufs[set] && bufs[set][s0]; if (!b) return;
+    const T = SETS[set], s0 = T.reduce((a, b) => Math.abs(b - n) < Math.abs(a - n) ? b : a), b = bufs[set][s0];
     const src = ctx.createBufferSource(), g = ctx.createGain(); src.buffer = b; src.playbackRate.value = Math.pow(2, (n - s0) / 12);
-    const end = t + Math.min(len, b.duration / src.playbackRate.value - .2);
-    g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(vol, t + .015); g.gain.setValueAtTime(vol, end); g.gain.exponentialRampToValueAtTime(0.0001, end + .12);
-    src.connect(g).connect(master); src.start(t); src.stop(end + .15); track(src);
+    const end = t + Math.max(.05, Math.min(len, b.duration / src.playbackRate.value - .25));
+    g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(vol, t + .012); g.gain.setValueAtTime(vol, end); g.gain.exponentialRampToValueAtTime(0.0001, end + .14);
+    src.connect(g).connect(master); src.start(t); src.stop(end + .16); track(src);
   }
-  INSTR.orgelA = (n, t, len, vol = .32) => aufnahme('orgelA', n, t, len, vol);
+  // Instrument mit Aufnahme, sonst Synthese. shift: Tonhöhenausgleich zwischen Synthese-Konvention und echter Tonhöhe
+  const mitAufnahme = (set, synth, shift = 0) => (n, t, len, vol) => geladen(set) ? aufnahme(set, n + shift, t, len, vol * FAKTOR[set]) : synth(n, t, len, vol);
+  Object.assign(INSTR, {
+    orgelS: mitAufnahme('orgel', INSTR.orgel), chorS: mitAufnahme('chor', INSTR.chor), floeteS: mitAufnahme('floete', INSTR.holz),
+    violineS: mitAufnahme('violine', INSTR.streicher), bratscheS: mitAufnahme('bratsche', INSTR.streicher), celloS: mitAufnahme('cello', INSTR.streicher),
+    trompeteS: mitAufnahme('trompete', brass, -12), posauneS: mitAufnahme('posaune', brass, -12), // Bläser-Synthese klingt eine Oktave tiefer als notiert
+    glockenS: mitAufnahme('glocken', bell), spieluhrS: mitAufnahme('spieluhr', INSTR.spieluhr, 12), // Spieluhr klingt eine Oktave höher
+  });
   INSTR.mandoline = (n, t, len, vol = .2) => INSTR.zupf(n, t, len, vol, true);
   INSTR.gitarre = (n, t, len, vol = .16) => INSTR.zupf(n, t, len, vol, false);
   /* Folk-Duo: Melodie auf der Mandoline (lange Töne als Tremolo), Begleitung als Fingerpicking auf der Gitarre:
@@ -391,7 +410,9 @@ const Snd = (() => {
   function note(n, len = .35) { const c = ensure(); if (!c) return; bell(n, c.currentTime + .01, len); }
   function stop() { playing.forEach(o => { try { o.stop(); } catch (e) {} }); playing = []; }
   function toggle() { on = !on; save.sound = on; persist(); if (!on) stop(); else phrase([[72, 1], [76, 1], [79, 2]], 'bell', .14); return on; } // Einschalten spielt einen kleinen Klang zum Testen
-  return {tap, pour, nope, note, phrase, choir, song, folkEvents, laden, geladen, stop, toggle, styleName: s => styleOf(s).name, get state() { return ctx ? ctx.state : 'noch nicht gestartet'; }, ensure, get on() { return on; }};
+  return {tap, pour, nope, note, phrase, choir, song, folkEvents, laden, ladenAlle, geladen, stop, toggle,
+    get aufnahmen() { return aufnahmenAn; }, set aufnahmen(v) { aufnahmenAn = v; save.klang = v ? 'auf' : 'synth'; persist(); if (v) ladenAlle(); },
+    ladeStand: () => ({fertig: Object.keys(SETS).filter(k => ladeStatus[k] === 'ok').length, fehler: Object.keys(SETS).filter(k => ladeStatus[k] === 'fehler').length, gesamt: Object.keys(SETS).length}), styleName: s => styleOf(s).name, get state() { return ctx ? ctx.state : 'noch nicht gestartet'; }, ensure, get on() { return on; }};
 })();
 
 /* ---- Melodien (gemeinfrei). [MIDI-Note, Dauer in Achteln], 60 = c', Note 0 = Pause ----

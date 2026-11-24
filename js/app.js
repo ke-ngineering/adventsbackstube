@@ -168,24 +168,25 @@ if (/tontest/.test(location.hash + location.search)) setTimeout(tonTest, 300);
 // Lieder-Prüfseite: Seite mit #lieder öffnen → jede Melodie anhören und als „stimmt“ / „klingt falsch“ markieren
 function liederCheck() {
   const marks = save.songCheck || (save.songCheck = {});
-  const list = () => MELODIES.map((m, i) => `<div class="song-row"><button class="btn small" data-play="${i}">▶</button><button class="btn small" data-mel="${i}">nur Melodie</button>${m.style === 'orgel' ? `<button class="btn small red" data-auf="${i}">▶ Aufnahme (Test)</button>` : ''}
+  const list = () => MELODIES.map((m, i) => `<div class="song-row"><button class="btn small" data-play="${i}">▶</button><button class="btn small" data-mel="${i}">nur Melodie</button>
       <span class="song-name">${m.name}<small>${Snd.styleName(m.style)}${m.voices ? ', vierstimmig' + (m.satz ? ' (' + m.satz + ')' : '') : m.chords ? ', mit Akkorden' : ''}${m.tempo ? ', ruhiger' : ''} · ${m.ok === false ? 'aus dem Gedächtnis – bitte prüfen' : 'Noten: ' + (m.src || '')}</small></span>
       <button class="btn small ${marks[m.name] === 'ok' ? 'active' : ''}" data-ok="${i}">stimmt</button>
       <button class="btn small ${marks[m.name] === 'bad' ? 'bad' : ''}" data-bad="${i}">klingt falsch</button></div>`).join('');
   api.help('Lieder-Prüfung', `<p>Tippe auf ▶ und hör dir jede Melodie an. Stimmt sie? Dann „stimmt“, sonst „klingt falsch“ – und sag Claude am besten, an welcher Stelle.</p>
+    <p class="klang-wahl"><b>Klang:</b> <button class="btn small" id="klangAuf">echte Aufnahmen</button><button class="btn small" id="klangSyn">nachgebaut</button> <span class="soft" id="klangStand"></span></p>
     <div id="songList">${list()}</div><p class="how-tip" id="songSum"></p>`);
+  // Klangwahl (D67): Aufnahmen oder Synthese – zum Vergleichen; ohne geladene Aufnahmen spielt immer die Synthese
+  const klang = () => {
+    $('klangAuf').classList.toggle('active', Snd.aufnahmen); $('klangSyn').classList.toggle('active', !Snd.aufnahmen);
+    const s = Snd.ladeStand(); $('klangStand').textContent = !Snd.aufnahmen ? '' : s.fertig === s.gesamt ? `alle ${s.gesamt} Instrumente geladen` : `${s.fertig} von ${s.gesamt} Instrumenten geladen${s.fehler ? `, ${s.fehler} nicht ladbar – dort klingt die Nachbildung` : ' …'}`;
+  };
+  $('klangAuf').onclick = () => { Player.reset(); Snd.stop(); Snd.aufnahmen = true; Snd.ladenAlle(); klang(); };
+  $('klangSyn').onclick = () => { Player.reset(); Snd.stop(); Snd.aufnahmen = false; klang(); };
+  klang(); const iv = setInterval(() => { if (!$('songList')) return clearInterval(iv); klang(); }, 700);
   const sum = () => { const v = Object.values(marks); $('songSum').textContent = `${v.filter(x => x === 'ok').length} bestätigt, ${v.filter(x => x === 'bad').length} falsch, ${MELODIES.length - v.length} offen.`; };
   $('songList').onclick = e => {
     const b = e.target.closest('button'); if (!b) return;
     if (b.dataset.play) { Player.toggle('p' + b.dataset.play, b, () => Snd.song(MELODIES[+b.dataset.play])); return; }
-    if (b.dataset.auf) { // Vergleich: dieselben Noten mit echten Orgeltönen (D66)
-      const m = Object.assign({}, MELODIES[+b.dataset.auf], {style: 'orgelA'});
-      if (!Snd.geladen('orgelA')) { const t = b.textContent; b.textContent = 'lädt …'; Snd.laden('orgelA').then(() => { b.textContent = t; Player.toggle('a' + b.dataset.auf, b, () => Snd.song(m)); }).catch(() => { b.textContent = 'Laden fehlgeschlagen'; }); return; }
-      Player.toggle('a' + b.dataset.auf, b, () => Snd.song(m)); return; }
-    if (b.dataset.auf) { // Vergleich: dieselben Noten mit echten Orgeltönen (D66)
-      const m = Object.assign({}, MELODIES[+b.dataset.auf], {style: 'orgelA'});
-      if (!Snd.geladen('orgelA')) { const t = b.textContent; b.textContent = 'lädt …'; Snd.laden('orgelA').then(() => { b.textContent = t; Player.toggle('a' + b.dataset.auf, b, () => Snd.song(m)); }).catch(() => { b.textContent = 'Laden fehlgeschlagen'; }); return; }
-      Player.toggle('a' + b.dataset.auf, b, () => Snd.song(m)); return; }
     if (b.dataset.mel) { const m = MELODIES[+b.dataset.mel]; Player.toggle('m' + b.dataset.mel, b, () => Snd.phrase(m.notes, m.style, .2 * (m.tempo || 1))); return; }
     const m = MELODIES[+(b.dataset.ok || b.dataset.bad)]; marks[m.name] = b.dataset.ok ? 'ok' : 'bad'; persist();
     $('songList').innerHTML = list(); sum();
