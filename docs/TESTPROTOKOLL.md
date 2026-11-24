@@ -175,3 +175,11 @@ Wunsch zum Gewürzregal: Flüssige Zutaten sollen fließen, andere herunterpurze
 
 ## Runde 13 – Prototyp v13 (ausstehend)
 **Zu prüfen:** Lieder auf `#lieder` anhören, vor allem die 4 „bitte prüfen“-Lieder.
+
+**Zwischenfeedback:** Der Tester schlägt midkar.com mit MIDI-Listen internationaler Weihnachtslieder vor, gern auch mehrstimmig.
+**Analyse:** Der Download aus der Arbeitsumgebung ist blockiert (HTTP 403). Die Seite nennt keine Nutzungsrechte. Mehrstimmige Sequenzen sind Arrangements Dritter, und viele Titel sind modern und geschützt.
+**Entscheidung des Testers:** a) Mehrstimmig aus dem freien Liederbuch jetzt umsetzen, b) internationale Lieder „für später“ notieren.
+**Folge:** v14 (D44, D45).
+
+## Runde 14 – Prototyp v14 (ausstehend)
+**Zu prüfen:** Tochter Zion vierstimmig. Klingt der Satz stimmig, ist der Bläserklang angenehm?
