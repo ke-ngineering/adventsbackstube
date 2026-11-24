@@ -157,26 +157,85 @@ const Snd = (() => {
     g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + .06); g.gain.setValueAtTime(vol, t + Math.max(.07, len - .08)); g.gain.exponentialRampToValueAtTime(0.0001, t + len + .05);
     o.connect(lp); o2.connect(lp); lp.connect(g).connect(master); o.start(t); o2.start(t); o.stop(t + len + .1); o2.stop(t + len + .1); playing.push(o, o2);
   }
-  // Mehrstimmig als Bläsersatz: jede Stimme in Originallage, Sopran etwas lauter
-  function choir(voices, tempo = .2) {
-    const c = ensure(); if (!c) return 0; const t0 = c.currentTime + .05; let end = 0;
+  /* ---- Besetzungen (D55): Jedes Lied hat einen Stil – Instrumente werden im Browser erzeugt ---- */
+  function osc(type, f, t, end, dest, det = 0) { const o = ctx.createOscillator(); o.type = type; o.frequency.value = f; o.detune.value = det; o.connect(dest); o.start(t); o.stop(end); playing.push(o); return o; }
+  function vibAll(os, t, end, depth, rate) { const l = ctx.createOscillator(), g = ctx.createGain(); l.frequency.value = rate; g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(depth, t + .35); l.connect(g); os.forEach(o => g.connect(o.detune)); l.start(t); l.stop(end); playing.push(l); }
+  function adsr(t, len, a, peak, rel = .12) { const g = ctx.createGain(); g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(peak, t + a); g.gain.setValueAtTime(peak, t + Math.max(a, len - .02)); g.gain.exponentialRampToValueAtTime(0.0001, t + len + rel); g.connect(master); return g; }
+  const INSTR = {
+    bell, brass,
+    streicher(n, t, len, vol = .11) { // Streichquartett: zwei leicht verstimmte Sägezähne, weich gefiltert, Vibrato
+      const f = hz(n), g = adsr(t, len, .09, vol, .18), lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = Math.min(5000, f * 4); lp.Q.value = .7; lp.connect(g);
+      vibAll([osc('sawtooth', f, t, t + len + .25, lp, -6), osc('sawtooth', f, t, t + len + .25, lp, 6)], t, t + len + .25, 7, 5.5); },
+    chor(n, t, len, vol = .12) { // Chor „Aah“: zwei Sägezähne durch drei Formantfilter
+      const f = hz(n), g = adsr(t, len, .14, vol, .25), mix = ctx.createGain(); mix.gain.value = 1;
+      [[730, 1.8, 1], [1090, 2.5, .5], [2440, 4, .18]].forEach(([fq, q, a]) => { const bp = ctx.createBiquadFilter(), m = ctx.createGain(); bp.type = 'bandpass'; bp.frequency.value = fq; bp.Q.value = q; m.gain.value = a * 3; mix.connect(bp); bp.connect(m).connect(g); });
+      vibAll([osc('sawtooth', f, t, t + len + .3, mix, -8), osc('sawtooth', f, t, t + len + .3, mix, 8)], t, t + len + .3, 9, 4.8); },
+    holz(n, t, len, vol = .14) { // Flöte: Sinus + Hauch, Vibrato
+      const f = hz(n), g = adsr(t, len, .05, vol, .1); vibAll([osc('sine', f, t, t + len + .15, g)], t, t + len + .15, 8, 5);
+      const g2 = ctx.createGain(); g2.gain.value = .25; g2.connect(g); osc('triangle', f * 2, t, t + len + .15, g2); },
+    orgel(n, t, len, vol = .07) { // Orgel: Zugriegel 16′ 8′ 4′ 2⅔′ 2′
+      const f = hz(n), g = adsr(t, len, .02, vol, .08); [[.5, .6], [1, 1], [2, .7], [3, .35], [4, .3]].forEach(([m, a]) => { const gg = ctx.createGain(); gg.gain.value = a; gg.connect(g); osc('sine', f * m, t, t + len + .1, gg); }); },
+    spieluhr(n, t, len, vol = .2) { // Spieluhr: hell, kurz, mit Metallobertönen
+      const f = hz(n + 12); [[1, vol], [3.98, vol * .25], [8.1, vol * .08]].forEach(([m, v]) => { const g = ctx.createGain(); env(g, t, .003, v, Math.max(.6, len * 2)); g.connect(master); osc('sine', f * m, t, t + len * 2 + .7, g); }); },
+    epiano(n, t, len, vol = .16) { // E-Piano (FM) für das Jazz-Trio
+      const f = hz(n), g = ctx.createGain(); env(g, t, .004, vol, Math.max(.5, len * 1.4)); g.connect(master);
+      const car = osc('sine', f, t, t + len * 1.4 + .6, g), mod = ctx.createOscillator(), mg = ctx.createGain(); mod.frequency.value = f; mg.gain.setValueAtTime(f * 1.8, t); mg.gain.exponentialRampToValueAtTime(f * .15, t + .5);
+      mod.connect(mg).connect(car.frequency); mod.start(t); mod.stop(t + len * 1.4 + .6); playing.push(mod); },
+    bass(n, t, len, vol = .3) { // gezupfter Kontrabass
+      const f = hz(n), g = ctx.createGain(); env(g, t, .006, vol, Math.max(.35, len)); g.connect(master); const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.setValueAtTime(f * 6, t); lp.frequency.exponentialRampToValueAtTime(f * 2, t + .25); lp.connect(g);
+      osc('triangle', f, t, t + len + .5, lp); osc('sawtooth', f, t, t + len + .5, lp, 4); },
+  };
+  function besen(t) { // Besen auf der Snare: gefiltertes Rauschen
+    const len = .16, buf = ctx.createBuffer(1, Math.floor(ctx.sampleRate * len), ctx.sampleRate), d = buf.getChannelData(0);
+    for (let i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / d.length, 2);
+    const s = ctx.createBufferSource(), bp = ctx.createBiquadFilter(), g = ctx.createGain(); s.buffer = buf; bp.type = 'bandpass'; bp.frequency.value = 3800; bp.Q.value = .6; g.gain.value = .14;
+    s.connect(bp).connect(g).connect(master); s.start(t); playing.push(s);
+  }
+  // Stil → Instrument je Stimme (Sopran, Alt, Tenor, Bass) und Lautstärke
+  const STYLE = {
+    bell: {v: ['bell'], name: 'Glockenspiel'}, blech: {v: ['brass'], name: 'Posaunenchor'}, brass: {v: ['brass'], name: 'Posaunenchor'},
+    streicher: {v: ['streicher'], name: 'Streichquartett'}, chor: {v: ['chor'], name: 'Chor'}, holz: {v: ['holz'], name: 'Flöten'},
+    orgel: {v: ['orgel'], name: 'Orgel'}, spieluhr: {v: ['spieluhr'], name: 'Spieluhr'}, jazz: {v: ['epiano', 'epiano', 'epiano', 'bass'], name: 'Jazz-Trio', swing: true},
+  };
+  const styleOf = s => STYLE[s] || STYLE.bell;
+  const swingT = (t8, tempo) => { const beat = Math.floor(t8 / 2), off = t8 - beat * 2; return (beat * 2 + (off >= 1 ? 1.34 + (off - 1) * .66 : off * 1.34)) * tempo; };
+  // Mehrstimmig: jede Stimme in Originallage, Sopran etwas lauter
+  function choir(voices, tempo = .2, style = 'blech') {
+    const c = ensure(); if (!c) return 0; const t0 = c.currentTime + .05, st = styleOf(style); let end = 0;
     voices.forEach((v, k) => {
-      let t = t0;
-      for (const [n, d] of v) { if (n) brass(n + 12, t, d * tempo * .94, k === 0 ? .14 : .09); t += d * tempo; }
-      end = Math.max(end, t);
+      const ins = INSTR[st.v[Math.min(k, st.v.length - 1)]], lead = k === 0;
+      let p = 0;
+      for (const [n, d] of v) {
+        const ta = t0 + (st.swing ? swingT(p, tempo) : p * tempo), tb = t0 + (st.swing ? swingT(p + d, tempo) : (p + d) * tempo);
+        if (n) { const nn = style === 'blech' || style === 'brass' ? n + 12 : n; ins === INSTR.brass ? ins(nn, ta, (tb - ta) * .94, lead ? .14 : .09) : ins(nn, ta, (tb - ta) * .94, ins === INSTR.bass ? .3 : lead ? undefined : (st.v[0] === 'orgel' ? .045 : .07)); }
+        p += d;
+      }
+      end = Math.max(end, t0 + p * tempo);
     });
+    if (st.swing) for (let b = 0; t0 + b * tempo * 2 < end; b++) besen(t0 + b * tempo * 2 + (b % 2 ? .0 : .01));
     return end - c.currentTime;
   }
   function phrase(notes, voice = 'bell', tempo = .17) {
-    const c = ensure(); if (!c) return 0; let t = c.currentTime + .05;
-    for (const [n, d] of notes) { if (n) (voice === 'brass' ? brass : bell)(n, t, d * tempo * .92); t += d * tempo; }
-    return t - c.currentTime;
+    const c = ensure(); if (!c) return 0; const t0 = c.currentTime + .05, st = styleOf(voice), ins = INSTR[st.v[0]];
+    let p = 0;
+    for (const [n, d] of notes) {
+      const ta = t0 + (st.swing ? swingT(p, tempo) : p * tempo), tb = t0 + (st.swing ? swingT(p + d, tempo) : (p + d) * tempo);
+      if (n) ins(n, ta, (tb - ta) * .92);
+      p += d;
+    }
+    if (st.swing) { for (let b = 0; b * 2 < p; b++) besen(t0 + b * tempo * 2); bassLine(notes, t0, tempo); }
+    return t0 + p * tempo - c.currentTime;
+  }
+  function bassLine(notes, t0, tempo) { // Jazz: einfacher Bass auf jedem Viertel – Grundton des Taktes aus der Melodie (Tiefster Ton je Halbtakt)
+    let p = 0; const seg = {};
+    for (const [n, d] of notes) { if (n) { const k = Math.floor(p / 4); seg[k] = Math.min(seg[k] || 999, n); } p += d; }
+    for (const k in seg) { const root = seg[k] % 12 + 36; INSTR.bass(root, t0 + swingT(k * 4, tempo), tempo * 1.8); INSTR.bass(root + 7, t0 + swingT(k * 4 + 2, tempo), tempo * 1.8); }
   }
   // einzelner Ton (Glockenspiel), z. B. beim Antippen
   function note(n, len = .35) { const c = ensure(); if (!c) return; bell(n, c.currentTime + .01, len); }
   function stop() { playing.forEach(o => { try { o.stop(); } catch (e) {} }); playing = []; }
   function toggle() { on = !on; save.sound = on; persist(); if (!on) stop(); else phrase([[72, 1], [76, 1], [79, 2]], 'bell', .14); return on; } // Einschalten spielt einen kleinen Klang zum Testen
-  return {tap, pour, nope, note, phrase, choir, stop, toggle, get state() { return ctx ? ctx.state : 'noch nicht gestartet'; }, ensure, get on() { return on; }};
+  return {tap, pour, nope, note, phrase, choir, stop, toggle, styleName: s => styleOf(s).name, get state() { return ctx ? ctx.state : 'noch nicht gestartet'; }, ensure, get on() { return on; }};
 })();
 
 /* ---- Melodien (gemeinfrei). [MIDI-Note, Dauer in Achteln], 60 = c', Note 0 = Pause ----
@@ -285,9 +344,12 @@ const MELODIES = [
     [[67,3],[64,3],[63,3],[59,3],[67,3],[64,3],[63,3],[59,3],[62,3],[62,3],[62,3],[67,3],[64,3],[64,2],[63,1],[64,3],[62,3],[66,3],[62,3],[62,3],[64,3],[62,3],[62,3],[62,3],[64,3],[62,3],[64,3],[66,3],[64,3],[66,3],[62,3],[62,3],[60,3],[62,6]],
     [[59,3],[59,3],[57,3],[55,3],[59,3],[60,3],[59,3],[55,3],[59,3],[54,3],[55,3],[59,3],[57,3],[59,3],[55,3],[57,3],[60,3],[59,3],[55,3],[60,3],[59,3],[59,3],[55,3],[60,3],[59,3],[59,3],[62,3],[57,3],[60,3],[59,3],[55,3],[55,3],[59,6]],
     [[52,3],[52,3],[47,3],[52,3],[52,3],[48,3],[47,3],[52,3],[43,3],[50,3],[43,3],[55,3],[48,3],[47,3],[40,3],[50,3],[50,3],[43,3],[47,3],[48,3],[43,3],[55,3],[47,3],[48,3],[43,3],[52,3],[50,3],[48,3],[50,3],[43,3],[47,3],[48,3],[43,6]]]},
-  {name:'Deck the Halls', ok:false, notes:[
+  // Melodie gemeinfrei (walisisch); geprüft mit einer MIDI-Datei des Auftraggebers (nur Melodiestimme), hier nach C-Dur gesetzt
+  {name:'Deck the Halls', src:'Melodie geprüft mit MIDI-Datei', notes:[
     [67,3],[65,1],[64,2],[62,2],[60,2],[62,2],[64,2],[60,2],[62,1],[64,1],[65,1],[62,1],[64,3],[62,1],[60,2],[59,2],[60,4],
-    [67,3],[65,1],[64,2],[62,2],[60,2],[62,2],[64,2],[60,2],[62,1],[64,1],[65,1],[62,1],[64,3],[62,1],[60,2],[59,2],[60,4]]},
+    [67,3],[65,1],[64,2],[62,2],[60,2],[62,2],[64,2],[60,2],[62,1],[64,1],[65,1],[62,1],[64,3],[62,1],[60,2],[59,2],[60,4],
+    [62,3],[64,1],[65,2],[62,2],[64,3],[65,1],[67,2],[62,2],[64,1],[66,1],[67,2],[69,1],[71,1],[72,2],[71,2],[69,2],[67,4],
+    [67,3],[65,1],[64,2],[62,2],[60,2],[62,2],[64,2],[60,2],[69,1],[69,1],[69,1],[69,1],[67,3],[65,1],[64,2],[62,2],[60,4]]},
   {name:'Good King Wenceslas', ok:false, notes:[
     [67,2],[67,2],[67,2],[69,2],[67,2],[67,2],[62,4],[64,2],[62,2],[64,2],[66,2],[67,4],[67,4],
     [67,2],[67,2],[67,2],[69,2],[67,2],[67,2],[62,4],[64,2],[62,2],[64,2],[66,2],[67,4],[67,4],
@@ -295,8 +357,43 @@ const MELODIES = [
   {name:'Joy to the World', ok:false, notes:[
     [72,3],[71,1],[69,2],[67,4],[65,2],[64,2],[62,2],[60,4],[67,1],[69,3],[69,1],[71,3],[71,1],[72,6],
     [72,1],[72,1],[71,1],[69,1],[67,1],[67,2],[65,1],[64,2],[60,4]]},
+  // Neu aus den MIDI-Dateien des Auftraggebers (D55): nur die gemeinfreien Melodien, je eine Strophe
+  {name:'I Saw Three Ships', src:'Melodie aus MIDI-Datei (gemeinfrei, englisch)', notes:[
+    [62,1],[67,2],[67,1],[69,2],[71,1],[74,2],[71,1],[69,2],[72,1],[71,2],[67,1],[67,2],[71,1],[69,2],[66,1],[62,2],
+    [62,1],[67,2],[67,1],[69,2],[71,1],[74,2],[71,1],[69,2],[72,1],[71,2],[67,1],[67,1],[69,1],[71,1],[69,3],[67,3]]},
+  {name:'Hark! The Herald Angels Sing', src:'Melodie aus MIDI-Datei (gemeinfrei, F. Mendelssohn Bartholdy)', notes:[
+    [60,2],[65,2],[65,3],[64,1],[65,2],[69,2],[69,2],[67,2],[72,2],[72,2],[72,3],[70,1],[69,2],[67,2],[69,4],
+    [60,2],[65,2],[65,3],[64,1],[65,2],[69,2],[69,2],[67,2],[72,2],[67,2],[67,3],[64,1],[64,2],[62,2],[60,4],
+    [72,2],[72,2],[72,2],[65,2],[70,2],[69,2],[69,2],[67,2],[72,2],[72,2],[72,2],[65,2],[70,2],[69,2],[69,2],[67,2],
+    [74,3],[74,1],[74,2],[72,2],[70,2],[69,2],[70,4],[67,2],[69,1],[70,1],[72,3],[65,1],[65,2],[67,2],[69,4],
+    [74,3],[74,1],[74,2],[72,2],[70,2],[69,2],[70,4],[67,2],[69,1],[70,1],[72,3],[77,1],[77,2],[76,2],[77,4]]},
+  {name:'Kommt und lasst uns Christum ehren', src:'Melodie aus MIDI-Datei (gemeinfrei, „Quem pastores“)', notes:[
+    [65,4],[69,2],[72,4],[69,2],[70,2],[72,2],[74,2],[72,4],[67,2],[69,2],[70,2],[72,2],[70,2],[69,2],[67,2],[65,4],[62,2],[64,4],[60,2],
+    [69,4],[70,2],[72,4],[74,2],[72,4],[67,2],[69,4],[65,2],[70,4],[70,2],[69,2],[67,2],[65,2],[65,2],[62,2],[64,2],[65,6]]},
+  {name:'God Rest Ye Merry, Gentlemen', src:'Melodie aus MIDI-Datei (gemeinfrei, englisch)', notes:[
+    [64,2],[64,2],[71,2],[71,2],[69,2],[67,2],[66,2],[64,2],[62,2],[64,2],[66,2],[67,2],[69,2],[71,6],
+    [64,2],[64,2],[71,2],[71,2],[69,2],[67,2],[66,2],[64,2],[62,2],[64,2],[66,2],[67,2],[69,2],[71,6],
+    [71,2],[72,2],[69,2],[71,2],[72,2],[74,2],[76,2],[71,2],[69,2],[67,2],[64,2],[66,2],[67,2],[69,4],[67,2],[69,2],[71,4],[72,2],[71,2],[71,2],[69,2],[67,2],[66,2],[64,4],
+    [67,1],[66,1],[64,2],[69,4],[67,2],[69,2],[71,2],[72,2],[74,2],[76,2],[71,2],[69,2],[67,2],[66,2],[64,6]]},
+  {name:'Morning Star', src:'Melodie aus MIDI-Datei (gemeinfrei, J. P. Harding 1892)', notes:[
+    [72,4],[70,2],[68,2],[67,4],[65,2],[63,2],[63,2],[68,2],[67,2],[68,2],[72,4],[70,4],[75,4],[73,2],[72,2],[72,4],[70,2],[68,2],[67,2],[70,2],[68,2],[65,2],[63,8],
+    [72,4],[70,2],[68,2],[67,4],[65,2],[63,2],[63,2],[68,2],[72,2],[75,2],[75,4],[73,4],[72,4],[68,2],[70,2],[72,4],[68,2],[65,2],[63,2],[65,2],[67,2],[70,2],[68,8]]},
+  {name:'Carol of the Bells', ok:false, src:'gemeinfrei (M. Leontowytsch 1914), aus dem Gedächtnis', notes:[
+    [70,2],[69,1],[70,1],[67,2],[70,2],[69,1],[70,1],[67,2],[70,2],[69,1],[70,1],[67,2],[70,2],[69,1],[70,1],[67,2],
+    [74,2],[72,1],[74,1],[70,2],[74,2],[72,1],[74,1],[70,2],[74,2],[72,1],[74,1],[70,2],[74,2],[72,1],[74,1],[70,2],
+    [79,1],[79,1],[79,1],[77,1],[75,1],[74,1],[72,1],[72,1],[72,1],[70,1],[69,1],[67,1],[69,1],[70,1],[72,1],[69,1],[70,2],[67,6],
+    [70,2],[69,1],[70,1],[67,2],[70,2],[69,1],[70,1],[67,2],[67,6]]},
 ];
 MELODIES.forEach(m => { if (m.voices && !m.notes) m.notes = m.voices[0]; }); // Melodie = Sopran
+// Besetzung je Lied (D55): passend zum Charakter des Stücks
+const BESETZUNG = {'Stille Nacht, heilige Nacht': 'chor', 'Alle Jahre wieder': 'spieluhr', 'O Tannenbaum': 'streicher', 'Kling, Glöckchen, klingelingeling': 'bell',
+  'Lasst uns froh und munter sein': 'holz', 'Jingle Bells': 'jazz', 'Ihr Kinderlein kommet': 'holz', 'Leise rieselt der Schnee': 'spieluhr', 'O du fröhliche': 'orgel',
+  'Morgen kommt der Weihnachtsmann': 'spieluhr', 'We Wish You a Merry Christmas': 'jazz', 'Süßer die Glocken nie klingen': 'bell', 'Macht hoch die Tür': 'blech',
+  'Tochter Zion, freue dich': 'blech', 'Kommet, ihr Hirten': 'holz', 'Herbei, o ihr Gläubigen': 'orgel', 'Es ist ein Ros entsprungen': 'chor', 'Zu Bethlehem geboren': 'streicher',
+  'Es kommt ein Schiff geladen': 'chor', 'We Three Kings': 'streicher', 'Deck the Halls': 'jazz', 'Good King Wenceslas': 'blech', 'Joy to the World': 'blech',
+  'I Saw Three Ships': 'holz', 'Hark! The Herald Angels Sing': 'chor', 'Kommt und lasst uns Christum ehren': 'streicher', 'God Rest Ye Merry, Gentlemen': 'jazz',
+  'Morning Star': 'orgel', 'Carol of the Bells': 'bell'};
+MELODIES.forEach(m => { m.style = m.style || BESETZUNG[m.name] || 'bell'; });
 const tones = m => m.notes.filter(x => x[0] > 0); // ohne Pausen – für Stationen, die Ton für Ton spielen
 const melodyFor = L => MELODIES[(L - 1) % MELODIES.length];
 function chunks(notes, n) { // in n etwa gleich lange Stücke teilen, Schnitt bevorzugt nach langen Tönen

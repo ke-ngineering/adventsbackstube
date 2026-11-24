@@ -10,9 +10,9 @@ const ORDER = [13, 6, 21, 2, 17, 9, 24, 11, 4, 19, 1, 15, 8, 22, 5, 12, 18, 3, 2
 // Lied des Tages – passend zum Datum (Nikolaus, Heiligabend …)
 const SONG_DAYS = [null, 'Macht hoch die Tür', 'Alle Jahre wieder', 'Kling, Glöckchen, klingelingeling', 'Es kommt ein Schiff geladen',
   'Leise rieselt der Schnee', 'Lasst uns froh und munter sein', 'O Tannenbaum', 'Jingle Bells', 'O du fröhliche', 'Kommet, ihr Hirten',
-  'We Wish You a Merry Christmas', 'Süßer die Glocken nie klingen', 'Zu Bethlehem geboren', 'Deck the Halls', 'Ihr Kinderlein kommet',
-  'Good King Wenceslas', 'Es ist ein Ros entsprungen', 'We Three Kings', 'Morgen kommt der Weihnachtsmann', 'Joy to the World',
-  'Herbei, o ihr Gläubigen', 'Tochter Zion, freue dich', 'Es ist ein Ros entsprungen', 'Stille Nacht, heilige Nacht'];
+  'We Wish You a Merry Christmas', 'Süßer die Glocken nie klingen', 'I Saw Three Ships', 'Deck the Halls', 'Ihr Kinderlein kommet',
+  'God Rest Ye Merry, Gentlemen', 'Es ist ein Ros entsprungen', 'We Three Kings', 'Morgen kommt der Weihnachtsmann', 'Kommt und lasst uns Christum ehren',
+  'Herbei, o ihr Gläubigen', 'Tochter Zion, freue dich', 'Hark! The Herald Angels Sing', 'Stille Nacht, heilige Nacht'];
 const songOfDay = d => MELODIES.find(m => m.name === SONG_DAYS[d]) || MELODIES[d % MELODIES.length];
 
 let api;
@@ -103,7 +103,7 @@ function openDay(d) {
   const neuGame = p.neu.ids.find(x => x.startsWith('game:'));
   const bald = neuGame && !ready(neuGame.slice(5)) ? `<p class="soft">${SPIELE_BALD}</p>` : '';
   api.screen.innerHTML = `<div class="dayview">
-      <div class="day-head"><span class="day-num">${d}</span><div><b>${d}. Dezember</b><br><span class="soft">Lied des Tages: „${song.name}“</span></div></div>
+      <div class="day-head"><span class="day-num">${d}</span><div><b>${d}. Dezember</b><br><span class="soft">Lied des Tages: „${song.name}“ · ${Snd.styleName(song.style)}${song.voices ? ', vierstimmig' : ''}</span></div></div>
       <div class="story">${Art.kruemel(64, first ? 'staunen' : 'froh')}<p>${p.story}</p></div>
       <div class="neu-box"><b>Heute neu: ${p.neu.title}</b><p>${p.neu.text}</p>${bald}</div>
       <h3 class="menu-h">Tagesmenü</h3>

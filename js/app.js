@@ -19,8 +19,16 @@ const api = {
   restart: () => startLevel(false),
   help: (title, html) => { $('helpOk').hidden = false; $('helpTitle').textContent = title; $('helpBody').innerHTML = html; $('help').classList.add('on'); $('help').querySelector('.dialog').scrollTop = 0; $('helpOk').focus({preventScroll: true}); },
   win,
+  toast: m => toast(m),
 };
 
+// Bildchen für die neuen Stationen (SVG)
+const ICONS = {
+  licht: '<svg viewBox="0 0 64 64" width="64" height="64"><path d="M6,14 Q20,30 32,16 T58,16" stroke="#3b5d2a" stroke-width="3" fill="none"/><circle cx="14" cy="24" r="6" fill="#ffd45a"/><circle cx="32" cy="18" r="6" fill="#ff6b6b"/><circle cx="50" cy="22" r="6" fill="#ffd45a"/><path d="M10,44 h16 v12 h-16z M32,40 v16 M32,48 h22" stroke="#5d6a52" stroke-width="5" fill="none" stroke-linecap="round"/></svg>',
+  aus: '<svg viewBox="0 0 64 64" width="64" height="64"><rect x="6" y="10" width="52" height="44" rx="8" fill="#ecc98a"/><path d="M12,16 h16 v8 h8 v16 h-24z" fill="#c98a4a" stroke="#8f5a28" stroke-width="2"/><path d="M40,16 h12 v24 h-8 v-8 h-4z" fill="#f2b8b0" stroke="#b97a56" stroke-width="2"/><path d="M12,44 h28 v6 h-28z" fill="none" stroke="#9aa0a8" stroke-width="2" stroke-dasharray="3 3"/></svg>',
+  streu: '<svg viewBox="0 0 64 64" width="64" height="64"><rect x="10" y="10" width="44" height="44" rx="4" fill="#fff8ea" stroke="#8a5533" stroke-width="2"/><g fill="#3f8a4a"><rect x="29" y="13" width="7" height="7"/><rect x="22" y="20" width="21" height="7"/><rect x="15" y="27" width="35" height="7"/><rect x="22" y="34" width="21" height="7"/></g><rect x="29" y="41" width="7" height="8" fill="#8a5533"/><circle cx="26" cy="31" r="2.5" fill="#c8283a"/><circle cx="40" cy="24" r="2.5" fill="#e0a82e"/></svg>',
+  schlitten: '<svg viewBox="0 0 64 64" width="64" height="64"><rect x="6" y="6" width="52" height="52" rx="8" fill="#eef3f8" stroke="#8a5533" stroke-width="3"/><rect x="10" y="26" width="26" height="12" rx="4" fill="#c8283a"/><circle cx="17" cy="32" r="3" fill="#e7b56e"/><circle cx="26" cy="32" r="3" fill="#fff8ea"/><rect x="40" y="10" width="12" height="40" rx="4" fill="#8fb3c9"/><rect x="10" y="44" width="26" height="10" rx="4" fill="#d6913f"/><path d="M58,32 h4" stroke="#c8283a" stroke-width="4"/></svg>',
+};
 function updateStars() { $('stars').innerHTML = `<b>★</b> ${totalStars()}`; }
 
 // ---- Adventskalender ----
@@ -52,7 +60,7 @@ function showHub() {
   $('hub').innerHTML = `<button class="btn cal-back" id="toCal">‹ Adventskalender</button>` + (da.length ? '' : '<p class="cal-note hub-empty">Die Übungsküche ist noch leer. Ab dem 1. Dezember packt jedes Türchen etwas aus – dann kannst du hier frei weiterspielen.</p>') + da.map(g => {
     const p = prog(g.id);
     return `<button class="station" data-g="${g.id}">
-      <span class="pic pic-${g.id}" aria-hidden="true"><i></i><i></i><i></i></span>
+      <span class="pic pic-${g.id}" aria-hidden="true">${ICONS[g.id] || '<i></i><i></i><i></i>'}</span>
       <span class="st-t">${g.title}</span>
       <span class="st-d">${g.desc}</span>
       <span class="st-l">Level ${p.level} · ★ ${starsOf(p)}</span>
@@ -103,7 +111,7 @@ function win({stars, text, melody}) {
   $('toHub').textContent = Kalender.active ? `Zum Türchen ${Kalender.active}` : 'Übungsküche';
   $('go').hidden = !!sp;
   $('tip').textContent = TIPS[(curL - 1) % TIPS.length];
-  $('song').textContent = Snd.on ? `♪ Es erklingt: „${melody.name}“${melody.voices ? ' – vierstimmig' : ''}` : '';
+  $('song').textContent = Snd.on ? `♪ Es erklingt: „${melody.name}“ · ${Snd.styleName(melody.style)}${melody.voices ? ', vierstimmig' : ''}` : '';
   $('win').classList.add('on'); $('go').focus(); updateStars();
   $('next').disabled = false;
 }
@@ -161,7 +169,7 @@ if (/tontest/.test(location.hash + location.search)) setTimeout(tonTest, 300);
 function liederCheck() {
   const marks = save.songCheck || (save.songCheck = {});
   const list = () => MELODIES.map((m, i) => `<div class="song-row"><button class="btn small" data-play="${i}">▶</button>${m.voices ? `<button class="btn small" data-choir="${i}">▶ 4-stimmig</button>` : ''}
-      <span class="song-name">${m.name}<small>${m.ok === false ? 'aus dem Gedächtnis – bitte prüfen' : 'Noten: ' + (m.src || '')}</small></span>
+      <span class="song-name">${m.name}<small>${Snd.styleName(m.style)} · ${m.ok === false ? 'aus dem Gedächtnis – bitte prüfen' : 'Noten: ' + (m.src || '')}</small></span>
       <button class="btn small ${marks[m.name] === 'ok' ? 'active' : ''}" data-ok="${i}">stimmt</button>
       <button class="btn small ${marks[m.name] === 'bad' ? 'bad' : ''}" data-bad="${i}">klingt falsch</button></div>`).join('');
   api.help('Lieder-Prüfung', `<p>Tippe auf ▶ und hör dir jede Melodie an. Stimmt sie? Dann „stimmt“, sonst „klingt falsch“ – und sag Claude am besten, an welcher Stelle.</p>
@@ -169,8 +177,8 @@ function liederCheck() {
   const sum = () => { const v = Object.values(marks); $('songSum').textContent = `${v.filter(x => x === 'ok').length} bestätigt, ${v.filter(x => x === 'bad').length} falsch, ${MELODIES.length - v.length} offen.`; };
   $('songList').onclick = e => {
     const b = e.target.closest('button'); if (!b) return;
-    if (b.dataset.play) { Snd.stop(); if (!Snd.on) Snd.toggle(); Snd.phrase(MELODIES[+b.dataset.play].notes, 'bell', .2); return; }
-    if (b.dataset.choir) { Snd.stop(); if (!Snd.on) Snd.toggle(); Snd.choir(MELODIES[+b.dataset.choir].voices, .2); return; }
+    if (b.dataset.play) { Snd.stop(); if (!Snd.on) Snd.toggle(); const m = MELODIES[+b.dataset.play]; Snd.phrase(m.notes, m.style, .2); return; }
+    if (b.dataset.choir) { Snd.stop(); if (!Snd.on) Snd.toggle(); const m = MELODIES[+b.dataset.choir]; Snd.choir(m.voices, .2, m.style); return; }
     const m = MELODIES[+(b.dataset.ok || b.dataset.bad)]; marks[m.name] = b.dataset.ok ? 'ok' : 'bad'; persist();
     $('songList').innerHTML = list(); sum();
   };

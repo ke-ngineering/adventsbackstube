@@ -8,7 +8,7 @@ Aufruf: python3 tools/test_generator.py
 """
 import pathlib, subprocess, tempfile
 root = pathlib.Path(__file__).resolve().parent.parent
-src = ''.join((root / 'js' / f).read_text() + '\n' for f in ['core.js', 'regal.js', 'blech.js', 'spritz.js', 'buch.js', 'rezepte.js', 'advent.js', 'kekse.js', 'kalender.js'])
+src = ''.join((root / 'js' / f).read_text() + '\n' for f in ['core.js', 'regal.js', 'blech.js', 'spritz.js', 'licht.js', 'buch.js', 'aus.js', 'streu.js', 'schlitten.js', 'rezepte.js', 'advent.js', 'kekse.js', 'kalender.js'])
 stub = "const location={hash:'',search:''},localStorage={getItem:()=>null,setItem:()=>{}},window={},document={addEventListener(){},hidden:false,getElementById:()=>null},navigator={userAgent:'test'};\n"
 test = r"""
 let worst = 0;
@@ -67,7 +67,8 @@ for (const m of MELODIES.filter(m => m.voices)) {
 { const P = Kalender._test.PLAN, O = Kalender._test.ORDER;
   if (P.length !== 25 || new Set(O).size !== 24 || O.some(d => d < 1 || d > 24)) { console.log('Kalender FEHLER'); process.exit(1); }
   for (let d = 1; d <= 24; d++) { const s = Kalender._test.songOfDay(d), want = Kalender._test.SONG_DAYS[d]; if (!s || s.name !== want) { console.log('Lied des Tages nicht gefunden', d, want); process.exit(1); } }
-  for (const p of P.slice(1)) if (p.reward && p.reward.type === 'recipe' && !RECIPES[p.reward.id]) { console.log('Rezept fehlt', p.reward.id); process.exit(1); }
+  for (const p of P.slice(1)) if (p.recipe && !RECIPES[p.recipe]) { console.log('Rezept fehlt', p.recipe); process.exit(1); }
+  for (const p of P.slice(1)) if (!COOKIES[p.cookie]) { console.log('Plätzchen fehlt', p.cookie); process.exit(1); }
   console.log('OK Kalender: 24 Türchen, Lied des Tages überall gefunden, Rezepte vorhanden'); }
 { const st = {level: 7, best: {1: 3}, sound: false, games: {blech: {level: 4, best: {}, cards: {a: 1}}}, cal: {active: null, days: {1: {opened: true, done: {regal: 2}, finished: true}}}, notiz: 'Grüße – äöü ß ★'};
   const c = Backup.code(st), r = Backup.read(' ' + c.slice(0, 20) + '\n' + c.slice(20) + ' ');
@@ -91,7 +92,33 @@ for (const m of MELODIES.filter(m => m.voices)) {
   for (let L = 4; L <= 40; L += 2) { const p = Spritz._test.generate(L).path, k = Spritz._test.cherries(p, 3 + L % 3, L); if (Object.keys(k).length < 3) { console.log('Kirschen zu wenige', L); process.exit(1); } }
   console.log('OK Kirschen-Level 4–40');
 }
-console.log('OK', MELODIES.length, 'Melodien,', MELODIES.filter(m => m.ok !== false).length, 'aus dem Liederbuch');
+// Lichterkette: Lösung (Ausgangsstellung) lässt alle Lämpchen leuchten, verdrehter Start nicht
+{ const chk = (g, tag) => { const pw = Licht._test.powered(g.sol, g.R, g.C, g.mask, g.plugs, g.col).on, pw0 = Licht._test.powered(g.state, g.R, g.C, g.mask, g.plugs, g.col).on;
+    if (!g.lamps.every(i => pw[i] >= 0) || g.lamps.every(i => pw0[i] >= 0)) { console.log('Lichterkette FEHLER', tag); process.exit(1); } };
+  for (let L = 1; L <= 40; L++) chk(Licht._test.generate(L), 'L' + L);
+  for (let d = 1; d <= 24; d++) { const sp = ADVENT[d].special; (sp.game === 'kette' ? sp.spec.parts : [sp]).filter(q => q.game === 'licht').forEach(q => { const g = Licht._test.generate(0, q.spec); chk(g, 'Türchen ' + d); console.log('OK Lichterkette-Tagesrätsel Türchen', d, q.spec.motif, g.lamps.length, 'Lämpchen', g.col ? '(bunt)' : ''); }); }
+  console.log('OK Lichterkette 1-40'); }
+// Ausstecher: Formen ergeben zusammen genau die Teigplatte (Lösung = Heimatplätze)
+{ const chk = (g, tag) => { const o = Array(g.R * g.C).fill(0);
+    for (const s of g.shapes) { let c = s.cells; let ok = false; for (let k = 0; k < 4; k++) { if (JSON.stringify(c) === JSON.stringify(s.home)) ok = true; c = Aus._test.turn(c); } if (!ok) { console.log('Ausstecher Form nicht drehbar', tag); process.exit(1); }
+      s.home.forEach(([r, c2]) => o[(s.at[0] + r) * g.C + s.at[1] + c2]++); if (s.home.length < 3 || s.home.length > 5) { console.log('Ausstecher Formgröße', tag); process.exit(1); } }
+    if (!g.mask.every((m, i) => m ? o[i] === 1 : o[i] === 0)) { console.log('Ausstecher FEHLER', tag); process.exit(1); } return g.shapes.length; };
+  for (let L = 1; L <= 40; L++) chk(Aus._test.generate(L), 'L' + L);
+  for (let d = 1; d <= 24; d++) { const sp = ADVENT[d].special; (sp.game === 'kette' ? sp.spec.parts : [sp]).filter(q => q.game === 'aus').forEach(q => console.log('OK Ausstecher-Tagesrätsel Türchen', d, q.spec.motif, chk(Aus._test.generate(0, q.spec), 'Türchen ' + d), 'Formen')); }
+  console.log('OK Ausstecher 1-40'); }
+// Zuckerstreusel: jedes Bild ohne Raten eindeutig lösbar
+{ for (const id in Streu._test.PICS) { const rows = Streu._test.PICS[id][1].split('|'); if (!rows.every(r => r.length === rows[0].length)) { console.log('Streusel-Bild ungleich breit', id); process.exit(1); } }
+  for (let L = 1; L <= 30; L++) { const P = Streu._test.generate(L); if (!Streu._test.unique(P.sol, P.R, P.C)) { console.log('Streusel nicht eindeutig', L, P.name); process.exit(1); } }
+  for (const id in Streu._test.PICS) { const P = Streu._test.generate(0, {motif: id}); if (!Streu._test.unique(P.sol, P.R, P.C)) { console.log('Streusel-Bild nicht eindeutig', id); process.exit(1); } }
+  for (let d = 1; d <= 24; d++) { const sp = ADVENT[d].special; (sp.game === 'kette' ? sp.spec.parts : [sp]).filter(q => q.game === 'streu').forEach(q => { if (!Streu._test.PICS[q.spec.motif]) { console.log('Streusel-Motiv fehlt', d); process.exit(1); } console.log('OK Streusel-Tagesrätsel Türchen', d, Streu._test.PICS[q.spec.motif][0]); }); }
+  console.log('OK Zuckerstreusel: alle Bilder und Level 1-30 eindeutig ohne Raten'); }
+// Marktschlitten: kürzester Weg stimmt mit Löser überein, Zeit pro Level
+{ let worst = 0; const rep = [];
+  const chk = (g, tag) => { const p = Schlitten._test.solveFrom(g.V, g.start); if (!p || p.length !== g.min) { console.log('Marktschlitten FEHLER', tag, g.min, p && p.length); process.exit(1); } };
+  for (let L = 1; L <= 30; L++) { const t = Date.now(), g = Schlitten._test.generate(L); worst = Math.max(worst, Date.now() - t); chk(g, 'L' + L); if (L % 5 === 0) rep.push(`L${L}:${g.min}`); }
+  for (let d = 1; d <= 24; d++) { const sp = ADVENT[d].special; (sp.game === 'kette' ? sp.spec.parts : [sp]).filter(q => q.game === 'schlitten').forEach(q => { const t = Date.now(), g = Schlitten._test.generate(0, q.spec); chk(g, 'Türchen ' + d); console.log('OK Marktschlitten-Tagesrätsel Türchen', d, g.min, 'Züge (Ziel', q.spec.min + ')', Date.now() - t, 'ms'); }); }
+  console.log('OK Marktschlitten 1-30, kürzeste Wege', rep.join(' '), '· langsamstes Level', worst, 'ms'); }
+console.log('OK', MELODIES.length, 'Melodien,', MELODIES.filter(m => m.ok !== false).length, 'geprüft (Liederbuch oder MIDI),', MELODIES.filter(m => m.ok === false).length, 'noch zu prüfen');
 """
 f = tempfile.NamedTemporaryFile('w', suffix='.js', delete=False)
 f.write(stub + src + test); f.close()

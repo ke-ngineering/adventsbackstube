@@ -205,3 +205,9 @@ Wunsch: We Three Kings vierstimmig. Das MIDI-Arrangement (Mannheim Steamroller, 
 **Automatisch geprüft:** Sicherungscode hin und zurück (inkl. Umlaute, Zeilenumbrüche beim Einfügen), Tippfehler/fremde Texte werden abgelehnt; im Browser: Zurückholen ersetzt den Stand und lädt neu, keine Skriptfehler; Manifest lädt mit 3 Symbolen. Frischer Spielstand ≈ 1,7 kB Code.
 **Offen:** Auf echtem iPhone/Android „Zum Home-Bildschirm“ testen. Hinweis: Auf dem iPhone hat die Startbildschirm-App einen **eigenen Speicher** – Spielstand per Code mitnehmen.
 
+## Runde 18 – v18 Kalender 2.0 (24.11., automatisch geprüft)
+**Neu:** Türchen packen aus, Übungsküche, Krümel, Plätzchendose (24 Zeichnungen), Backstuben-Bild, 24 Tagesrätsel, 4 neue Spiele, Wendungen, 7 neue Klangfarben, 5 neue Lieder.
+**Automatisch (tools/test_generator.py):** alle Tagesrätsel lösbar (Regal mit Eis-Löser, Blech per Gauß, Spritzbeutel-Weg gültig inkl. Kirschen-Reihenfolge, Lichterkette leuchtet in Lösung, Ausstecher-Formen ergeben genau die Platte, Streusel-Bilder ohne Raten eindeutig, Marktschlitten kürzester Weg bestätigt). Übungslevel 1–30/40 je Spiel.
+**Im Browser (Chromium, 390 px):** Ablauf Türchen 1–24 vollständig abschließbar, Dose 24/24, Rezepte 7, Gewinn-Dialoge, Ziehen im Ausstecher, Schieben im Marktschlitten, Wischen im Zuckerstreusel. Alle Klangfarben laufen ohne Fehler (gehört hat sie noch niemand!).
+**Offen:** Menschlicher Test nach `TESTPLAN.md`.
+
