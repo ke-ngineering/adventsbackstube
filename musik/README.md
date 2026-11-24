@@ -18,5 +18,6 @@ node tools/musik_export.js
 - **Liederbuch „Singen im Advent“** (gemeinfrei): Melodien und der Satz von „Tochter Zion“.
 - **Good King Wenceslas**: Satz von Thomas Helmore (1853), **Carol of the Bells**: Satz von M. Leontowytsch (1914) – beide gemeinfrei, abgelesen aus IMSLP-Partituren.
 - **We Three Kings** sowie **O du fröhliche, Herbei, Hark!, Stille Nacht, Joy to the World**: eigene Sätze (mit `tools/satz/`).
+- **Fuge über „Es kommt ein Schiff geladen“**: eigene Komposition (Bauplan in `tools/satz/fuge.py`).
 - **Jazz-Trio** (Jingle Bells, We Wish You, Deck the Halls, God Rest Ye): eigene Akkordfolgen; Bass und Begleitung erzeugt das Spiel daraus.
 - Aus fremden MIDI-Dateien wurden nur gemeinfreie Melodien übernommen, keine Arrangements.
