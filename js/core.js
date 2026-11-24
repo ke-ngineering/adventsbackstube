@@ -1,6 +1,6 @@
 /* Adventsbackstube – gemeinsame Grundlagen: Spielstand, Zutaten, Klang, Melodien, Hilfsfunktionen.
    Wird von allen Spiel-Modulen (regal.js, blech.js, buch.js) und app.js genutzt. */
-const VERSION = 'v17.1';
+const VERSION = 'v18';
 const TEST = /(^|[#?&])test/.test(location.hash + location.search);
 const $ = id => document.getElementById(id);
 const wait = ms => new Promise(r => setTimeout(r, ms));
@@ -45,6 +45,11 @@ function prog(id) {
   return save.games[id] || (save.games[id] = {level:1, best:{}});
 }
 const starsOf = p => Object.values(p.best || {}).reduce((a, b) => a + b, 0);
+/* ---- Ausgepackte Inhalte (Kalender 2.0) und Spiele-Verzeichnis ----
+   Feat.has(id) wird von kalender.js gesetzt; Spiele[id] von app.js. */
+const Feat = {has: () => true};
+const Spiele = {};
+
 /* ---- Sicherungscode: Spielstand als kopierbarer Text (D50) ----
    Format: ABS1-<base64url(UTF-8-JSON)>-<Prüfsumme 6 Hex>. Ändert nichts am gespeicherten Format. */
 const Backup = (() => {

@@ -308,3 +308,45 @@ footer{text-align:center;font-size:13px;color:var(--soft);padding:10px 14px 16px
 .cal-foot.small{margin-top:4px}
 textarea.code{width:100%;box-sizing:border-box;font:13px/1.35 ui-monospace,Menlo,monospace;color:var(--ink);background:var(--tile);border:2px solid var(--woodlight);border-radius:12px;padding:8px;word-break:break-all;resize:vertical}
 .bk-msg{min-height:1.3em;font-weight:600;margin:6px 0}
+
+/* ---- Kalender 2.0 ---- */
+.szene-box{max-width:560px;margin:4px auto 8px;border-radius:16px;overflow:hidden;box-shadow:0 4px 0 rgba(0,0,0,.12)}
+.szene{display:block;width:100%;height:auto;--wall:light-dark(#f6e2b8,#4a3b5c)}
+.szene .flame{animation:flacker 1.4s ease-in-out infinite alternate;transform-origin:center bottom;transform-box:fill-box}
+.szene .bulb{animation:glimm 2.2s ease-in-out infinite alternate}
+.szene .bulb:nth-of-type(2n){animation-delay:-1.1s}
+@keyframes flacker{from{transform:scaleY(.85) skewX(-4deg)}to{transform:scaleY(1.1) skewX(4deg)}}
+@keyframes glimm{from{opacity:.55}to{opacity:1}}
+@media (prefers-reduced-motion:reduce){.szene .flame,.szene .bulb{animation:none}}
+.door .door-cookie{position:absolute;inset:0;display:grid;place-items:center;opacity:.9}
+.door.finished .num{position:absolute;left:7px;top:4px;font-size:15px}
+.story{display:flex;gap:10px;align-items:flex-start;background:var(--card);border-radius:14px;padding:10px 12px;margin-bottom:10px;box-shadow:0 3px 0 rgba(0,0,0,.08)}
+.story svg{flex:none}
+.story p{margin:4px 0;line-height:1.45}
+.neu-box{border:2px dashed var(--red);border-radius:14px;padding:10px 14px;margin-bottom:12px}
+.neu-box p{margin:6px 0 0;line-height:1.45}
+.neu{display:inline-block;background:var(--red);color:#fff;font-size:12px;border-radius:8px;padding:1px 7px;vertical-align:2px}
+.menu-h{margin:6px 0 8px}
+.task.special{background:light-dark(#fff2c8,#43395a);box-shadow:inset 0 0 0 2px #e0a100,0 3px 0 rgba(0,0,0,.1)}
+.task.special .t-ok{color:#e0a100}
+.reward-cookie{display:grid;place-items:center}
+.reward.feiern .reward-cookie{animation:keksrein 1.1s cubic-bezier(.2,1.4,.4,1)}
+@keyframes keksrein{0%{transform:translateY(-60px) rotate(-30deg) scale(.4);opacity:0}100%{transform:none;opacity:1}}
+.reward-btns{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:10px}
+.dose{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;background:radial-gradient(circle,#b94040,#7a2b2b);padding:10px;border-radius:18px}
+.dose-fach{all:unset;aspect-ratio:1;border-radius:50%;background:rgba(0,0,0,.18);display:grid;place-items:center;color:rgba(255,255,255,.55);font-weight:600;cursor:default}
+.dose-fach.voll{cursor:pointer;background:rgba(255,255,255,.12)}
+.dose-fach svg{width:100%;height:auto}
+.dose-text{min-height:3em}
+.howto-k{display:grid;place-items:center}
+.hub-empty{grid-column:1/-1;max-width:420px;margin:20px auto}
+.layer.secret{background:repeating-linear-gradient(135deg,#9aa4ad 0 6px,#b7c0c8 6px 12px)!important;color:#fff;font-weight:700;display:grid;place-items:center;font-size:13px}
+.jar.iced .glass{filter:saturate(.4) brightness(1.1)}
+.jar .ice{position:absolute;inset:8px 2px 2px;border-radius:10px;background:linear-gradient(160deg,rgba(220,240,255,.85),rgba(170,210,240,.6));box-shadow:inset 0 0 0 2px rgba(255,255,255,.8);display:grid;place-items:center;pointer-events:none}
+.jar .ice b{background:#3d7fb8;color:#fff;border-radius:50%;width:26px;height:26px;display:grid;place-items:center;font-size:15px}
+.jar{position:relative}
+.cell.gap{cursor:default;pointer-events:none}
+.blech.motiv{background:linear-gradient(#8d8f96,#7a7c83)}
+.sp.kirsche{position:relative}
+.sp.kirsche b{position:absolute;inset:18%;border-radius:50%;background:radial-gradient(circle at 35% 30%,#ff8a95 0 12%,#c8283a 45%,#8e1426);color:#fff;font-size:clamp(11px,3vw,15px);display:grid;place-items:center;z-index:2;box-shadow:0 2px 0 rgba(0,0,0,.25)}
+.sp.kirsche b::before{content:"";position:absolute;top:-30%;left:50%;width:2px;height:40%;background:#4f7a2a;transform:rotate(20deg)}

@@ -14,10 +14,11 @@ function levelCfg(L) {
 }
 let api, lvl, cfg, pads, seq, mel, round, pos, phase, mistakes, token = 0;
 
-function build(L) {
+function build(L, spec) { // spec (Tagesrätsel): {song: Liedname, len}
   cfg = levelCfg(L); const r = rng(L * 31337 + 7);
+  if (spec) { cfg = {T: spec.len || 12, melodic: true, nPads: 8, gap: .5}; }
   if (cfg.melodic) {
-    mel = MELODIES[Math.floor((L - 1) / 2) % MELODIES.length];
+    mel = spec ? (MELODIES.find(m => m.name === spec.song) || MELODIES[0]) : MELODIES[Math.floor((L - 1) / 2) % MELODIES.length];
     const notes = tones(mel).slice(0, cfg.T).map(x => x[0]);
     cfg.T = notes.length; // kurze Lieder: Folge so lang wie das Lied
     const uniq = [...new Set(notes)].sort((a, b) => a - b);
@@ -33,7 +34,7 @@ function build(L) {
 }
 
 function begin(L, resume, a) {
-  api = a; lvl = L; build(L); token++;
+  api = a; lvl = L; build(L, api.special); token++;
   round = 1; mistakes = 0; phase = 'idle';
   const c = resume ? api.getCur() : null;
   if (c && c.round) { round = Math.min(c.round, cfg.T); mistakes = c.mistakes || 0; } else api.saveCur(null);
@@ -47,7 +48,7 @@ function begin(L, resume, a) {
   api.controls.innerHTML = `<button class="btn red" id="play">▶ Vorspielen</button><button class="btn" id="restart">Neu starten</button>`;
   $('play').onclick = () => playRound();
   $('restart').onclick = () => api.restart();
-  api.legend.innerHTML = cfg.melodic ? '<span>♪ Diese Folge ist ein bekanntes Lied – erkennst du es?</span>' : '<span>Zufällige Folge – nur Gedächtnis zählt.</span>';
+  api.legend.innerHTML = api.special ? `<span>♪ Das Lied des Tages: „${mel.name}“</span>` : cfg.melodic ? '<span>♪ Diese Folge ist ein bekanntes Lied – erkennst du es?</span>' : '<span>Zufällige Folge – nur Gedächtnis zählt.</span>';
   head();
 }
 function head() {
@@ -103,5 +104,5 @@ function finish() {
 
 return {id:'buch', title:'Omas Rezeptbuch', sub:'Merke dir die Reihenfolge und tippe sie nach',
   desc:'Gedächtnis & Gehör – manchmal steckt ein Lied darin',
-  start: begin, stop() { token++; }, _test: {build, levelCfg, get seq() { return seq; }, get pads() { return pads; }}};
+  start: begin, stop() { token++; }, winTitle: 'Rezept gemerkt!', _test: {build, levelCfg, get seq() { return seq; }, get pads() { return pads; }}};
 })();

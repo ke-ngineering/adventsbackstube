@@ -8,16 +8,24 @@ Aufruf: python3 tools/test_generator.py
 """
 import pathlib, subprocess, tempfile
 root = pathlib.Path(__file__).resolve().parent.parent
-src = ''.join((root / 'js' / f).read_text() + '\n' for f in ['core.js', 'regal.js', 'blech.js', 'spritz.js', 'buch.js', 'rezepte.js', 'kalender.js'])
+src = ''.join((root / 'js' / f).read_text() + '\n' for f in ['core.js', 'regal.js', 'blech.js', 'spritz.js', 'buch.js', 'rezepte.js', 'advent.js', 'kekse.js', 'kalender.js'])
 stub = "const location={hash:'',search:''},localStorage={getItem:()=>null,setItem:()=>{}},window={},document={addEventListener(){},hidden:false,getElementById:()=>null},navigator={userAgent:'test'};\n"
 test = r"""
 let worst = 0;
 for (let L = 1; L <= 60; L++) {
-  const t = Date.now(); const s = Regal._test.generate(L); worst = Math.max(worst, Date.now() - t);
+  const t = Date.now(); const s = Regal._test.generate(L).s; worst = Math.max(worst, Date.now() - t);
   if (s.length > Regal._test.levelCfg(L).colors + 2) console.log('Regal Notfall-Glas', L);
   if (!Regal._test.solvable(s, 1e6)) { console.log('Regal UNLÖSBAR', L); process.exit(1); }
 }
 console.log('OK Regal 1-60, langsamstes Level', worst, 'ms');
+// Wendungen und Tagesrätsel des Regals
+for (let L = 6; L <= 40; L += 4) { const pl = Object.assign(Regal._test.planFor(L), {eis: [[L % 3, 1 + L % 2]]}); const g = Regal._test.generate(L, pl);
+  if (!Regal._test.solvable(g.s, 1e6, g.eis)) { console.log('Regal Eis UNLÖSBAR', L); process.exit(1); } }
+for (let d = 1; d <= 24; d++) for (const q of (ADVENT[d].special.game === 'kette' ? ADVENT[d].special.spec.parts : [ADVENT[d].special])) if (q.game === 'regal') {
+  const pl = Regal._test.planFor(1000 + d * 10, q.spec), g = Regal._test.generate(0, pl);
+  if (g.s.length > pl.colors + pl.spare || !Regal._test.solvable(g.s, 1e6, g.eis)) { console.log('Regal-Tagesrätsel UNLÖSBAR/Notfall', d); process.exit(1); }
+  console.log('OK Regal-Tagesrätsel Türchen', d, '–', ADVENT[d].special.title, pl.colors, 'Zutaten');
+}
 worst = 0;
 for (let L = 1; L <= 40; L++) {
   const t = Date.now(); const {state, par} = Blech._test.generate(L);
@@ -67,6 +75,22 @@ for (const m of MELODIES.filter(m => m.voices)) {
   const bad = c.slice(0, 10) + (c[10] === 'A' ? 'B' : 'A') + c.slice(11);
   if (Backup.read(bad).ok || Backup.read('hallo').ok || Backup.read('').ok) { console.log('Sicherungscode erkennt Fehler nicht'); process.exit(1); }
   console.log('OK Sicherungscode: hin und zurück, Umlaute, Tippfehler erkannt,', c.length, 'Zeichen'); }
+// Tagesrätsel aller Spiele: lösbar und angemessen
+{ const parts = []; for (let d = 1; d <= 24; d++) { const sp = ADVENT[d].special; (sp.game === 'kette' ? sp.spec.parts : [sp]).forEach(q => parts.push([d, q])); }
+  for (const [d, q] of parts) {
+    if (q.game === 'blech') { const g = Blech._test.generate(0, q.spec), st = g.state.slice(), sol = Blech._test.solve(st); sol.forEach(i => Blech._test.apply(st, i));
+      if (!st.every(v => v) || sol.length !== g.par) { console.log('Blech-Tagesrätsel FEHLER', d); process.exit(1); } console.log('OK Blech-Tagesrätsel Türchen', d, q.spec.shape, 'kürzeste Lösung', g.par); }
+    if (q.game === 'spritz') { const g = Spritz._test.generate(0, q.spec), p = g.path, C = g.C;
+      const ok = new Set(p).size === p.length && p.every((x, i) => !i || Math.abs(x - p[i - 1]) === C || (Math.abs(x - p[i - 1]) === 1 && Math.floor(x / C) === Math.floor(p[i - 1] / C)));
+      const cells = Spritz._test.MOTIFS[q.spec.motif] ? Spritz._test.MOTIFS[q.spec.motif].join('').split('').filter(c => c === 'X').length : g.R * g.C;
+      if (!ok || p.length < cells * .8) { console.log('Spritz-Tagesrätsel FEHLER', d, p.length, cells); process.exit(1); }
+      if (q.spec.kirschen) { const k = Spritz._test.cherries(p, q.spec.kirschen, q.spec.seed), order = Object.keys(k).map(Number).sort((a, b) => p.indexOf(a) - p.indexOf(b)).map(c => k[c]);
+        if (order.join() !== [...Array(order.length)].map((_, i) => i + 1).join() || order.length < 3) { console.log('Kirschen FEHLER', d, order); process.exit(1); } }
+      console.log('OK Spritz-Tagesrätsel Türchen', d, q.spec.motif, p.length, 'von', cells, 'Feldern'); }
+  }
+  for (let L = 4; L <= 40; L += 2) { const p = Spritz._test.generate(L).path, k = Spritz._test.cherries(p, 3 + L % 3, L); if (Object.keys(k).length < 3) { console.log('Kirschen zu wenige', L); process.exit(1); } }
+  console.log('OK Kirschen-Level 4–40');
+}
 console.log('OK', MELODIES.length, 'Melodien,', MELODIES.filter(m => m.ok !== false).length, 'aus dem Liederbuch');
 """
 f = tempfile.NamedTemporaryFile('w', suffix='.js', delete=False)
