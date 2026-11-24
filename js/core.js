@@ -1,6 +1,6 @@
 /* Adventsbackstube – gemeinsame Grundlagen: Spielstand, Zutaten, Klang, Melodien, Hilfsfunktionen.
    Wird von allen Spiel-Modulen (regal.js, blech.js, buch.js) und app.js genutzt. */
-const VERSION = 'v13';
+const VERSION = 'v14';
 const TEST = /(^|[#?&])test/.test(location.hash + location.search);
 const $ = id => document.getElementById(id);
 const wait = ms => new Promise(r => setTimeout(r, ms));
@@ -123,12 +123,22 @@ const Snd = (() => {
     });
   }
   // Posaunenchor-Klang (für die ganze Melodie am Levelende)
-  function brass(n, t, len) {
+  function brass(n, t, len, vol = .16) {
     const f = hz(n - 12), o = ctx.createOscillator(), o2 = ctx.createOscillator(), lp = ctx.createBiquadFilter(), g = ctx.createGain();
     o.type = 'sawtooth'; o2.type = 'sawtooth'; o.frequency.value = f; o2.frequency.value = f * 1.003;
     lp.type = 'lowpass'; lp.Q.value = 2; lp.frequency.setValueAtTime(f * 1.5, t); lp.frequency.linearRampToValueAtTime(f * 5, t + .08); lp.frequency.linearRampToValueAtTime(f * 3, t + len);
-    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(.16, t + .06); g.gain.setValueAtTime(.16, t + Math.max(.07, len - .08)); g.gain.exponentialRampToValueAtTime(0.0001, t + len + .05);
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + .06); g.gain.setValueAtTime(vol, t + Math.max(.07, len - .08)); g.gain.exponentialRampToValueAtTime(0.0001, t + len + .05);
     o.connect(lp); o2.connect(lp); lp.connect(g).connect(master); o.start(t); o2.start(t); o.stop(t + len + .1); o2.stop(t + len + .1); playing.push(o, o2);
+  }
+  // Mehrstimmig als Bläsersatz: jede Stimme in Originallage, Sopran etwas lauter
+  function choir(voices, tempo = .2) {
+    const c = ensure(); if (!c) return 0; const t0 = c.currentTime + .05; let end = 0;
+    voices.forEach((v, k) => {
+      let t = t0;
+      for (const [n, d] of v) { if (n) brass(n + 12, t, d * tempo * .94, k === 0 ? .14 : .09); t += d * tempo; }
+      end = Math.max(end, t);
+    });
+    return end - c.currentTime;
   }
   function phrase(notes, voice = 'bell', tempo = .17) {
     const c = ensure(); if (!c) return 0; let t = c.currentTime + .05;
@@ -139,7 +149,7 @@ const Snd = (() => {
   function note(n, len = .35) { const c = ensure(); if (!c) return; bell(n, c.currentTime + .01, len); }
   function stop() { playing.forEach(o => { try { o.stop(); } catch (e) {} }); playing = []; }
   function toggle() { on = !on; save.sound = on; persist(); if (!on) stop(); else phrase([[72, 1], [76, 1], [79, 2]], 'bell', .14); return on; } // Einschalten spielt einen kleinen Klang zum Testen
-  return {tap, pour, nope, note, phrase, stop, toggle, get state() { return ctx ? ctx.state : 'noch nicht gestartet'; }, ensure, get on() { return on; }};
+  return {tap, pour, nope, note, phrase, choir, stop, toggle, get state() { return ctx ? ctx.state : 'noch nicht gestartet'; }, ensure, get on() { return on; }};
 })();
 
 /* ---- Melodien (gemeinfrei). [MIDI-Note, Dauer in Achteln], 60 = c', Note 0 = Pause ----
@@ -204,13 +214,20 @@ const MELODIES = [
     [62,4],[62,2],[64,2],[66,2],[67,2],[67,2],[69,2],[66,2],[67,4],[62,2],[64,4],[62,2],[64,2],[66,2],[67,2],[67,2],[69,2],[66,2],[67,4],[67,2],
     [69,4],[67,2],[69,4],[67,2],[69,2],[67,2],[65,2],[64,4],[67,2],[69,4],[67,2],[69,4],[67,2],[69,2],[67,2],[65,2],[64,4],[67,2],
     [60,4],[60,2],[65,4],[64,2],[62,10],[67,2],[65,4],[64,2],[62,2],[60,2],[62,2],[60,12]]},
-  {name:'Tochter Zion, freue dich', src:SIA, notes:[
-    [70,4],[67,3],[68,1],[70,4],[63,4],[65,1],[67,1],[68,1],[70,1],[68,2],[67,2],[65,8],
-    [67,1],[68,1],[70,1],[72,1],[70,2],[70,2],[75,4],[70,4],[68,2],[67,2],[65,3],[63,1],[63,8],
-    [67,1],[65,1],[67,1],[68,1],[67,2],[67,2],[65,4],[63,4],[68,2],[67,2],[65,2],[63,2],[62,8],
-    [63,1],[62,1],[63,1],[65,1],[63,2],[63,2],[72,4],[69,4],[70,2],[72,1],[70,1],[69,3],[70,1],[70,8],
-    [70,4],[67,3],[68,1],[70,4],[63,4],[65,1],[67,1],[68,1],[70,1],[68,2],[67,2],[65,8],
-    [67,1],[68,1],[70,1],[72,1],[70,2],[70,2],[75,4],[70,4],[68,2],[67,2],[65,3],[63,1],[63,8]]},
+  // Vierstimmiger Satz (Sopran, Alt, Tenor, Bass) aus dem Liederbuch, S. 43; Form A–B–A (D.C. al Fine)
+  {name:'Tochter Zion, freue dich', src:SIA, voices:[
+    [[70,4],[67,3],[68,1],[70,4],[63,4],[65,1],[67,1],[68,1],[70,1],[68,2],[67,2],[65,8],[67,1],[68,1],[70,1],[72,1],[70,2],[70,2],[75,4],[70,4],[68,2],[67,2],[65,3],[63,1],[63,8],
+     [67,1],[65,1],[67,1],[68,1],[67,2],[67,2],[65,4],[63,4],[68,2],[67,2],[65,2],[63,2],[62,8],[63,1],[62,1],[63,1],[65,1],[63,2],[63,2],[72,4],[69,4],[70,2],[72,1],[70,1],[69,3],[70,1],[70,8],
+     [70,4],[67,3],[68,1],[70,4],[63,4],[65,1],[67,1],[68,1],[70,1],[68,2],[67,2],[65,8],[67,1],[68,1],[70,1],[72,1],[70,2],[70,2],[75,4],[70,4],[68,2],[67,2],[65,3],[63,1],[63,8]],
+    [[63,4],[63,3],[62,1],[63,4],[58,4],[62,1],[63,1],[65,1],[67,1],[65,2],[63,2],[62,8],[63,6],[63,2],[63,4],[63,4],[62,2],[63,4],[62,2],[63,8],
+     [63,1],[62,1],[63,1],[65,1],[63,2],[63,2],[62,4],[60,4],[65,2],[63,2],[62,2],[60,2],[59,8],[60,1],[59,1],[60,1],[62,1],[60,2],[60,2],[63,6],[63,2],[62,2],[63,1],[62,1],[60,2],[65,2],[65,8],
+     [63,4],[63,3],[62,1],[63,4],[58,4],[62,1],[63,1],[65,1],[67,1],[65,2],[63,2],[62,8],[63,6],[63,2],[63,4],[63,4],[62,2],[63,4],[62,2],[63,8]],
+    [[55,4],[58,3],[56,1],[55,4],[58,4],[56,2],[53,2],[58,2],[58,2],[58,8],[58,6],[58,2],[58,4],[55,4],[56,2],[56,4],[56,2],[55,8],
+     [58,6],[58,2],[56,4],[55,4],[59,2],[60,2],[56,2],[55,2],[55,8],[55,6],[55,2],[53,4],[60,4],[58,2],[55,2],[60,2],[60,2],[62,8],
+     [55,4],[58,3],[56,1],[55,4],[58,4],[56,2],[53,2],[58,2],[58,2],[58,8],[58,6],[58,2],[58,4],[55,4],[56,2],[56,4],[56,2],[55,8]],
+    [[51,4],[55,3],[53,1],[51,4],[55,4],[53,3],[51,1],[50,2],[51,2],[46,8],[51,1],[53,1],[55,1],[56,1],[55,2],[55,2],[55,4],[51,4],[53,2],[55,1],[56,1],[58,2],[46,2],[51,8],
+     [51,6],[51,2],[46,4],[48,4],[50,2],[51,2],[53,2],[48,2],[55,8],[48,6],[46,2],[45,4],[53,4],[55,2],[51,2],[53,2],[53,2],[46,8],
+     [51,4],[55,3],[53,1],[51,4],[55,4],[53,3],[51,1],[50,2],[51,2],[46,8],[51,1],[53,1],[55,1],[56,1],[55,2],[55,2],[55,4],[51,4],[53,2],[55,1],[56,1],[58,2],[46,2],[51,8]]]},
   {name:'Kommet, ihr Hirten', src:SIA, notes:[
     [72,2],[72,1],[69,1],[74,1],[70,1],[72,2],[72,1],[69,1],[74,1],[70,1],[72,2],[69,1],[72,1],[67,1],[69,1],[65,6],
     [72,2],[72,1],[69,1],[74,1],[70,1],[72,2],[72,1],[69,1],[74,1],[70,1],[72,2],[69,1],[72,1],[67,1],[69,1],[65,6],
@@ -247,6 +264,7 @@ const MELODIES = [
     [72,3],[71,1],[69,2],[67,4],[65,2],[64,2],[62,2],[60,4],[67,1],[69,3],[69,1],[71,3],[71,1],[72,6],
     [72,1],[72,1],[71,1],[69,1],[67,1],[67,2],[65,1],[64,2],[60,4]]},
 ];
+MELODIES.forEach(m => { if (m.voices && !m.notes) m.notes = m.voices[0]; }); // Melodie = Sopran
 const tones = m => m.notes.filter(x => x[0] > 0); // ohne Pausen – für Stationen, die Ton für Ton spielen
 const melodyFor = L => MELODIES[(L - 1) % MELODIES.length];
 function chunks(notes, n) { // in n etwa gleich lange Stücke teilen, Schnitt bevorzugt nach langen Tönen

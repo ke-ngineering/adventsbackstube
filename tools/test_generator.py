@@ -46,6 +46,16 @@ for (const m of MELODIES) {
   const t = tones(m); if (t.length < 8 || m.notes.some(([n, d]) => !(d > 0) || (n && (n < 55 || n > 84)))) { console.log('Melodie FEHLER', m.name); process.exit(1); }
   const pads = new Set(t.slice(0, 18).map(x => x[0])).size; if (pads > 8) { console.log('Zu viele Schalen fürs Rezeptbuch', m.name, pads); process.exit(1); }
 }
+for (const m of MELODIES.filter(m => m.voices)) {
+  const len = m.voices.map(v => v.reduce((a, n) => a + n[1], 0));
+  if (len.some(l => l !== len[0])) { console.log('Stimmen ungleich lang', m.name, len); process.exit(1); }
+  // pro Achtel prüfen: Stimmen kreuzen nicht (S >= A >= T >= B)
+  const at = (v, t) => { let s = 0; for (const [n, d] of v) { if (t < s + d) return n; s += d; } return 0; };
+  const cross = new Set();
+  for (let t = 0; t < len[0]; t += .5) { const p = m.voices.map(v => at(v, t)); for (let k = 1; k < 4; k++) if (p[k] && p[k - 1] && p[k] > p[k - 1]) cross.add('Takt ' + (Math.floor(t / 8) % 16 + 1)); }
+  if (cross.size) console.log('  Hinweis Stimmkreuzung (im Notenbild prüfen):', m.name, [...cross].join(', '));
+  console.log('OK vierstimmig:', m.name, len[0] / 8, 'Takte');
+}
 console.log('OK', MELODIES.length, 'Melodien,', MELODIES.filter(m => m.ok !== false).length, 'aus dem Liederbuch');
 """
 f = tempfile.NamedTemporaryFile('w', suffix='.js', delete=False)

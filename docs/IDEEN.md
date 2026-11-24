@@ -53,3 +53,11 @@ Status: ✅ umgesetzt · 🔨 in Arbeit · 💡 Idee · ❌ verworfen
 | 💡 | Spritzbeutel: Zwei Teigfarben, bei denen Hell- und Dunkel-Punkte abwechselnd durchlaufen werden müssen |
 | ✅ | Glasur-Blech: Rest-Trick lernbar über Lehrplan, Fingerabdruck-Labor und Rezeptkarte (v8); Meisterbleche ab Level 17 |
 | 💡 | Spritzbeutel: Zuckerperlen, die man in einer bestimmten Reihenfolge passieren muss |
+
+## Lieder – für später
+| Status | Idee |
+|---|---|
+| ✅ | Vierstimmig: Tochter Zion (v14) |
+| 💡 | Vierstimmig nachziehen: Es ist ein Ros entsprungen, Herbei o ihr Gläubigen, Ich steh an deiner Krippe hier, Der Christbaum ist der schönste Baum (Liederbuch S. 37–42, Werkzeuge in `tools/noten/`) |
+| 💡 | **Internationale gemeinfreie Lieder** (Anregung: Liste auf midkar.com – deren MIDI-Dateien aber nicht verwenden, keine Nutzungsrechte): God Rest Ye Merry Gentlemen, Greensleeves / What Child Is This, Hark the Herald Angels Sing, I Saw Three Ships, It Came Upon a Midnight Clear, Jolly Old Saint Nicholas. Melodie nach bestem Wissen notieren, als „bitte prüfen“ markieren – oder exakt aus einer vom Tester angehängten MIDI-Datei (nur Melodiestimme) übernehmen. |
+| 💡 | Weitere Lieder aus dem Liederbuch: Vom Himmel hoch, In dulci jubilo, Fröhliche Weihnacht überall, Maria durch ein Dornwald ging, Still still still, Was soll das bedeuten |

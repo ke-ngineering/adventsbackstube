@@ -4,7 +4,7 @@
 > Wer (Mensch oder Claude) die Entwicklung fortsetzt, liest zuerst diese Datei.
 > Nach jeder Arbeitssitzung: Status, Entscheidungen und Agenda hier aktualisieren.
 
-Stand: 24.11.2026 (Prototyp v13)
+Stand: 24.11.2026 (Prototyp v14)
 
 ## 1. Vision
 
@@ -67,6 +67,8 @@ mit genug Inhalt für spürbar lange Spielsessions (ca. 20–30 Min neue Tagesin
 | D41 | 24.11. | Liedersammlung auf 10 gemeinfreie Lieder erweitert + Lieder-Prüfseite `#lieder` | Tester: „ruhig eine große Auswahl“, z. B. We Three Kings; Spielerin singt im Chor → Noten müssen stimmen |
 | D42 | 24.11. | Ausnahme von der Ein-Repo-Regel: `musikpirat/singen-im-advent.github.io` **nur lesend** als Notenquelle | Vom Auftraggeber ausdrücklich erlaubt; gemeinfreies Liederbuch, frei verbreitbar |
 | D43 | 24.11. | 23 Lieder, 19 notengetreu aus dem Liederbuch; Liederkiste.com NICHT als Quelle (Noten nur für private Zwecke, keine Veröffentlichung) | Genauigkeit für eine Chorsängerin; Lizenz sauber |
+| D44 | 24.11. | Mehrstimmige Sätze aus dem Liederbuch als Bläsersatz am Levelende; zuerst Tochter Zion, die übrigen 4 folgen mit derselben Methode | Wunsch „gerne mehrstimmig“; Posaunenchor-Bezug; Genauigkeit vor Menge |
+| D45 | 24.11. | Midkar.com-MIDIs NICHT verwendet (Download blockiert; Sequenzen/Arrangements ohne Nutzungsrechte, viele moderne geschützte Titel); gemeinfreie Titel daraus als „für später“ notiert | Rechte & Technik |
 | D12 | 23.11. | Persönliche Inhalte (Name, Nachrichten) **verschlüsselt** im Repo; Schlüssel steht nur im Link-Teil nach `#`, den sie bekommt (wird nie an Server übertragen) | Personalisierung trotz öffentlichem Repo |
 
 ## 3. Spielkonzept
@@ -181,12 +183,18 @@ Ziel: **spielbar ab Di, 1.12.2026**, Link vorher an sie (z. B. am 1. Advent, 29.
   Abgleich: Meine Gedächtnis-Versionen von Stille Nacht, Herbei, We Wish und Morgen kommt waren tongenau; O Tannenbaum (Rhythmus 2. Hälfte)
   und Jingle Bells (eine punktierte Note) wurden korrigiert. Weitere Lieder im Buch (z. B. Vom Himmel hoch, In dulci jubilo,
   Fröhliche Weihnacht überall, Maria durch ein Dornwald ging) können bei Bedarf ergänzt werden.
+  **Mehrstimmig (v14, D44):** Lieder mit `voices:[S,A,T,B]` erklingen am Levelende als vierstimmiger Bläsersatz (`Snd.choir`,
+  jede Stimme in Originallage, Sopran etwas lauter); auf `#lieder` „▶ 4-stimmig“. Fertig: **Tochter Zion** (Liederbuch S. 43,
+  Form A–B–A, alle Stimmen mit Rasterhilfe abgelesen, Zusammenklänge geprüft; Takt 7: Bass kreuzt kurz den Tenor – so im Satz).
+  **Offen (Werkzeuge in `tools/noten/`):** Es ist ein Ros entsprungen (S. 40, Praetorius – anspruchsvoll, Achtel-Durchgänge),
+  Herbei o ihr Gläubigen (S. 41), Ich steh an deiner Krippe hier (S. 42), Der Christbaum ist der schönste Baum (S. 37).
 - Level-Generator: Seeded RNG (mulberry32), Seed aus Levelnummer → jedes Level ist für sie immer gleich.
   DFS-Solver prüft Lösbarkeit (Knotenlimit 60k), sonst neuer Versuch; Notfall: Extraglas.
 - Hosting-Optionen: GitHub Pages (bevorzugt, Link + „Zum Startbildschirm“) oder claude.ai-Artifact-Link (Vorschau).
 - Tests: `python3 tools/test_generator.py` (alle Generatoren/Löser in Node), `tools/screenshots.py` (Playwright, 390 px).
 
 ## 7. Offene Fragen
+- Mehrstimmig: Tochter Zion anhören (`#lieder` → „▶ 4-stimmig“) – klingt der Satz richtig?
 - Lieder prüfen (`#lieder`): v. a. die 4 Gedächtnis-Lieder (We Three Kings, Deck the Halls, Good King Wenceslas, Joy to the World)
 - Prototyp v10 testen: Lehrplan Glasur-Blech Level 1–11 durchspielen – lernt man den Rest-Trick? Labor verständlich? Spritzbeutel schwer genug?
 - Weiterhin offen: Rezeptbuch (Tempo, Lieder erkannt, Melodien korrekt?)
