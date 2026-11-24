@@ -1,0 +1,46 @@
+X:30
+T:Gigue über „I Saw Three Ships“
+N:eigene Komposition über die Liedmelodie (gemeinfrei)
+N:Satz: Gigue, fugiert (D65)
+N:Besetzung im Spiel: Flöten & Laute
+M:6/8
+L:1/8
+Q:1/4=176
+%%score (S A) (T B)
+V:S name="Sopran" clef=treble
+V:A name="Alt" clef=treble
+V:T name="Tenor" clef=treble-8
+V:B name="Bass" clef=bass
+K:C
+[V:S]
+D G2 G A2 | B d2 B A2 | c B2 G G2- | G d2 e d2 | 
+^c d2 d A2 | A d2 ^c d2 | ^c B2 =c B2 | A B2 c d2 | 
+e d2 c d2 | e d2 e d2 | ^c d2 d c2 | ^c d3 d2 | 
+^c B2 B =c2 | c c2 c d2 | d d2 d e2 | d e5 | 
+G c2 c d2 | e g2 e d2 | f e2 c c2- | c g2 c d2- | 
+d d2 e d2- | d6 | D G2 G A2 | B d2 B A2 | 
+c B2 G G A | B A3 G2- | G6- | G |]
+[V:A]
+z6 | z6 | z6 | A, D2 D E2 | 
+^F A2 F E2 | G ^F2 D D2- | D B2 A G2 | ^F G2 G F2 | 
+^F G2 F G2 | G ^F2 G F2 | E ^F3 ^C2 | E D3 D2- | 
+D D2 D E2- | E E2 E ^F2- | ^F F2 F G2 | ^F E2 E F2 | 
+^F G3 G2 | G G3 G2 | F G2 A G2- | G G2 ^F G2- | 
+G G2 G ^F2- | ^F D2 C D2 | D D2 E D2 | C D2 E ^F2- | 
+^F G3 G2- | G ^F3 D2- | D D5- | D |]
+[V:T]
+z6 | z6 | z6 | z6 | 
+z6 | z6 | D, G,2 G, A,2 | B, D2 B, A,2 | 
+C B,2 G, G,2- | G, A,2 G, A,2 | B, A,3 A,2 | G, A,2 B, A,2- | 
+A, G,2 ^F, G,2- | G, A,2 G, A,2- | A, B,2 A, B,2 | B, C2 B, C2 | 
+D E2 F E2 | D E2 E B,2 | B, C2 B, C2 | C B,2 C B,2 | 
+A, B,3 ^F,2- | ^F, G,5 | G, B,2 A, B,2 | C B,2 B, C2- | 
+C G,3 B,2- | B, C3 B,2- | B, B,5- | B, |]
+[V:B]
+z6 | z6 | z6 | z6 | 
+z6 | z6 | z6 | z6 | 
+z6 | A,, D,2 D, E,2 | ^F, A,2 F, E,2 | G, ^F,2 D, D,2- | 
+D, G,2 G, C,2 | C, A,,2 A,, D,2 | D, B,,2 B,, E,2 | E, A,,2 A,, D,2 | 
+D, C,2 D, C,2 | B,, C,2 C, G,,2- | G,,6 | D,, G,,2 G,, A,,2 | 
+B,, D,2 B,, A,,2 | C, B,,2 G,, G,,2- | G,, G,,2 ^F,, G,,2 | A,, G,,2 G,, D,2- | 
+D, E,3 G,2- | G, D,3 G,2- | G, G,5- | G, |]
