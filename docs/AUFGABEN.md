@@ -60,6 +60,7 @@ Details zum Konzept: `KONZEPT-ADVENT.md`. Entscheidungen: `PROJEKT.md`.
 | M16 | Raumhall + lebendiges Spiel (D66) | ✅ v21 |
 | M17 | Hörvergleich Orgel: Synthese vs. Aufnahme | ✅ „klingt cool“ → Ausbau |
 | M18 | Aufnahmen für alle Besetzungen + Rückfall (D67) | ✅ v22 – bitte anhören, v. a. Lautstärkeverhältnis der Instrumente |
+| M19 | Carol of the Bells als Glockenfassung im Lied-Tool (D68) | ✅ v23 – bitte anhören; gefällt sie besser, kann sie auch an Türchen 10 |
 | M7 | Musik-Rückmeldungen Runde 19 umsetzen (Tempi, Jazz-Trio, Sätze, Joy to the World, GKW) | ✅ v19 |
 | M8 | Ton-Fehler nach Fensterwechsel (D59) | ✅ v19 |
 | M6 | Vierstimmiger Satz für Stille Nacht (Finale) | ✅ v19 |

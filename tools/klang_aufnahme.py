@@ -8,7 +8,7 @@ SF = '/usr/share/sounds/sf3/MuseScore_General.sf3'
 LISTE = [  # Name, GM-Programm, Tonumfang, Länge in s, kbit/s
     ('orgel', 19, 36, 81, 3.8, 96), ('trompete', 56, 54, 84, 3.2, 64), ('posaune', 57, 36, 72, 3.2, 64), ('chor', 52, 40, 81, 3.8, 64),
     ('violine', 40, 55, 90, 3.2, 64), ('bratsche', 41, 48, 78, 3.2, 64), ('cello', 42, 36, 69, 3.2, 64), ('floete', 73, 60, 96, 3.0, 64),
-    ('glocken', 9, 60, 96, 2.4, 64), ('spieluhr', 10, 60, 96, 2.4, 64)]
+    ('glocken', 9, 60, 96, 2.4, 64), ('spieluhr', 10, 60, 96, 2.4, 64), ('roehrenglocken', 14, 45, 75, 3.4, 64)]
 
 def aufnehmen(name, prog, lo, hi, dauer=3.8, kbit=96):
   out = os.path.join(os.path.dirname(__file__), '..', 'klang', name); os.makedirs(out, exist_ok=True)
