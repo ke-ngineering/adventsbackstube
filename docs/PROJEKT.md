@@ -73,6 +73,8 @@ mit genug Inhalt für spürbar lange Spielsessions (ca. 20–30 Min neue Tagesin
 | D47 | 24.11. | Fremde Arrangements (z. B. aus MIDI-Dateien) nie übernehmen; für gemeinfreie Melodien ohne freien Satz schreibt Claude **eigene** vierstimmige Sätze | Rechte; Wunsch nach 4-stimmigem We Three Kings |
 | D48 | 24.11. | 6 Rezepte geschrieben (eigene Texte, mit Experimentier-Idee und Sicherheitshinweis beim Frittieren); Rezept zum 24.12. bleibt offen | Auftraggeber will über den 24. noch nachdenken |
 | D49 | 24.11. | Ton-Freischaltung nur bei mousedown/click/touchend/keydown (nicht pointerup); blockierter AudioContext wird beim nächsten Antippen neu angelegt | Kein Ton in Safari (Mac) mit v15/16: pointerup zählt dort bei Maus/Trackpad nicht als Nutzeraktion |
+| D50 | 24.11. | **Sicherungscode** für den Spielstand: `ABS1-<base64url(JSON)>-<Prüfsumme>`, Kopieren/Zurückholen im Kalender („Spielstand sichern“), Zurückholen mit Bestätigung durch zweites Tippen | Fortschritt liegt nur im Browser; iOS-Startbildschirm-Apps haben eigenen Speicher; Handywechsel. Speicherformat selbst unverändert (CLAUDE.md Regel 9) |
+| D51 | 24.11. | **App-Symbol + Manifest** (Lebkuchenstern mit Zuckerguss auf Weihnachtsrot, `icons/`, `manifest.webmanifest`), Anleitung „Als App aufs Handy“ im Kalender. **Kein Service Worker** | Startbildschirm-App ohne Browserleiste; ein Service Worker würde Updates im Advent verzögern (alte Version aus dem Cache) |
 | D12 | 23.11. | Persönliche Inhalte (Name, Nachrichten) **verschlüsselt** im Repo; Schlüssel steht nur im Link-Teil nach `#`, den sie bekommt (wird nie an Server übertragen) | Personalisierung trotz öffentlichem Repo |
 
 ## 3. Spielkonzept
@@ -173,7 +175,7 @@ Ziel: **spielbar ab Di, 1.12.2026**, Link vorher an sie (z. B. am 1. Advent, 29.
 | 24.11. | Kalender mit 24 Türchen & Datumssperre (v15) | ✅ |
 | 25.11. | Tagesplan, Wendungen, Rezeptseiten | ⏳ |
 | 26.11. | Tagesplan 1–24 (Mechanik, Levelzahl, Wendungen, Goodies); Rezeptseiten | ⏳ |
-| 27.11. | Persönliche Inhalte einbauen; Spielstand-Backup-Code; PWA-Manifest + Icon | ⏳ |
+| 27.11. | Persönliche Inhalte einbauen ⏳; Spielstand-Backup-Code ✅ (v17); PWA-Manifest + Icon ✅ (v17) | ⏳ |
 | 28.11. | Test auf echtem Handy, Feinschliff, Hosting (GitHub Pages) | ⏳ |
 | 29.11. | Link verschicken (1. Advent) | ⏳ |
 | Dez. | Optional: Inhalte nachliefern | – |
@@ -210,8 +212,8 @@ Ziel: **spielbar ab Di, 1.12.2026**, Link vorher an sie (z. B. am 1. Advent, 29.
 
 ## 7. Offene Fragen
 - Kalender: Passt das Tagesmenü (Umfang ~20–40 Min.)? Passen die Rezept-Tage?
-- Rezept zum 24.12. gemeinsam festlegen (Ideen: eigenes Rezept, „Hamburg trifft München“-Fusion, Experimentier-Karte, Back-Gutschein)
-- Nächste Schritte: persönliche Inhalte (verschlüsselt), PWA-Icon/„Zum Startbildschirm“, Spielstand-Backup-Code
+- Rezept zum 24.12.: eigenes Rezept gemeinsam ausdenken – Wunsch: Kuchen, fruchtig, luftig mit Joghurt/Frischkäse. Vorschläge (v17): Winterwolke (luftiger Joghurt-Frischkäse-Kuchen mit Glühwein-Kirschen), Bratapfel-Joghurt-Torte, Pavlova-Kranz mit Frischkäsecreme und Granatapfel, Orangen-Joghurt-Gugelhupf
+- Nächste Schritte: persönliche Inhalte (verschlüsselt) – Zweck dem Auftraggeber erklärt (Begrüßung mit Spitzname, kleine Briefchen hinter einzelnen Türchen); v17 testen (Sicherungscode, App-Symbol auf iPhone/Android)
 - Mehrstimmig: Tochter Zion anhören (`#lieder` → „▶ 4-stimmig“) – klingt der Satz richtig?
 - Lieder prüfen (`#lieder`): v. a. die 4 Gedächtnis-Lieder (We Three Kings, Deck the Halls, Good King Wenceslas, Joy to the World)
 - Prototyp v10 testen: Lehrplan Glasur-Blech Level 1–11 durchspielen – lernt man den Rest-Trick? Labor verständlich? Spritzbeutel schwer genug?

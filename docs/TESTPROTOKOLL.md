@@ -198,3 +198,10 @@ Wunsch: We Three Kings vierstimmig. Das MIDI-Arrangement (Mannheim Steamroller, 
 **Zu prüfen:** Ton in Safari (Mac) nach v16.1. Falls es weiter still bleibt: `#tontest` (Zustand, welche Knöpfe hörbar), Lautsprecher-Symbol im Spiel, Safari-Tab nicht stummgeschaltet.
 
 **Nachtrag Runde 16:** In v15 ging der Ton auf dem Mac, sobald einmal auf der Lieder-Testseite ein Lied abgespielt wurde – danach auch in den Spielen. Das bestätigt die Diagnose: Der Ton war nicht kaputt, sondern nur nicht freigeschaltet (der Knopf auf der Testseite spielt direkt im Klick, die Spiele teils verzögert). v16.1 schaltet jetzt bei jedem Klick frei, bis Safari den Ton wirklich laufen lässt.
+
+## Runde 17 – v17 (24.11.)
+**Rückmeldung zu v16.1:** Ton in Safari (Mac) geht jetzt („scheint zu gehen“).
+**Neu:** Sicherungscode (Kopieren/Zurückholen), App-Symbol + Manifest, Anleitung „Als App aufs Handy“.
+**Automatisch geprüft:** Sicherungscode hin und zurück (inkl. Umlaute, Zeilenumbrüche beim Einfügen), Tippfehler/fremde Texte werden abgelehnt; im Browser: Zurückholen ersetzt den Stand und lädt neu, keine Skriptfehler; Manifest lädt mit 3 Symbolen. Frischer Spielstand ≈ 1,7 kB Code.
+**Offen:** Auf echtem iPhone/Android „Zum Home-Bildschirm“ testen. Hinweis: Auf dem iPhone hat die Startbildschirm-App einen **eigenen Speicher** – Spielstand per Code mitnehmen.
+

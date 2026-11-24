@@ -1,6 +1,6 @@
 /* Adventsbackstube – gemeinsame Grundlagen: Spielstand, Zutaten, Klang, Melodien, Hilfsfunktionen.
    Wird von allen Spiel-Modulen (regal.js, blech.js, buch.js) und app.js genutzt. */
-const VERSION = 'v16.1';
+const VERSION = 'v17';
 const TEST = /(^|[#?&])test/.test(location.hash + location.search);
 const $ = id => document.getElementById(id);
 const wait = ms => new Promise(r => setTimeout(r, ms));
@@ -45,6 +45,24 @@ function prog(id) {
   return save.games[id] || (save.games[id] = {level:1, best:{}});
 }
 const starsOf = p => Object.values(p.best || {}).reduce((a, b) => a + b, 0);
+/* ---- Sicherungscode: Spielstand als kopierbarer Text (D50) ----
+   Format: ABS1-<base64url(UTF-8-JSON)>-<Prüfsumme 6 Hex>. Ändert nichts am gespeicherten Format. */
+const Backup = (() => {
+  const sum = t => { let h = 2166136261; for (let i = 0; i < t.length; i++) { h ^= t.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(16).padStart(8, '0').slice(0, 6); };
+  const b64 = t => btoa(unescape(encodeURIComponent(t))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  const unb64 = t => decodeURIComponent(escape(atob(t.replace(/-/g, '+').replace(/_/g, '/') + '==='.slice((t.length + 3) % 4))));
+  function code(st = save) { const body = b64(JSON.stringify(st)); return `ABS1-${body}-${sum(body)}`; }
+  function read(c) { // liefert {ok, save} oder {ok:false, why}
+    c = String(c || '').replace(/\s+/g, '');
+    const m = /^ABS1-([A-Za-z0-9_-]+)-([0-9a-f]{6})$/.exec(c);
+    if (!m) return {ok: false, why: 'Das sieht nicht wie ein Sicherungscode aus. Er beginnt mit „ABS1-“.'};
+    if (sum(m[1]) !== m[2]) return {ok: false, why: 'Der Code ist unvollständig oder verändert – bitte ganz kopieren.'};
+    try { const st = JSON.parse(unb64(m[1])); if (st && typeof st === 'object' && st.level) return {ok: true, save: st}; } catch (e) {}
+    return {ok: false, why: 'Der Code ließ sich nicht lesen.'};
+  }
+  function restore(c) { const r = read(c); if (r.ok) { try { localStorage.setItem(KEY, JSON.stringify(r.save)); } catch (e) { return {ok: false, why: 'Speichern im Browser ist nicht möglich.'}; } } return r; }
+  return {code, read, restore};
+})();
 const totalStars = () => starsOf(save) + Object.values(save.games || {}).reduce((a, g) => a + starsOf(g), 0);
 
 /* ---- Klang: Geräusche synthetisch (Web Audio), keine Dateien ---- */

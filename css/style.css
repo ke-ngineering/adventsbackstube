@@ -304,3 +304,7 @@ footer{text-align:center;font-size:13px;color:var(--soft);padding:10px 14px 16px
 .rz-box{background:light-dark(#fbefd6,#3a3150);border-radius:10px;padding:8px 10px;font-size:15px}
 .rz-box.exp{background:light-dark(#e8f2e1,#2f3a33)}
 .rz-index{display:grid;gap:8px}
+
+.cal-foot.small{margin-top:4px}
+textarea.code{width:100%;box-sizing:border-box;font:13px/1.35 ui-monospace,Menlo,monospace;color:var(--ink);background:var(--tile);border:2px solid var(--woodlight);border-radius:12px;padding:8px;word-break:break-all;resize:vertical}
+.bk-msg{min-height:1.3em;font-weight:600;margin:6px 0}

@@ -59,7 +59,8 @@ function showGrid(a) {
     return `<button class="door${st.opened ? ' opened' : ''}${st.finished ? ' finished' : ''}${open ? '' : ' locked'}" data-d="${d}" aria-label="Türchen ${d}${open ? '' : ' (noch zu)'}">
       <span class="num">${d}</span>${st.finished ? '<span class="tick">★</span>' : ''}</button>`;
   }).join('')}</div>
-  <div class="cal-foot"><button class="btn" id="toBackstube">Zur Backstube (frei spielen)</button><button class="btn" id="myRecipes">Meine Rezepte (${unlockedRecipes().length})</button></div>`;
+  <div class="cal-foot"><button class="btn" id="toBackstube">Zur Backstube (frei spielen)</button><button class="btn" id="myRecipes">Meine Rezepte (${unlockedRecipes().length})</button></div>
+  <div class="cal-foot small"><button class="btn small" id="backup">Spielstand sichern</button><button class="btn small" id="install">Als App aufs Handy</button></div>`;
   api.screen.querySelector('.doors').onclick = e => {
     const b = e.target.closest('.door'); if (!b) return; const d = +b.dataset.d;
     if (!unlocked(d)) { Snd.nope(); b.classList.remove('shake'); void b.offsetWidth; b.classList.add('shake'); api.toast(`Türchen ${d} öffnet sich am ${d}. Dezember.`); return; }
@@ -73,7 +74,40 @@ function showGrid(a) {
       : '<p>Noch keine Rezepte – das erste wartet hinter Türchen 3.</p>');
     $('helpBody').onclick = e => { const b = e.target.closest('[data-recipe]'); if (b) showRecipe(b.dataset.recipe); };
   };
+  $('backup').onclick = showBackup;
+  $('install').onclick = showInstall;
   api.setTitle('Dein Adventskalender');
+}
+function showBackup() {
+  api.help('Spielstand sichern', `<p>Dein Fortschritt liegt nur in diesem Browser. Kopiere den Code und heb ihn auf – zum Beispiel als Notiz oder Nachricht an dich selbst. Damit holst du alles zurück, auch auf einem neuen Handy.</p>
+    <textarea class="code" id="bkCode" readonly rows="4"></textarea>
+    <div class="dlg-btns"><button class="btn red" id="bkCopy">Code kopieren</button></div>
+    <h3>Spielstand zurückholen</h3>
+    <p class="soft">Code hier einfügen. Achtung: Der jetzige Spielstand auf diesem Gerät wird dabei ersetzt.</p>
+    <textarea class="code" id="bkIn" rows="3" placeholder="ABS1-…"></textarea>
+    <p class="bk-msg" id="bkMsg" role="status"></p>
+    <div class="dlg-btns"><button class="btn" id="bkLoad">Zurückholen</button></div>`);
+  const ta = $('bkCode'); ta.value = Backup.code();
+  $('bkCopy').onclick = async () => {
+    let ok = false;
+    try { await navigator.clipboard.writeText(ta.value); ok = true; } catch (e) { try { ta.focus(); ta.select(); ok = document.execCommand('copy'); } catch (e2) {} }
+    $('bkCopy').textContent = ok ? 'Kopiert ✓' : 'Bitte von Hand markieren und kopieren';
+  };
+  let armed = false;
+  $('bkIn').oninput = () => { armed = false; $('bkLoad').textContent = 'Zurückholen'; $('bkMsg').textContent = ''; };
+  $('bkLoad').onclick = () => {
+    const r = Backup.read($('bkIn').value);
+    if (!r.ok) { Snd.nope(); $('bkMsg').textContent = r.why; return; }
+    const g = r.save, n = Object.values((g.cal && g.cal.days) || {}).filter(x => x.finished).length;
+    if (!armed) { armed = true; $('bkLoad').textContent = 'Ja, ersetzen'; $('bkMsg').textContent = `Code in Ordnung: ${n} ${n === 1 ? 'Türchen' : 'Türchen'} geschafft. Nochmal tippen zum Ersetzen.`; return; }
+    if (Backup.restore($('bkIn').value).ok) location.reload();
+  };
+}
+function showInstall() {
+  const iOS = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  api.help('Als App aufs Handy', iOS
+    ? `<p>So liegt die Backstube wie eine App auf deinem Startbildschirm:</p><ol><li>Diese Seite in <b>Safari</b> öffnen.</li><li>Unten auf <b>Teilen</b> tippen (Kästchen mit Pfeil nach oben).</li><li><b>Zum Home-Bildschirm</b> wählen und „Hinzufügen“ tippen.</li></ol><p class="soft">Wichtig: Die App auf dem Startbildschirm hat einen eigenen Speicher. Wenn du schon im Browser gespielt hast, nimm deinen Spielstand mit „Spielstand sichern“ mit.</p>`
+    : `<p>So liegt die Backstube wie eine App auf deinem Startbildschirm:</p><ol><li>Diese Seite in <b>Chrome</b> öffnen.</li><li>Oben rechts auf die <b>drei Punkte</b> tippen.</li><li><b>Zum Startbildschirm hinzufügen</b> (oder „App installieren“) wählen.</li></ol>`);
 }
 function openDay(d) {
   const st = day(d), first = !st.opened; st.opened = true; cal().active = d; persist();
