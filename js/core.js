@@ -1,6 +1,6 @@
 /* Adventsbackstube – gemeinsame Grundlagen: Spielstand, Zutaten, Klang, Melodien, Hilfsfunktionen.
    Wird von allen Spiel-Modulen (regal.js, blech.js, buch.js) und app.js genutzt. */
-const VERSION = 'v14';
+const VERSION = 'v15';
 const TEST = /(^|[#?&])test/.test(location.hash + location.search);
 const $ = id => document.getElementById(id);
 const wait = ms => new Promise(r => setTimeout(r, ms));

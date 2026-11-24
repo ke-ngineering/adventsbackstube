@@ -18,12 +18,30 @@ const api = {
 
 function updateStars() { $('stars').innerHTML = `<b>★</b> ${totalStars()}`; }
 
+// ---- Adventskalender ----
+const calApi = {
+  get screen() { return $('calendar'); },
+  hub: () => showHub(),
+  play: id => open(id),
+  setTitle: t => { $('sub').textContent = t; },
+  toast,
+};
+function toast(msg) { const t = $('toast'); t.textContent = msg; t.classList.remove('on'); void t.offsetWidth; t.classList.add('on'); }
+function screens(which) { $('calendar').hidden = which !== 'cal'; $('hub').hidden = which !== 'hub'; $('game').hidden = which !== 'game'; }
+function showCal(d) {
+  $('help').classList.remove('on'); $('win').classList.remove('on');
+  if (cur) cur.stop(); cur = null;
+  screens('cal'); save.last = null; persist(); updateStars();
+  d ? Kalender.openDay(d) : Kalender.showGrid(calApi);
+  $('status').textContent = TEST ? 'Testmodus' : '';
+}
 function showHub() {
   $('help').classList.remove('on');
   if (cur) cur.stop(); cur = null; Snd.stop();
-  $('hub').hidden = false; $('game').hidden = true;
+  screens('hub');
+  if (save.cal) { save.cal.active = null; }
   $('sub').textContent = 'Wähle eine Station in deiner Backstube';
-  $('hub').innerHTML = GAMES.map(g => {
+  $('hub').innerHTML = `<button class="btn cal-back" id="toCal">‹ Adventskalender</button>` + GAMES.map(g => {
     const p = prog(g.id);
     return `<button class="station" data-g="${g.id}">
       <span class="pic pic-${g.id}" aria-hidden="true"><i></i><i></i><i></i></span>
@@ -33,14 +51,16 @@ function showHub() {
     </button>`;
   }).join('');
   save.last = null; persist(); updateStars();
+  $('toCal').onclick = () => { Snd.tap(.8); showCal(); };
   $('status').textContent = TEST ? 'Testmodus' : '';
 }
 function open(id) {
   cur = GAMES.find(g => g.id === id); if (!cur) return showHub();
   const p = prog(id);
   curL = (p.cur && p.cur.lvl) || p.level;
-  $('hub').hidden = true; $('game').hidden = false;
+  screens('game');
   $('sub').textContent = cur.sub;
+  const d = Kalender.active; $('back').textContent = d ? `‹ Türchen ${d}` : '‹ Backstube';
   save.last = id; persist();
   startLevel(true);
 }
@@ -61,7 +81,9 @@ function win({stars, text, melody}) {
   Snd.stop(); setTimeout(() => melody.voices ? Snd.choir(melody.voices, .2) : Snd.phrase(melody.notes, 'brass', .2), 350); // kurz absetzen, damit nichts überlappt
   $('winTitle').textContent = {regal: 'Regal sortiert!', blech: 'Blech glasiert!', spritz: 'Spritzgebäck gebacken!', buch: 'Rezept gemerkt!'}[cur.id];
   $('winStars').innerHTML = '★'.repeat(stars) + `<span class="off">${'★'.repeat(3 - stars)}</span>`;
-  $('winText').textContent = text;
+  const calMsg = Kalender.onWin(cur.id);
+  $('winText').textContent = text + (calMsg ? ' ' + calMsg : '');
+  $('toHub').textContent = Kalender.active ? `Zum Türchen ${Kalender.active}` : 'Backstube';
   $('tip').textContent = TIPS[(curL - 1) % TIPS.length];
   $('song').textContent = Snd.on ? `♪ Es erklingt: „${melody.name}“${melody.voices ? ' – vierstimmig' : ''}` : '';
   $('win').classList.add('on'); $('go').focus(); updateStars();
@@ -69,12 +91,12 @@ function win({stars, text, melody}) {
 }
 
 $('hub').onclick = e => { const b = e.target.closest('.station'); if (b) { Snd.tap(); open(b.dataset.g); } };
-$('back').onclick = () => { Snd.tap(.8); showHub(); };
+$('back').onclick = () => { Snd.tap(.8); const d = Kalender.active; d ? showCal(d) : showHub(); };
 $('prev').onclick = () => { if (curL > 1) { curL--; startLevel(true); } };
 $('next').onclick = () => { if (TEST || curL < prog(cur.id).level) { curL++; startLevel(true); } };
 $('go').onclick = () => { $('win').classList.remove('on'); curL++; startLevel(false); };
 $('helpOk').onclick = () => $('help').classList.remove('on');
-$('toHub').onclick = () => { $('win').classList.remove('on'); showHub(); };
+$('toHub').onclick = () => { $('win').classList.remove('on'); const d = Kalender.active; d ? showCal(d) : showHub(); };
 
 const setSndBtn = () => { const b = $('snd'); b.setAttribute('aria-pressed', Snd.on); b.classList.toggle('off', !Snd.on); b.setAttribute('aria-label', Snd.on ? 'Ton ausschalten' : 'Ton einschalten'); };
 $('snd').onclick = () => { Snd.toggle(); setSndBtn(); };
@@ -139,5 +161,5 @@ function liederCheck() {
 if (/lieder/.test(location.hash + location.search)) setTimeout(liederCheck, 300);
 
 // Beim Öffnen dort weitermachen, wo sie aufgehört hat
-if (save.last && GAMES.some(g => g.id === save.last)) open(save.last); else showHub();
+if (save.last && GAMES.some(g => g.id === save.last)) open(save.last); else showCal();
 }

@@ -8,8 +8,8 @@ Aufruf: python3 tools/test_generator.py
 """
 import pathlib, subprocess, tempfile
 root = pathlib.Path(__file__).resolve().parent.parent
-src = ''.join((root / 'js' / f).read_text() + '\n' for f in ['core.js', 'regal.js', 'blech.js', 'spritz.js', 'buch.js'])
-stub = "const location={hash:'',search:''},localStorage={getItem:()=>null,setItem:()=>{}},window={},document={addEventListener(){},hidden:false},navigator={userAgent:'test'};\n"
+src = ''.join((root / 'js' / f).read_text() + '\n' for f in ['core.js', 'regal.js', 'blech.js', 'spritz.js', 'buch.js', 'kalender.js'])
+stub = "const location={hash:'',search:''},localStorage={getItem:()=>null,setItem:()=>{}},window={},document={addEventListener(){},hidden:false,getElementById:()=>null},navigator={userAgent:'test'};\n"
 test = r"""
 let worst = 0;
 for (let L = 1; L <= 60; L++) {
@@ -56,6 +56,10 @@ for (const m of MELODIES.filter(m => m.voices)) {
   if (cross.size) console.log('  Hinweis Stimmkreuzung (im Notenbild prüfen):', m.name, [...cross].join(', '));
   console.log('OK vierstimmig:', m.name, len[0] / 8, 'Takte');
 }
+{ const P = Kalender._test.PLAN, O = Kalender._test.ORDER;
+  if (P.length !== 25 || new Set(O).size !== 24 || O.some(d => d < 1 || d > 24)) { console.log('Kalender FEHLER'); process.exit(1); }
+  for (let d = 1; d <= 24; d++) { const s = Kalender._test.songOfDay(d), want = Kalender._test.SONG_DAYS[d]; if (!s || s.name !== want) { console.log('Lied des Tages nicht gefunden', d, want); process.exit(1); } }
+  console.log('OK Kalender: 24 Türchen, Lied des Tages überall gefunden'); }
 console.log('OK', MELODIES.length, 'Melodien,', MELODIES.filter(m => m.ok !== false).length, 'aus dem Liederbuch');
 """
 f = tempfile.NamedTemporaryFile('w', suffix='.js', delete=False)

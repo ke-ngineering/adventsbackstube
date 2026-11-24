@@ -183,3 +183,7 @@ Wunsch zum Gewürzregal: Flüssige Zutaten sollen fließen, andere herunterpurze
 
 ## Runde 14 – Prototyp v14 (ausstehend)
 **Zu prüfen:** Tochter Zion vierstimmig. Klingt der Satz stimmig, ist der Bläserklang angenehm?
+
+## Runde 15 – Prototyp v15 (ausstehend)
+**Automatisch geprüft:** Geschlossenes Türchen zeigt einen Hinweis. Im Testmodus Türchen 1 geöffnet, „Glasur-Blech 1 Level“ gelöst, und der Fortschritt steht im Tagesmenü (1/1 ✓). Der Gewinn-Dialog bietet „Zum Türchen 1“. Für alle 24 Tage wird ein Lied des Tages gefunden.
+**Zu prüfen:** Kalender-Optik, Tagesmenü-Umfang, Ablauf Türchen → Station → zurück.

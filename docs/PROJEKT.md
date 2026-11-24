@@ -4,7 +4,7 @@
 > Wer (Mensch oder Claude) die Entwicklung fortsetzt, liest zuerst diese Datei.
 > Nach jeder Arbeitssitzung: Status, Entscheidungen und Agenda hier aktualisieren.
 
-Stand: 24.11.2026 (Prototyp v14)
+Stand: 24.11.2026 (Prototyp v15)
 
 ## 1. Vision
 
@@ -69,6 +69,7 @@ mit genug Inhalt für spürbar lange Spielsessions (ca. 20–30 Min neue Tagesin
 | D43 | 24.11. | 23 Lieder, 19 notengetreu aus dem Liederbuch; Liederkiste.com NICHT als Quelle (Noten nur für private Zwecke, keine Veröffentlichung) | Genauigkeit für eine Chorsängerin; Lizenz sauber |
 | D44 | 24.11. | Mehrstimmige Sätze aus dem Liederbuch als Bläsersatz am Levelende; zuerst Tochter Zion, die übrigen 4 folgen mit derselben Methode | Wunsch „gerne mehrstimmig“; Posaunenchor-Bezug; Genauigkeit vor Menge |
 | D45 | 24.11. | Midkar.com-MIDIs NICHT verwendet (Download blockiert; Sequenzen/Arrangements ohne Nutzungsrechte, viele moderne geschützte Titel); gemeinfreie Titel daraus als „für später“ notiert | Rechte & Technik |
+| D46 | 24.11. | Adventskalender als Startseite; Tagesmenü aus Stations-Aufgaben; Lied des Tages; Rezept-Tage 3/6/10/13/17/20/24; Backstube bleibt zum freien Spielen | Vorschlag mit Standardwerten umgesetzt (Fragen zu Tagesmenü/Rezepttagen offen, leicht änderbar) |
 | D12 | 23.11. | Persönliche Inhalte (Name, Nachrichten) **verschlüsselt** im Repo; Schlüssel steht nur im Link-Teil nach `#`, den sie bekommt (wird nie an Server übertragen) | Personalisierung trotz öffentlichem Repo |
 
 ## 3. Spielkonzept
@@ -117,7 +118,14 @@ mit genug Inhalt für spürbar lange Spielsessions (ca. 20–30 Min neue Tagesin
    Level aus zufälligem Weg (Warnsdorff-Heuristik) → immer lösbar; v7 schwerer (D30): 4×4 → 8×8, 8–30 % Lücken; Start-Stern nur L1–2.
    Tipp zeigt gestrichelt einen möglichen Anfang (kostet einen Stern).
 
-### Advents-Rahmen (geplant)
+### Advents-Rahmen (v15 umgesetzt: `js/kalender.js`)
+- ✅ **Startseite = Adventskalender** mit 24 Türchen (durcheinander angeordnet), Türchen öffnet ab dem jeweiligen Dezembertag (lokales Datum), Verpasstes nachholbar, im Testmodus alle offen. Im November Hinweis „Noch X Tage“ + Link zur Backstube.
+- ✅ **Tagesmenü** je Tag 2–4 Aufgaben „Station: N Level“ (Plan in `Kalender.PLAN`); Level zählen, wenn die Station aus dem Türchen gestartet wurde; Gewinn-Dialog meldet Fortschritt, Knopf „Zum Türchen N“.
+- ✅ **Lied des Tages** (`SONG_DAYS`, passend zum Datum: 1. Macht hoch die Tür, 6. Lasst uns froh und munter sein, 24. Stille Nacht), erklingt beim ersten Öffnen, „♪ Lied anhören“ (vierstimmig, wenn vorhanden).
+- ✅ **Belohnung** nach geschafftem Türchen: Stern im Kalender; Rezept an Tag 3, 6, 10, 13, 17, 20, 24 (Rezepttexte folgen, `RECIPES`), Willkommen an Tag 1.
+- Spielstand: `save.cal = {active, days:{Tag:{opened, done:{station:n}, finished}}}`.
+
+**Ursprüngliche Planung:**
 - Kalender-Startseite mit 24 Türchen; Türchen öffnet sich ab dem jeweiligen Datum (lokales Datum).
 - Pro Tag 8–12 Level, Mechanik im Wechsel; Schwierigkeit steigt über den Advent.
 - Sterne (3 = ohne Rückgängig) füllen sichtbar einen Plätzchenteller / die Backstube.
@@ -158,7 +166,7 @@ Ziel: **spielbar ab Di, 1.12.2026**, Link vorher an sie (z. B. am 1. Advent, 29.
 | 23.11. | Mechanik 2 Glasur-Blech + Mechanik 3 Rezeptbuch, Backstube-Startseite (v4) | ✅ (vorgezogen) |
 | 23.11. | v5/v6: Glasur-Blech verständlich (Anleitung, Kurs, Lernhilfe), 4. Station Spritzbeutel | ✅ |
 | 24.11. | v7: Spritzbeutel schwerer · v8: Glasur-Blech mit Lehrplan, Labor, Rezeptkarte | ✅ |
-| 24.11. | Kalender mit 24 Türchen & Datumssperre | ⏳ |
+| 24.11. | Kalender mit 24 Türchen & Datumssperre (v15) | ✅ |
 | 25.11. | Tagesplan, Wendungen, Rezeptseiten | ⏳ |
 | 26.11. | Tagesplan 1–24 (Mechanik, Levelzahl, Wendungen, Goodies); Rezeptseiten | ⏳ |
 | 27.11. | Persönliche Inhalte einbauen; Spielstand-Backup-Code; PWA-Manifest + Icon | ⏳ |
@@ -194,6 +202,8 @@ Ziel: **spielbar ab Di, 1.12.2026**, Link vorher an sie (z. B. am 1. Advent, 29.
 - Tests: `python3 tools/test_generator.py` (alle Generatoren/Löser in Node), `tools/screenshots.py` (Playwright, 390 px).
 
 ## 7. Offene Fragen
+- Kalender: Passt das Tagesmenü (Umfang ~20–40 Min.)? Passen die Rezept-Tage?
+- Nächste Schritte: Rezepttexte (7), persönliche Inhalte (verschlüsselt), PWA-Icon/„Zum Startbildschirm“, Spielstand-Backup-Code
 - Mehrstimmig: Tochter Zion anhören (`#lieder` → „▶ 4-stimmig“) – klingt der Satz richtig?
 - Lieder prüfen (`#lieder`): v. a. die 4 Gedächtnis-Lieder (We Three Kings, Deck the Halls, Good King Wenceslas, Joy to the World)
 - Prototyp v10 testen: Lehrplan Glasur-Blech Level 1–11 durchspielen – lernt man den Rest-Trick? Labor verständlich? Spritzbeutel schwer genug?
