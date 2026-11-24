@@ -211,3 +211,21 @@ Wunsch: We Three Kings vierstimmig. Das MIDI-Arrangement (Mannheim Steamroller, 
 **Im Browser (Chromium, 390 px):** Ablauf Türchen 1–24 vollständig abschließbar, Dose 24/24, Rezepte 7, Gewinn-Dialoge, Ziehen im Ausstecher, Schieben im Marktschlitten, Wischen im Zuckerstreusel. Alle Klangfarben laufen ohne Fehler (gehört hat sie noch niemand!).
 **Offen:** Menschlicher Test nach `TESTPLAN.md`.
 
+## Runde 19 – Musik (24.11., Rückmeldung zu v18)
+| Lied | Rückmeldung | Änderung v19 |
+|---|---|---|
+| O Tannenbaum | zu schnell | 70 % Tempo |
+| Jingle Bells, We Wish You, Deck the Halls, God Rest Ye | Jazz-Arrangement „komisch/schräg“ | Ursache: der Bass riet die Harmonie aus der Melodie. Neu: echte Akkordfolgen, Walking Bass, Begleitakkorde, Besen |
+| Ihr Kinderlein kommet | zu schnell | langsamer |
+| Leise rieselt der Schnee | „nicht das traditionelle“ | Noten mit Liederbuch (S. 36) und Wikibooks verglichen – stimmen überein (Volksweise/Ebel). Jetzt ruhiger und mit Flöte statt Spieluhr (Spieluhr klang eine Oktave höher). **Bitte nochmal anhören** und ggf. sagen, welche Stelle anders klingt |
+| O du fröhliche | festlicher Orgelsatz gewünscht | eigener vierstimmiger Satz, Orgel |
+| Tochter Zion (4-st.) | „klingt richtig schön“ | – (jetzt Lied zu Türchen 1) |
+| Herbei, o ihr Gläubigen | vierstimmig gewünscht | eigener Satz, Chor |
+| We Three Kings | 15 % langsamer | erledigt |
+| Good King Wenceslas | bricht ab, Anfang seltsam | Satz von Th. Helmore (1853) aus der PDF des Auftraggebers |
+| Joy to the World | fragmentiert, Rhythmus falsch | Melodie neu nach Lowell Masons „Antioch“ |
+| Hark! | Satz im Stil Mendelssohns | eigener vierstimmiger Satz, Chor |
+| Carol of the Bells | schön, aber fragmentiert | vorerst entfernt – genaue Noten fehlen (Bitte: gemeinfreie Partitur Leontowytsch, z. B. IMSLP) |
+| Morning Star | weglassen | entfernt |
+| Ton | nach 2–3 Fensterwechseln kein Ton mehr | D59; im Test 6 Wechsel simuliert, Ton läuft weiter |
+

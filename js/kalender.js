@@ -8,11 +8,12 @@ const PLAN = ADVENT;
 // Türchen-Anordnung wie ein echter Kalender (durcheinander)
 const ORDER = [13, 6, 21, 2, 17, 9, 24, 11, 4, 19, 1, 15, 8, 22, 5, 12, 18, 3, 23, 10, 16, 7, 20, 14];
 // Lied des Tages – passend zum Datum (Nikolaus, Heiligabend …)
-const SONG_DAYS = [null, 'Macht hoch die Tür', 'Alle Jahre wieder', 'Kling, Glöckchen, klingelingeling', 'Es kommt ein Schiff geladen',
-  'Leise rieselt der Schnee', 'Lasst uns froh und munter sein', 'O Tannenbaum', 'Jingle Bells', 'O du fröhliche', 'Kommet, ihr Hirten',
-  'We Wish You a Merry Christmas', 'Süßer die Glocken nie klingen', 'I Saw Three Ships', 'Deck the Halls', 'Ihr Kinderlein kommet',
-  'God Rest Ye Merry, Gentlemen', 'Es ist ein Ros entsprungen', 'We Three Kings', 'Morgen kommt der Weihnachtsmann', 'Kommt und lasst uns Christum ehren',
-  'Herbei, o ihr Gläubigen', 'Tochter Zion, freue dich', 'Hark! The Herald Angels Sing', 'Stille Nacht, heilige Nacht'];
+// Vierstimmige Sätze an den besonderen Tagen (D60): 1. Türchen, Adventssonntage 13/20, 18, 9, 23 und Heiligabend
+const SONG_DAYS = [null, 'Tochter Zion, freue dich', 'Macht hoch die Tür', 'Kling, Glöckchen, klingelingeling', 'Es kommt ein Schiff geladen',
+  'Leise rieselt der Schnee', 'Lasst uns froh und munter sein', 'O Tannenbaum', 'Jingle Bells', 'Good King Wenceslas', 'Kommet, ihr Hirten',
+  'We Wish You a Merry Christmas', 'Süßer die Glocken nie klingen', 'Hark! The Herald Angels Sing', 'Deck the Halls', 'Ihr Kinderlein kommet',
+  'God Rest Ye Merry, Gentlemen', 'Es ist ein Ros entsprungen', 'We Three Kings', 'Morgen kommt der Weihnachtsmann', 'O du fröhliche',
+  'Joy to the World', 'I Saw Three Ships', 'Herbei, o ihr Gläubigen', 'Stille Nacht, heilige Nacht'];
 const songOfDay = d => MELODIES.find(m => m.name === SONG_DAYS[d]) || MELODIES[d % MELODIES.length];
 
 let api;
@@ -123,7 +124,7 @@ function openDay(d) {
   if (st.finished && !st.gefeiert) { st.gefeiert = true; persist(); const r = $('reward'); r.classList.add('feiern'); Snd.stop(); setTimeout(() => playSong(song), 500); }
   api.setTitle(`Türchen ${d}`);
 }
-function playSong(song, kurz) { const n = kurz ? song.notes.slice(0, 24) : song.notes; if (song.voices && !kurz) Snd.choir(song.voices, .2, song.style); else Snd.phrase(n, song.style || 'bell', .19); }
+function playSong(song, kurz) { Snd.song(song, .2, kurz); }
 function rewardTeaser(d) {
   const r = PLAN[d].recipe;
   return `<span class="soft">Schaffst du das ganze Tagesmenü, bekommst du ein <b>Plätzchen für deine Dose</b>${r ? ', ein <b>Rezept</b>' : ''} und das Lied des Tages.</span>`;
