@@ -29,7 +29,7 @@ def compose(P):
     segs = segments(P)
     layers = []
     for (t0, t1, ch) in segs:
-        fx = {v: fixed_at(P, v, t0) for v in range(4) if fixed_at(P, v, t0) is not None}
+        fx = {v: fixed_at(P, v, t0) for v in range(4) if fixed_at(P, v, t0)}  # feste Pausen (0) zählen nicht als Ton
         fr = free_voices(P, t0)
         # Stimmen, die im Abschnitt fest werden, nicht frei füllen
         fr = [v for v in fr if all(fixed_at(P, v, x) is None for x in range(t0, t1))]
@@ -95,6 +95,7 @@ def compose(P):
                     t = end; break
     out = [embellish(P, merge(x), v) for v, x in enumerate(voices)]
     if getattr(P, 'TANZ', False): out = [tanz(P, x, v) for v, x in enumerate(out)]
+    if hasattr(P, 'figur'): out = [P.figur(x, v) for v, x in enumerate(out)]  # eigene Tanzfiguren des Bauplans (D69)
     return [[[n, d] for n, d, *_ in x] for x in out]
 
 def v_bass_ok(ch, o): return True
@@ -121,7 +122,7 @@ def cost_move(p, q, fr):
         if d > 7 and v == 3: c += (d - 7) * 3
     for i, j in itertools.combinations(range(4), 2):
         if None in (p[i], p[j], q[i], q[j]): continue
-        if p[i] != q[i] and p[j] != q[j] and (p[i] - p[j]) % 12 == (q[i] - q[j]) % 12 and (q[i] - q[j]) % 12 in (0, 7): c += 80
+        if p[i] != q[i] and p[j] != q[j] and (p[i] - p[j]) % 12 == (q[i] - q[j]) % 12 and (q[i] - q[j]) % 12 in (0, 7): c += 30
     return c
 
 def merge(v):  # gleiche Töne hintereinander zusammenfassen? Nein – Tonwiederholungen bleiben (Text/Artikulation); nur Pausen verbinden
@@ -205,3 +206,60 @@ def clean(v, P=None):
         if not changed: break
     return v
 
+
+
+def glaetten(v, P, max_sprung=7):
+    """Große Sprünge freier Mittel-/Unterstimmen (> max_sprung Halbtöne) durch nähere Akkordtöne ersetzen,
+    ohne neue Parallelen oder Stimmkreuzungen (D69)."""
+    segs = segments(P)
+    def at(w, t):
+        tt = 0
+        for n, d in v[w]:
+            if tt <= t < tt + d: return n
+            tt += d
+        return 0
+    for vi in (1, 2, 3):
+        x, t, prev = v[vi], 0, None
+        for k, (n, d) in enumerate(x):
+            if n and prev and abs(n - prev) > max_sprung and fixed_at(P, vi, t) is None:
+                ch = next(c for (a, b, c) in segs if a <= t < b)
+                base = len(report(v)['Parallelen'])
+                for cand in sorted((c for c in range(P.RANGE[vi][0], P.RANGE[vi][1] + 1) if c % 12 in ch['tones'] and abs(c - prev) < abs(n - prev)), key=lambda c: abs(c - prev)):
+                    if vi == 3 and cand % 12 != ch['bass']: continue
+                    hi, lo = at(vi - 1, t), (at(vi + 1, t) if vi < 3 else 0)
+                    if (hi and cand > hi) or (lo and cand < lo): continue
+                    x[k][0] = cand
+                    if len(report(v)['Parallelen']) <= base: break
+                    x[k][0] = n
+            if x[k][0]: prev = x[k][0]
+            t += d
+    return v
+
+
+def akkordtreue(v, P, schwer=4):
+    """Freie Töne, die auf einem betonten Schlag (alle `schwer` Achtel) nicht zum Akkord gehören, werden dort
+    durch einen Akkordton ersetzt (der keine Parallelen erzeugt); über den Schlag gehaltene Töne werden geteilt (D69)."""
+    segs = segments(P)
+    anfang = {a for (a, e, c) in segs}
+    def finde(vi):
+        t = 0
+        for k, (n, d) in enumerate(v[vi]):
+            for b in range(int(t), int(t + d)):
+                if b >= t and (b % schwer == 0 or b in anfang) and n and fixed_at(P, vi, b) is None:
+                    ch = next(c for (a, e, c) in segs if a <= b < e)
+                    if n % 12 not in ch['tones'] or (vi == 3 and b in anfang and n % 12 not in (ch['bass'], ch['third'])): return k, t, b, ch
+            t += d
+        return None
+    for vi in (1, 2, 3):
+        for _ in range(200):
+            f = finde(vi)
+            if not f: break
+            k, t, b, ch = f; n, d = v[vi][k]
+            if b > t: v[vi][k:k + 1] = [[n, b - t], [n, t + d - b]]; k += 1
+            base = len(report(v)['Parallelen'])
+            pool = sorted((c for c in range(P.RANGE[vi][0], P.RANGE[vi][1] + 1) if (vi == 3 and c % 12 in (ch['bass'], ch['third'])) or (vi < 3 and c % 12 in ch['tones'])), key=lambda c: (vi == 3 and c % 12 != ch['bass'], abs(c - n)))
+            for c in pool:
+                v[vi][k][0] = c
+                if len(report(v)['Parallelen']) <= base: break
+            else: v[vi][k][0] = pool[0]
+    return v

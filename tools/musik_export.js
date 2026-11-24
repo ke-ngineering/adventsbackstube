@@ -11,7 +11,7 @@ for (const d of ['', 'abc', 'midi']) fs.mkdirSync(path.join(OUT, d), {recursive:
 const slug = s => s.toLowerCase().replace(/ä/g, 'ae').replace(/ö/g, 'oe').replace(/ü/g, 'ue').replace(/ß/g, 'ss').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 const BASE = .2; // Sekunden pro Achtel im Spiel (× tempo des Liedes)
 // General-MIDI-Instrumente je Besetzung (Programmnummer 0–127)
-const GM = {bell: 9, blech: 57, brass: 57, streicher: 48, chor: 52, holz: 73, orgel: 19, spieluhr: 10, epiano: 4, bass: 32, folk: 105, mandoline: 105, gitarre: 25, tanz: 74, glocken: 9};
+const GM = {musette: 73, bell: 9, blech: 57, brass: 57, streicher: 48, chor: 52, holz: 73, orgel: 19, spieluhr: 10, epiano: 4, bass: 32, folk: 105, mandoline: 105, gitarre: 25, tanz: 74, glocken: 9};
 const VOICE = ['Sopran', 'Alt', 'Tenor', 'Bass'];
 
 // ---------- MIDI (Typ 1) ----------
@@ -35,7 +35,14 @@ function midiFile(tracks, usPerQuarter, title) {
   const head = [...str('MThd'), 0, 0, 0, 6, 0, 1, 0, tracks.length + 1, (TPQ >> 8) & 255, TPQ & 255];
   return Buffer.from([...head, ...str('MTrk'), ...u32(meta.length), ...meta, ...tracks.flat()]);
 }
-const notesToEv = (notes, vel) => { let t = 0; const ev = []; for (const [n, d] of notes) { if (n) ev.push({t: t * T8, n, len: d * T8 * .95, vel}); t += d; } return ev; };
+const dynAt = (dyn, t) => { for (const [a, b, f] of dyn || []) if (t >= a && t < b) return f; return 1; };
+const notesToEv = (notes, vel, dyn) => { let t = 0; const ev = []; for (const [n, d] of notes) { if (n) ev.push({t: t * T8, n, len: d * T8 * .95, vel: Math.max(1, Math.round(vel * dynAt(dyn, t)))}); t += d; } return ev; };
+// Schlagwerk (D69): Pauken als Instrument 47 mit Tonhöhe; Trommel auf Kanal 10 (45 tiefe Tom, 38 Snare)
+function percTrack(m) {
+  if (!m.perc) return [];
+  const ev = notesToEv(m.perc.map(([n, d]) => [n && (m.percIns === 'pauke' ? n : n === 2 ? 45 : 38), d]), 90, m.dyn).map(e => ({...e, len: Math.min(e.len, T8)}));
+  return [m.percIns === 'pauke' ? track(ev, 'Pauken', 4, 47) : track(ev, 'Trommel', 9, 0)];
+}
 
 // ---------- ABC ----------
 const SHARP = ['C', '^C', 'D', '^D', 'E', 'F', '^F', 'G', '^G', 'A', '^A', 'B'], FLAT = ['C', '_D', 'D', '_E', 'E', 'F', '_G', 'G', '_A', 'A', '_B', 'B'];
@@ -84,10 +91,14 @@ function abcFile(m, k) {
 
 // ---------- Ausgabe ----------
 const list = [];
-ALLE_LIEDER.forEach((m, k) => {
+// Mehrsätzige Stücke: jeder Satz als eigene Datei (eigenes Tempo, eigene Besetzung)
+const EINZELN = [];
+ALLE_LIEDER.forEach(m => { if (m.teile) m.teile.forEach((t, i) => EINZELN.push({...t, name: `${m.name.split(':')[0]} ${i + 1}. ${t.titel}`, src: m.src, satz: `${i + 1}. Satz – ${t.titel}`, notes: t.voices[0]})); else EINZELN.push(m); });
+EINZELN.forEach((m, k) => {
   const id = slug(m.name), usq = Math.round(BASE * (m.tempo || 1) * 2 * 1e6);
   let tracks;
-  if (m.voices) tracks = m.voices.map((v, i) => track(notesToEv(v, i ? 80 : 96), VOICE[i], i, m.style === 'tanz' ? (i < 2 ? 74 : 24) : m.style === 'glocken' ? [9, 10, 10, 14][i] : GM[m.style] ?? 0));
+  const prog = i => m.style === 'tanz' ? (i < 2 ? 74 : 24) : m.style === 'musette' ? (i < 2 ? 73 : 19) : m.style === 'glocken' ? [9, 10, 10, 14][i] : m.style === 'streicher' ? [40, 40, 41, 42][i] : m.style === 'blech' ? [56, 56, 57, 57][i] : GM[m.style] ?? 0;
+  if (m.voices) tracks = m.voices.map((v, i) => track(notesToEv(v, i ? 80 : 96, m.dyn), VOICE[i], i, prog(i))).concat(percTrack(m));
   else if (m.style === 'folk' && m.chords) {
     const {ev} = Snd.folkEvents(m), parts = {};
     for (const e of ev) (parts[e.part] = parts[e.part] || []).push({t: e.t * T8, n: e.n, len: e.len * T8, vel: Math.min(127, Math.round(e.vol * 520))});
@@ -96,7 +107,7 @@ ALLE_LIEDER.forEach((m, k) => {
   fs.writeFileSync(path.join(OUT, 'midi', id + '.mid'), midiFile(tracks, usq, m.name));
   fs.writeFileSync(path.join(OUT, 'abc', id + '.abc'), abcFile(m, k + 1));
   list.push({datei: id, name: m.name, quelle: m.src || null, satz: m.satz || null, besetzung: m.style, tempo: m.tempo || 1, takt: m.meter || null, auftakt: m.pickup || 0,
-    akkorde: m.chords || null, melodie: m.notes, stimmen: m.voices || null});
+    akkorde: m.chords || null, melodie: m.notes, stimmen: m.voices || null, schlagwerk: m.perc ? {instrument: m.percIns, noten: m.perc} : null, dynamik: m.dyn || null});
 });
 fs.writeFileSync(path.join(OUT, 'lieder.json'), JSON.stringify({format: 'Noten als [MIDI-Tonhöhe, Dauer in Achteln]; 60 = c′ (C4); 0 = Pause. Grundtempo 0,2 s je Achtel × tempo.', lieder: list}, null, 1));
 console.log(`OK ${list.length} Lieder → musik/abc, musik/midi, musik/lieder.json`);

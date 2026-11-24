@@ -19,5 +19,6 @@ node tools/musik_export.js
 - **Good King Wenceslas**: Satz von Thomas Helmore (1853), **Carol of the Bells**: Satz von M. Leontowytsch (1914) – beide gemeinfrei, abgelesen aus IMSLP-Partituren.
 - **We Three Kings** sowie **O du fröhliche, Herbei, Hark!, Stille Nacht, Joy to the World**: eigene Sätze (mit `tools/satz/`).
 - **Fuge über „Es kommt ein Schiff geladen“** und **Gigue über „I Saw Three Ships“**: eigene Kompositionen (Baupläne in `tools/satz/fuge.py` und `tools/satz/gigue.py`).
+- **Branle über „Ding Dong!“** und **Weihnachts-Suite** (Intrada, Branle gay, Gigue über „In dulci jubilo“): eigene Kompositionen (D69, `tools/satz/branle.py`, `intrada.py`, `musette.py`, `gigue_dulci.py`). Die Suite liegt als drei Dateien vor (`weihnachts-suite-1…3`), mit Trommel- bzw. Paukenspur; leise Echo-Stellen sind als geringere Anschlagstärke gespeichert.
 - **Folk-Duo** (Jingle Bells, We Wish You, Deck the Halls, God Rest Ye): eigene Akkordfolgen; das Gitarren-Fingerpicking erzeugt das Spiel daraus.
 - Aus fremden MIDI-Dateien wurden nur gemeinfreie Melodien übernommen, keine Arrangements.
