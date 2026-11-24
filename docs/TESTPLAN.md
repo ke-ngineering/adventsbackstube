@@ -93,8 +93,8 @@ Allgemein:
 - [ ] Ruckelt es bei langen Liedern auf dem Handy? (Viele Instrumente werden live erzeugt.)
 - [ ] Im Lied-Tool oben „Klang: echte Aufnahmen / nachgebaut“: Lädt „alle 13 Instrumente“? Klingen die Aufnahmen besser? Sind die Instrumente gleich laut?
 - [ ] Im Lied-Tool ganz unten „Carol of the Bells (Glockenfassung)“ anhören: Glockenspiel oben, Spieluhren in der Mitte, Röhrenglocken unten – schöner als das Streichquartett?
-- [ ] Im Lied-Tool ganz unten die **Branle über „Ding Dong!“** anhören: Trommel, Glockenkaskade im Gloria, leise Echo-Stellen, Melodie in der Bratsche (Mitte), fröhlicher Schluss?
-- [ ] Die **Weihnachts-Suite** anhören (knapp 3 Minuten): Intrada mit Pauken und Posaunenchor – Musette mit Flöten über Bordun – Gigue mit Kanon. Sind die Übergänge zwischen den Sätzen gut? Ist eine Stelle zu laut oder zu leise (Pauken, Trommel)?
+- [ ] Im Lied-Tool ganz unten die **Branle über „Ding Dong!“** anhören (ohne Trommel): sind die schnellen Läufe deutlich? Glockenkaskade im Gloria, leise Echo-Stellen, Melodie in der Bratsche (Mitte), fröhlicher Schluss?
+- [ ] Die **Weihnachts-Suite** anhören (knapp 3 Minuten): Intrada mit Pauken und Posaunenchor – Musette mit Flöten über Bordun – Gigue mit Kanon und wechselnden Instrumenten. Sind die Übergänge zwischen den Sätzen gut? Ist eine Stelle zu laut oder zu leise (Pauken, Trommel)?
 - [ ] Ohne Internet (Flugmodus nach dem ersten Laden bzw. vor dem ersten Laden): Musik spielt trotzdem (Nachbildung).
 
 ## 5. Speichern und Sicherheit

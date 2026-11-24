@@ -8,13 +8,13 @@ kompakt = lambda x: json.dumps(x, separators=(',', ':'))
 branle, intrada, musette, gigue = lauf('branle.py'), lauf('intrada.py'), lauf('musette.py'), lauf('gigue_dulci.py')
 QUELLE = 'eigene Komposition (D69)'
 js = []
-js.append("  {name:'Branle über „Ding Dong! Merrily on High“', meter:4, mlabel:'2/2', tempo:.95, style:'streicher', percIns:'tabor', "
+js.append("  {name:'Branle über „Ding Dong! Merrily on High“', meter:4, mlabel:'2/2', tempo:.95, style:'streicher', room:.16, mix:[1.4,1.05,1.05,1.1], "
           f"src:'{QUELLE} über Arbeaus „Branle de l\\'Official“ (Orchésographie 1589, gemeinfrei)', satz:'Branle mit Glockenkaskade, Diminutionen, Echo und Tenorlied', "
-          f"voices:{kompakt(branle['voices'])}, perc:{kompakt(branle['perc'])}, dyn:{kompakt(branle['dyn'])}}}")
+          f"voices:{kompakt(branle['voices'])}, dyn:{kompakt(branle['dyn'])}}}")  # ohne Trommel (D70)
 teile = [
     f"{{titel:'Intrada über „Macht hoch die Tür“', style:'blech', meter:3, mlabel:'3/4', tempo:1.4, percIns:'pauke', voices:{kompakt(intrada['voices'])}, perc:{kompakt(intrada['perc'])}, dyn:{kompakt(intrada['dyn'])}}}",
-    f"{{titel:'Branle gay (Musette) über „Ding Dong! Merrily on High“', style:'musette', meter:3, mlabel:'3/4', tempo:.75, percIns:'tabor', voices:{kompakt(musette['voices'])}, perc:{kompakt(musette['perc'])}, dyn:{kompakt(musette['dyn'])}}}",
-    f"{{titel:'Gigue über „In dulci jubilo“', style:'tanz', meter:3, mlabel:'6/8', pickup:1, tempo:.85, voices:{kompakt(gigue['voices'])}, dyn:{kompakt(gigue['dyn'])}}}",
+    f"{{titel:'Branle gay (Musette) über „Ding Dong! Merrily on High“', style:'musette', meter:3, mlabel:'3/4', tempo:.75, room:.14, mix:[1.1,.75,.6,.6], voices:{kompakt(musette['voices'])}, dyn:{kompakt(musette['dyn'])}}}",
+    f"{{titel:'Gigue über „In dulci jubilo“', style:'tanz', meter:3, mlabel:'6/8', pickup:1, tempo:.85, voices:{kompakt(gigue['voices'])}, dyn:{kompakt(gigue['dyn'])}, wechsel:{kompakt(gigue['wechsel'])}}}",
 ]
 js.append("  {name:'Weihnachts-Suite: Intrada – Branle gay – Gigue', style:'blech', "
           f"src:'{QUELLE} über „Macht hoch die Tür“, „Ding Dong! Merrily on High“ und „In dulci jubilo“ (gemeinfrei)', satz:'Suite in drei Sätzen', teile:[\n    "

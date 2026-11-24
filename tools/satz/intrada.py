@@ -66,7 +66,7 @@ ENTRY = {0: 0, 1: 0, 2: 0, 3: 0}
 def scale_at(t): return set(G_DUR) | ({1} if M(9) <= t < M(13) else set())  # M 9–12 in D-Dur (cis)
 TAIL = 2 * BAR
 HEMIOLE = (M(29), M(31))
-DYN = [[M(21) - 2, M(25) - 2, .4]]
+DYN = [[M(21) - 2, M(25) - 2, .68]]
 
 
 def figur(v, idx):

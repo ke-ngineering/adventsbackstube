@@ -102,7 +102,7 @@ TEN = tenor()
 
 ab = {}; t = 0
 for name, l in ABSCHNITTE: ab[name] = t; t += l
-DYN = [[ab['A2'], ab['B'], .45]]
+DYN = [[ab['A2'], ab['B'], .72]]
 
 
 def trommel():
